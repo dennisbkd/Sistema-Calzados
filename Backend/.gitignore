@@ -3,3 +3,5 @@ package-lock.json
 api.http
 config/baseDatos.js
 .env
+src/models
+package.json

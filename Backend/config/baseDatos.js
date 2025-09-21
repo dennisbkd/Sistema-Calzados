@@ -1,7 +1,7 @@
-import { Sequelize } from "sequelize";
-import * as dotenv from 'dotenv';
+import { Sequelize } from "sequelize"
+import * as dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,      
@@ -18,13 +18,13 @@ const sequelize = new Sequelize(
 export async function db() {
   try {
     await sequelize.authenticate();
-    console.log("Conexión exitosa a la base de datos PostgreSQL");
+    console.log("Conexión exitosa a la base de datos PostgreSQL")
   } catch (error) {
-    console.error("Error al conectarse a la base de datos:", error);
-    throw error;
+    console.error("Error al conectarse a la base de datos:", error)
+    throw error
   }
 }
 
-export default sequelize;
+export default sequelize
 
 

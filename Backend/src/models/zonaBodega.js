@@ -1,27 +1,26 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../../config/baseDatos.js'
 
-export const Rol = sequelize.define('Rol', {
+export const ZonaBodega = sequelize.define('ZonaBodega', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
   nombre: {
-    type: DataTypes.STRING(50),
-    allowNull: false,
-    unique: true
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
   descripcion: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.TEXT,
     allowNull: true
   },
-  activo: {
+  activa: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true
   }
 }, {
-  timestamps: true, // Sequelize maneja createdAt y updatedAt automáticamente
-  tableName: 'rol'
+  timestamps: true,
+  tableName: 'ZonaBodega'
 })
