@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../../config/baseDatos.js'
 
-export const Rol = sequelize.define('Rol', {
+export const MetodoPago = sequelize.define('MetodoPago', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -9,8 +9,7 @@ export const Rol = sequelize.define('Rol', {
   },
   nombre: {
     type: DataTypes.STRING(50),
-    allowNull: false,
-    unique: true
+    allowNull: false
   },
   descripcion: {
     type: DataTypes.STRING(255),
@@ -22,6 +21,6 @@ export const Rol = sequelize.define('Rol', {
     defaultValue: true
   }
 }, {
-  timestamps: true, // Sequelize maneja createdAt y updatedAt automáticamente
-  tableName: 'Rol'
+  timestamps: true,
+  tableName: 'MetodoPago'
 })
