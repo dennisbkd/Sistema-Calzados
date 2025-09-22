@@ -7,6 +7,8 @@ export const App = ({ usuarioServicio, autorizacionServicio }) => {
   const app = express()
   const port = 3000
   app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
+
   db()
 
   app.use('/usuario', rutaUsuario({ usuarioServicio }))
