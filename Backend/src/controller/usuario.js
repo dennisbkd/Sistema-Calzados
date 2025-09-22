@@ -9,7 +9,7 @@ export class UsuarioControlador {
       if (respuesta.error) return res.status(401).json(respuesta.error)
       return res.status(200).json(respuesta)
     } catch (e) {
-      return { error: 'error en el servidor', e }
+      return res.status(500).json({ error: `error en el servidor ${e.message}` })
     }
   }
 }
