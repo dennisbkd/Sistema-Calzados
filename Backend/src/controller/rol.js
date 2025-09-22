@@ -11,23 +11,19 @@ export class RolControlador {
       const resultado = await this.rolServicio.crearRol({ input })
 
       if (resultado.error) return res.status(400).json(resultado.error)
-
-      const autor = req.user?.id || 1 // id del usuario autenticado
-      if (autor) {
-        await this.bitacoraServicio.crearBitacora({
-          usuarioId: autor,
-          accion: 'CREAR',
-          tablaAfectada: 'Rol',
-          registroId: resultado.id,
-          datosAnteriores: null,
-          datosNuevos: JSON.stringify(input),
-          ip: req.ip.replace('::ffff:', '')
-        })
-      }
+      const autor = 1
+      await this.bitacoraServicio.crearBitacora({
+        usuarioId: autor,
+        accion: 'CREAR',
+        tablaAfectada: 'Rol',
+        registroId: resultado.id,
+        datosAnteriores: null,
+        datosNuevos: JSON.stringify(input),
+        ip: req.ip.replace('::ffff:', '')
+      })
 
       return res.status(201).json(resultado)
     } catch (e) {
-      console.error(e)
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
     }
   }
@@ -54,37 +50,36 @@ export class RolControlador {
           ip: req.ip.replace('::ffff:', '')
         })
       }
-
       return res.status(200).json(resultado)
     } catch (e) {
-      console.error(e)
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
     }
   }
 
-  // Desactivar un rol (no eliminarlo)
+  // Desactivar un rol (activo = false)
   eliminarRol = async (req, res) => {
     try {
-      const { id } = req.body
+      const { id } = req.params 
       const resultado = await this.rolServicio.eliminarRol({ id })
 
       const autor = req.user?.id || 1
-      if (autor) {
-        await this.bitacoraServicio.crearBitacora({
-          usuarioId: autor,
-          accion: 'DESACTIVAR',
-          tablaAfectada: 'Rol',
-          registroId: resultado.id,
-          datosAnteriores: true,
-          datosNuevos: false,
-          ip: req.ip.replace('::ffff:', '')
-        })
-      }
+      await this.bitacoraServicio.crearBitacora({
+        usuarioId: autor,
+        accion: 'DESACTIVAR',
+        tablaAfectada: 'Rol',
+        registroId: resultado.id,
+        datosAnteriores: { activo: true },
+        datosNuevos: { activo: false },
+        ip: req.ip.replace('::ffff:', '')
+      })
 
-      return res.status(200).json(resultado)
+      return res.status(200).json({
+        mensaje: 'Rol desactivado correctamente',
+        rol: resultado.toJSON()  // convertir a JSON plano
+      })
     } catch (e) {
       console.error(e)
-      return res.status(500).json({ error: 'Error en el servidor', e: e.message })
+      return res.status(500).json({ error: 'Error en el servidor', detalles: e.message })
     }
   }
 

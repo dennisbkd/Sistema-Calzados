@@ -16,8 +16,6 @@ export const App = async ({
   app.use(express.json())
 
   db()
-  await sequelize.sync({ alter: true })
-
   app.use('/usuario', rutaUsuario({ usuarioServicio }))
   app.use('/rol', rutaRol({ rolServicio, bitacoraServicio}))
 

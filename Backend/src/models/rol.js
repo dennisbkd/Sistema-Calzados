@@ -23,5 +23,5 @@ export const Rol = sequelize.define('Rol', {
   }
 }, {
   timestamps: true, // Sequelize maneja createdAt y updatedAt automáticamente
-  tableName: 'rol'
+  tableName: 'Rol'
 })

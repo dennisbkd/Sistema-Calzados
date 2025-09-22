@@ -3,8 +3,8 @@ import { App } from './main.js'
 import { UsuarioServicio } from './services/usuario.js'
 import { RolServicio } from './services/rol.js'
 import { BitacoraServicio } from './services/bitacora.js' 
-import { Rol, Usuario } from './models/index.js'
-import { Bitacora } from './models/bitacora.js'
+import { Rol, Usuario, Bitacora } from './models/index.js'
+
 
 const usuarioServicio = new UsuarioServicio(
   {

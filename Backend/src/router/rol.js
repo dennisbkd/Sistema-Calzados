@@ -7,7 +7,7 @@ export const rutaRol = ({ rolServicio, bitacoraServicio }) => {
    
   ruta.post('/crear', rolControlador.crearRol)
   ruta.patch('/editar', rolControlador.editarRol)
-  ruta.delete('/eliminar', rolControlador.eliminarRol)
+  ruta.delete('/eliminar/:id', rolControlador.eliminarRol)
   ruta.get('/listar', rolControlador.listarRoles)
 
   return ruta
