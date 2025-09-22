@@ -12,12 +12,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "6.0.0",
     "express": "5.1.0",
+    "jsonwebtoken": "9.0.2",
     "mysql2": "3.14.4",
     "sequelize": "6.37.7",
     "standard": "17.1.2"
   },
   "eslintConfig": {
-    "extends":"standard"
+    "extends": "standard"
   }
 }
