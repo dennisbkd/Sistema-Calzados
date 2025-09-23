@@ -15,7 +15,7 @@ const sequelize = new Sequelize(
   }
 )
 
-export async function db() {
+export async function db () {
   try {
     await sequelize.authenticate()
     console.log('Conexión exitosa a la base de datos MySQL')
@@ -26,3 +26,4 @@ export async function db() {
 }
 
 export default sequelize
+
