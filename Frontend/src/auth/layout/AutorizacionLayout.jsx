@@ -25,7 +25,17 @@ export default function AutorizacionLayout() {
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 overflow-hidden rounded-2xl shadow-lg bg-white">
         {/* Left Section (fixed image/panel) */}
         <div className="flex flex-col items-center justify-center text-white p-10 bg-gradient-to-b from-blue-700 to-blue-500">
-          <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+          <motion.div
+            initial={{ y: 0 }}
+            animate={{
+              y: [-10, 10, -10] // Movimiento de flotación suave
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
             <div className="bg-white rounded-full p-4 mb-4">
               <Footprints className="h-12 w-12 text-blue-600" />
             </div>
