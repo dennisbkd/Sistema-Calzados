@@ -9,7 +9,6 @@ export class AutorizacionServicio {
 
   iniciarSesion = async ({ body }) => {
     const { nombre, password } = body
-    console.log(nombre)
     try {
       const usuarioExistente = await this.modeloUsuario.findOne({
         include: {
@@ -47,8 +46,6 @@ export class AutorizacionServicio {
   }
 
   solicitaRecuperamientoPassword = async ({ email }) => {
-    console.log(email)
-
     try {
       const usuario = await this.modeloUsuario.findOne({
         where: { email }
