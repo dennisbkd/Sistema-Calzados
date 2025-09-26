@@ -138,5 +138,6 @@ InventarioUbicacion.belongsTo(ProductoVariante, { foreignKey: 'varianteId', as: 
 export {
   Usuario,
   Rol,
-  UsuarioRol
+  UsuarioRol,
+  Bitacora
 }
