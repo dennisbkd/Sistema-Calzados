@@ -56,11 +56,10 @@ export class RolServicio {
       const roles = await this.modeloRol.findAll({
         attributes: ['id', 'nombre', 'descripcion', 'activo']
       })
-      if (!roles || roles.length === 0) return { error: 'No hay roles registrados' }
-      return roles
+      return roles || [] // nunca devuelvas undefined ni un objeto error
     } catch (e) {
       console.error(e)
-      throw new Error('Error al listar los roles: ' + e.message)
+      throw e // deja que React Query capture el error
     }
   }
 }

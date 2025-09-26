@@ -4,6 +4,7 @@ import { db } from '../config/baseDatos.js'
 
 import { rutaUsuario } from './router/usuario.js'
 import { rutaAutorizacion } from './router/autorizacion.js'
+import { rutaRol } from './router/rol.js'
 import cors from 'cors'
 
 export const App = ({ usuarioServicio, autorizacionServicio, rolServicio, bitacoraServicio }) => {

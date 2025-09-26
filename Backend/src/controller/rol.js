@@ -59,7 +59,7 @@ export class RolControlador {
   // Desactivar un rol (activo = false)
   eliminarRol = async (req, res) => {
     try {
-      const { id } = req.params 
+      const { id } = req.params
       const resultado = await this.rolServicio.eliminarRol({ id })
 
       const autor = req.user?.id || 1
@@ -87,7 +87,6 @@ export class RolControlador {
   listarRoles = async (req, res) => {
     try {
       const resultado = await this.rolServicio.listarRoles()
-      if (resultado.error) return res.status(400).json(resultado.error)
       return res.status(200).json(resultado)
     } catch (e) {
       console.error(e)

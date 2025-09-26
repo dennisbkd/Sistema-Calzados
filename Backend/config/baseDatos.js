@@ -26,4 +26,3 @@ export async function db () {
 }
 
 export default sequelize
-
