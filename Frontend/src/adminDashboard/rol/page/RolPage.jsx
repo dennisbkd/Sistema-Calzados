@@ -3,6 +3,7 @@
 
 import { useState } from "react"
 import { useRol } from "../hooks/useRol"
+import { Eye, EyeOff, Pencil, Plus, RefreshCcw, Save, Search, Trash2 } from "lucide-react"
 
 export const RolesPage = () => {
   const { listar, crear, editar, eliminar } = useRol()
@@ -44,16 +45,16 @@ export const RolesPage = () => {
 
   const handleCreateOrEdit = () => {
     if (editingRole) {
-      editar.mutate({ 
-        id: editingRole.id, 
-        descripcion: descInput, 
+      editar.mutate({
+        id: editingRole.id,
+        descripcion: descInput,
         activo: editingRole.activo
       })
     } else {
-      crear.mutate({ 
-        nombre: nameInput, 
-        descripcion: descInput, 
-        activo: true 
+      crear.mutate({
+        nombre: nameInput,
+        descripcion: descInput,
+        activo: true
       })
     }
     closeModal()
@@ -64,10 +65,10 @@ export const RolesPage = () => {
   }
 
   const handleReactivate = (role) => {
-    editar.mutate({ 
-      id: role.id, 
-      descripcion: role.descripcion, 
-      activo: true 
+    editar.mutate({
+      id: role.id,
+      descripcion: role.descripcion,
+      activo: true
     })
   }
 
@@ -121,13 +122,15 @@ export const RolesPage = () => {
                 </div>
               </div>
               <div className="flex gap-2 mt-6">
-                <button 
+                <button
                   onClick={handleCreateOrEdit}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex-1"
+                  className="bg-green-600 flex justify-center hover:bg-green-700 text-white px-4 py-2 rounded-md flex-1"
                 >
-                  {editingRole ? "💾 Guardar Cambios" : "✅ Crear Rol"}
+                  {editingRole ?
+                    <div className="flex items-center gap-x-2"><Save size={20} /><span>Editar Rol</span></div> :
+                    <div className="flex items-center gap-x-2"><Plus size={20} /><span>Crear Rol</span></div>}
                 </button>
-                <button 
+                <button
                   onClick={closeModal}
                   className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md"
                 >
@@ -148,8 +151,8 @@ export const RolesPage = () => {
               Gestión de Roles {viewInactive && "(Inactivos)"}
             </h1>
             <p className="text-gray-600">
-              {viewInactive 
-                ? "Roles desactivados del sistema" 
+              {viewInactive
+                ? "Roles desactivados del sistema"
                 : "Administra los roles y permisos del sistema"
               }
             </p>
@@ -167,22 +170,24 @@ export const RolesPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-64 pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                <span className="absolute left-3 top-2.5 text-gray-400"><Search size={20} /></span>
               </div>
-              <button 
+              <button
                 onClick={() => setViewInactive(!viewInactive)}
-                className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-3 py-2 border border-gray-300 rounded-md hover:cursor-pointer hover:bg-gray-100"
               >
-                {viewInactive ? "👁️ Ver Activos" : "👁️ Ver Inactivos"}
+                {viewInactive ?
+                  <div className="flex items-center gap-x-2"><Eye size={20} /><span>Ver Activos</span></div> :
+                  <div className="flex items-center gap-x-2"><EyeOff size={20} /><span>Ver Inactivos</span></div>}
               </button>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => openModal()}
               disabled={viewInactive}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 flex items-center gap-x-2 hover:cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              ➕ Nuevo Rol
+              <Plus size={20} /> <span>Nuevo Rol</span>
             </button>
           </div>
 
@@ -230,11 +235,10 @@ export const RolesPage = () => {
                         <div className="text-sm text-gray-600 max-w-xs">{role.descripcion}</div>
                       </td>
                       <td className="p-4">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          role.activo 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${role.activo
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                          }`}>
                           {role.activo ? "Activo" : "Inactivo"}
                         </span>
                       </td>
@@ -243,23 +247,23 @@ export const RolesPage = () => {
                           {viewInactive ? (
                             <button
                               onClick={() => handleReactivate(role)}
-                              className="text-green-600 hover:text-green-700 px-2 py-1 border border-green-200 rounded-md"
+                              className="group text-green-600 flex items-center gap-x-2 hover:cursor-pointer border-b-1 hover:text-green-700 px-2 py-1 "
                             >
-                              🔄 Reactivar
+                              <RefreshCcw className="group-hover:animate-spin" size={20} /> <span> Reactivar</span>
                             </button>
                           ) : (
                             <>
                               <button
                                 onClick={() => openModal(role)}
-                                className="text-blue-600 hover:text-blue-700 px-2 py-1 border border-blue-200 rounded-md"
+                                className="text-blue-600 flex items-center gap-x-2 hover:cursor-pointer hover:bg-blue-50 hover:text-blue-700 px-2 py-1 border border-blue-200 rounded-md"
                               >
-                                ✏️ Editar
+                                <Pencil size={20} /> <span>Editar</span>
                               </button>
                               <button
                                 onClick={() => handleDelete(role)}
-                                className="text-red-600 hover:text-red-700 px-2 py-1 border border-red-200 rounded-md"
+                                className="text-red-600 flex items-center gap-x-2 hover:cursor-pointer hover:text-red-700 px-2 py-1"
                               >
-                                🗑️ Eliminar
+                                <Trash2 size={20} /> <span>Eliminar</span>
                               </button>
                             </>
                           )}
@@ -274,10 +278,10 @@ export const RolesPage = () => {
                           <span className="text-4xl mb-2">
                             {viewInactive ? "📭" : "📋"}
                           </span>
-                          {searchTerm 
+                          {searchTerm
                             ? `No se encontraron roles ${viewInactive ? 'inactivos' : 'activos'} que coincidan con "${searchTerm}"`
-                            : viewInactive 
-                              ? "No hay roles inactivos" 
+                            : viewInactive
+                              ? "No hay roles inactivos"
                               : "No hay roles activos"
                           }
                         </div>
@@ -300,40 +304,40 @@ export const RolesPage = () => {
                   {viewInactive ? (
                     <button
                       onClick={() => {
-                        const rolesToReactivate = selectedRoles.map(id => 
+                        const rolesToReactivate = selectedRoles.map(id =>
                           roles.find(r => r.id === id)
                         ).filter(role => role && !role.activo)
-                        
+
                         if (rolesToReactivate.length > 0) {
                           rolesToReactivate.forEach(role => {
-                            editar.mutate({ 
-                              id: role.id, 
-                              descripcion: role.descripcion, 
-                              activo: true 
+                            editar.mutate({
+                              id: role.id,
+                              descripcion: role.descripcion,
+                              activo: true
                             })
                           })
                         }
                       }}
-                      className="text-green-600 hover:text-green-700 px-3 py-1 border border-green-200 rounded-md"
+                      className="group text-green-600 flex items-center gap-x-2 hover:cursor-pointer border-b-1 hover:text-green-700 px-2 py-1 "
                     >
-                      🔄 Reactivar seleccionados
+                      <RefreshCcw className="group-hover:animate-spin" size={20} /> <span>Reactivar Seleccionados</span>
                     </button>
                   ) : (
                     <button
                       onClick={() => {
-                        const rolesToDelete = selectedRoles.map(id => 
+                        const rolesToDelete = selectedRoles.map(id =>
                           roles.find(r => r.id === id)
                         ).filter(role => role && role.activo)
-                        
+
                         if (rolesToDelete.length > 0) {
                           rolesToDelete.forEach(role => {
                             eliminar.mutate(role.id)
                           })
                         }
                       }}
-                      className="text-red-600 hover:text-red-700 px-3 py-1 border border-red-200 rounded-md"
+                      className="text-red-600 flex items-center gap-x-2 hover:cursor-pointer hover:text-red-700 px-3 py-1 "
                     >
-                      🗑️ Desactivar seleccionados
+                      <Trash2 /> <span>Desactivar seleccionados</span>
                     </button>
                   )}
                 </div>

@@ -75,7 +75,7 @@ export class RolControlador {
 
       return res.status(200).json({
         mensaje: 'Rol desactivado correctamente',
-        rol: resultado.toJSON()  // convertir a JSON plano
+        rol: resultado.toJSON() // convertir a JSON plano
       })
     } catch (e) {
       console.error(e)
