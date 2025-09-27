@@ -1,4 +1,4 @@
-import { BrowserRouter, Outlet, Route, Routes } from "react-router"
+import { BrowserRouter, Route, Routes } from "react-router"
 import AutorizacionLayout from "./auth/layout/AutorizacionLayout"
 import { RutaProtegida } from "./auth/utils/RutaProtegida"
 import { RutaPublica } from "./auth/utils/RutaPublica"
@@ -17,11 +17,9 @@ export const AppRouter = () => {
         </Route>
         {/* RUTAS PARA PAGINAS PROTEGIDAS, USUARIOS QUE TENGAN TOKEN y ROLES */}
         <Route element={<RutaProtegida permitidos={['administrador']} />}>
-          <Route path="/home" element={<Outlet />}>
-            <Route path="/dashboard" element={<DashboardPage />}>
-              <Route path="usuarios" element={<div>Usuarios</div>} />
-              <Route path="roles" element={<RolesPage />} />
-            </Route>
+          <Route path="/home" element={<DashboardPage />}>
+            <Route path="usuarios" element={<div>Usuarios</div>} />
+            <Route path="roles" element={<RolesPage />} />
           </Route>
         </Route>
 

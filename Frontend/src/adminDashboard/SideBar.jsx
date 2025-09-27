@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 "use client"
 
 import { Link, useLocation } from "react-router"
@@ -9,6 +10,8 @@ import {
   Warehouse,
   LogOut,
   ChevronDown,
+  ArrowRightToLine,
+  ArrowLeftToLine,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
@@ -19,23 +22,23 @@ export const SideBar = () => {
 
   // Inicialización del submenu solo una vez
   const [usersMenuOpen, setUsersMenuOpen] = useState(() =>
-    location.pathname.startsWith("/dashboard/usuarios") ||
-    location.pathname.startsWith("/dashboard/roles")
+    location.pathname.startsWith("/home/usuarios") ||
+    location.pathname.startsWith("/home/roles")
   )
 
   const menuItems = [
-    { title: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { title: "Dashboard", path: "/home", icon: LayoutDashboard },
     {
       title: "Gestión Usuarios",
       icon: UserCheck,
       subItems: [
-        { title: "Usuarios", path: "/dashboard/usuarios" },
-        { title: "Roles", path: "/dashboard/roles" },
+        { title: "Usuarios", path: "/home/usuarios" },
+        { title: "Roles", path: "/home/roles" },
       ],
     },
-    { title: "Gestión Ventas", path: "/dashboard/ventas", icon: ShoppingCart },
-    { title: "Gestión Compras", path: "/dashboard/compras", icon: Package },
-    { title: "Gestión Inventario", path: "/dashboard/inventario", icon: Warehouse },
+    { title: "Gestión Ventas", path: "/home/ventas", icon: ShoppingCart },
+    { title: "Gestión Compras", path: "/home/compras", icon: Package },
+    { title: "Gestión Inventario", path: "/home/inventario", icon: Warehouse },
   ]
 
   const handleLogout = () => {
@@ -45,7 +48,7 @@ export const SideBar = () => {
 
   return (
     <motion.div
-      animate={{ width: isOpen ? 250 : 70 }}
+      animate={{ width: isOpen ? 250 : 100 }}
       transition={{ duration: 0.3 }}
       className="bg-slate-800 text-white h-full flex flex-col"
     >
@@ -64,8 +67,8 @@ export const SideBar = () => {
             )}
           </AnimatePresence>
         </div>
-        <button onClick={() => setIsOpen(!isOpen)} className="text-white font-bold text-xl">
-          {isOpen ? "←" : "→"}
+        <button onClick={() => setIsOpen(!isOpen)} className="text-white hover:bg-slate-500 hover:rounded-lg px-1 py-1 font-bold text-xl ">
+          {isOpen ? <ArrowRightToLine /> : <ArrowLeftToLine />}
         </button>
       </div>
 
@@ -81,9 +84,8 @@ export const SideBar = () => {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
-                  isActive ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-700 hover:text-white"
-                }`}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${isActive ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                  }`}
                 onClick={() => hasSub && setUsersMenuOpen((prev) => !prev)}
               >
                 <div className="flex items-center gap-3">
@@ -127,9 +129,8 @@ export const SideBar = () => {
                           <motion.div
                             whileHover={{ scale: 1.05 }}
                             transition={{ duration: 0.2 }}
-                            className={`px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white ${
-                              location.pathname === sub.path ? "bg-blue-600 text-white" : ""
-                            }`}
+                            className={`px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white ${location.pathname === sub.path ? "bg-blue-600 text-white" : ""
+                              }`}
                           >
                             {sub.title}
                           </motion.div>
