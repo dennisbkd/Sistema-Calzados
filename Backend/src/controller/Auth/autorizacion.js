@@ -18,7 +18,7 @@ export class AutorizacionControlador {
     const { email } = req.body
     try {
       const respuesta = await this.autorizacionServicio.solicitaRecuperamientoPassword({ email })
-      if (respuesta.mensaje) return res.status(401).json(respuesta.mensaje)
+      if (respuesta.error) return res.status(401).json(respuesta.error)
 
       return res.status(200).json(respuesta)
     } catch (e) {
