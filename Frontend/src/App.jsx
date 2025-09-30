@@ -1,3 +1,4 @@
+import { BrowserRouter } from "react-router"
 import { AppRouter } from "./AppRouter"
 import {
   QueryClient,
@@ -10,7 +11,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppRouter />
+      <BrowserRouter>
+        <AppRouter />
+      </BrowserRouter>
     </QueryClientProvider>
   )
 }
