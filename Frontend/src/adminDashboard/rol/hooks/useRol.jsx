@@ -13,8 +13,8 @@ export const useRol = () => {
       toast.success('Rol creado correctamente')
       queryClient.invalidateQueries(['listar-roles'])
     },
-    onError: () => {
-      toast.error('Error al crear el rol')
+    onError: (error) => {
+      toast.error(`Error al crear el rol ${error.message}`)
     }
   })
 
@@ -25,8 +25,8 @@ export const useRol = () => {
       toast.success('Rol editado correctamente')
       queryClient.invalidateQueries(['listar-roles'])
     },
-    onError: () => {
-      toast.error('Error al editar el rol')
+    onError: (error) => {
+      toast.error(`Error al editar el rol ${error.message}`)
     }
   })
 
@@ -47,7 +47,6 @@ export const useRol = () => {
     queryKey: ['listar-roles'],
     queryFn: async () => {
       const res = await listarRoles()
-      console.log("📌 Respuesta cruda listarRoles:", res) // aquí verás el array en consola
       return Array.isArray(res) ? res : [] // garantizamos array
     },
     onError: () => {

@@ -56,6 +56,7 @@ export class AutorizacionServicio {
         id: usuario.id,
         tipo: 'reset'
       })
+      const URL = process.env.EMAILURL || 'http://localhost:5173'
       await this.mailer.enviar(
         {
           to: email,
@@ -63,7 +64,7 @@ export class AutorizacionServicio {
           html: `
           <p>Has solicitado restablecer tu contraseña.</p>
           <p>Haz clic en el siguiente enlace (válido por 15 minutos):</p>
-          <a href = "http://localhost:3000/autorizacion/restablecer-password?token=${tokenTemporal}" >
+          <a href = "${URL}/restablecer-password?token=${tokenTemporal}" >
             Restablecer contraseña
           </a>
           `
@@ -76,6 +77,7 @@ export class AutorizacionServicio {
   }
 
   resetearPassword = async ({ token, nuevaPassword }) => {
+    console.log(nuevaPassword)
     try {
       const playload = this.token.verificarToken(token)
       if (playload.tipo !== 'reset') {
@@ -89,7 +91,7 @@ export class AutorizacionServicio {
         { where: { id: playload.id } }
       )
 
-      return { mensaje: 'Contraseña actualizada correctamente' }
+      return { mensaje: 'Se actualizo exitosamente la nueva contraseña' }
     } catch (e) {
       return { error: `Token inválido o expirado${e.message}` }
     }

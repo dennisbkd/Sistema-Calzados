@@ -2,7 +2,7 @@ import { App } from './main.js'
 import { UsuarioServicio } from './services/usuario.js'
 import { Rol, Usuario, Bitacora } from './models/index.js'
 import { AutorizacionServicio } from './services/Auth/autorizacion.js'
-import { BitacoraServicio } from './services/bitacora.js' 
+import { BitacoraServicio } from './services/bitacora.js'
 import { RolServicio } from './services/rol.js'
 
 import { token, mailer } from '../config/autenticacionEmail.js'

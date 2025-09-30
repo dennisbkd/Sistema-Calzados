@@ -2,6 +2,7 @@ import { Eye, LogIn } from "lucide-react"
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Authmutation } from "../hooks/Authmutation";
+import { NavLink } from "react-router";
 
 export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -75,9 +76,13 @@ export const LoginPage = () => {
             </div>
           )}
         />
+        <div className="flex gap-x-2">
+          <p className="text-sm">Problmas al iniciar sesión?</p>
+          <NavLink className="text-sm text-blue-800 border-b-1 border-blue-800" to='/solicitar-recuperamiento'>Solicitar</NavLink>
+        </div>
         <button
           type="submit"
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white mt-2 font-semibold py-2 px-4 rounded-lg transition"
         >
           <LogIn className="h-5 w-5" /> Iniciar Sesión
         </button>
