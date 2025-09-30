@@ -45,9 +45,6 @@ export default function AutorizacionLayout() {
           <p className="text-center max-w-sm opacity-80">
             Sistema de información para la gestion de inventario, compras y ventas para la tienda de calzados
           </p>
-          <div className="mt-6 flex space-x-4 text-sm underline">
-            <a href="#">Contact Us</a>
-          </div>
         </div>
 
         {/* Right Section with Tabs */}
