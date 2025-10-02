@@ -7,8 +7,9 @@ export class AutorizacionServicio {
     this.bcrypt = bcrypt
   }
 
-  iniciarSesion = async ({ body }) => {
+  iniciarSesion = async ({ body, acceso }) => {
     const { nombre, password } = body
+    const ahora = new Date()
     try {
       const usuarioExistente = await this.modeloUsuario.findOne({
         include: {
@@ -19,12 +20,48 @@ export class AutorizacionServicio {
         },
         where: { nombre }
       })
+      if (usuarioExistente === null) return { error: 'El usuario no existe o error al escribir la contraseña' }
 
-      if (usuarioExistente === null) return { error: 'El usuario no existe' }
+      const verificarBloqueo = usuarioExistente.bloqueado ? new Date(usuarioExistente.bloqueado) : null
 
+      if (verificarBloqueo && verificarBloqueo > ahora) {
+        return { error: `Cuenta bloqueada hasta ${usuarioExistente.bloqueado}` }
+      }
+      console.log(verificarBloqueo, ahora)
       const verificarPass = await this.bcrypt.compare(password, usuarioExistente.password)
 
-      if (!verificarPass) return { error: 'password incorrecto' }
+      if (!verificarPass) {
+        usuarioExistente.intentos += 1
+
+        if (usuarioExistente.intentos >= 3) {
+          const bloqueoHasta = new Date(Date.now() + 15 * 60 * 100)
+          usuarioExistente.bloqueado = bloqueoHasta
+
+          await this.mailer.enviar({
+            from: `"Seguridad" <${process.env.EMAIL_USER}>`,
+            to: usuarioExistente.email,
+            subject: 'Cuenta bloqueada por intentos fallidos',
+            text: `Tu cuenta fue bloqueada por demasiados intentos fallidos. Intenta nuevamente después de ${bloqueoHasta}.
+            Se intentó acceder desde ${acceso.userAgent} con la IP ${acceso.ip}`,
+            html: `
+              <p>⚠️ Tu cuenta fue bloqueada por demasiados intentos fallidos.</p>
+              <p>⏰ Intenta nuevamente después de: <b>${bloqueoHasta.toLocaleString('es-BO', { timeZone: 'America/La_Paz' })}</b></p>
+              <p>🌐 Intento desde: <b>${acceso.userAgent}</b></p>
+              <p>📌 IP: <b>${acceso.ip}</b></p>
+              <br/>
+             <p>Si no fuiste tú, cambia tu contraseña inmediatamente.</p>`
+          })
+          await usuarioExistente.save()
+          return { error: 'Cuenta bloqueada temporalmente' }
+        }
+        await usuarioExistente.save()
+        return { error: 'password incorrecto' }
+      }
+
+      usuarioExistente.intentos = 0
+      usuarioExistente.bloqueado = null
+
+      await usuarioExistente.save()
 
       const token = this.token.crearToken({
         id: usuarioExistente.id,

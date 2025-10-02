@@ -16,6 +16,15 @@ export const Usuario = sequelize.define('Usuario', {
     unique: true,
     allowNull: false
   },
+  intentos: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  bloqueado: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   password: {
     type: DataTypes.STRING(255),
     allowNull: false
