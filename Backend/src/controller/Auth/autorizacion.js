@@ -5,8 +5,10 @@ export class AutorizacionControlador {
 
   iniciarSesion = async (req, res) => {
     const body = req.body
+    const userAgent = req.headers['user-agent']
+    const ip = req.ip
     try {
-      const respuesta = await this.autorizacionServicio.iniciarSesion({ body })
+      const respuesta = await this.autorizacionServicio.iniciarSesion({ body, acceso: { userAgent, ip } })
       if (respuesta.error) return res.status(401).json({ error: respuesta.error })
       return res.status(200).json(respuesta)
     } catch (e) {
