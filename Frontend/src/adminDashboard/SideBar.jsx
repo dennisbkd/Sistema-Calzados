@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+
 "use client"
 
 import { Link, useLocation } from "react-router"
@@ -14,8 +15,10 @@ import {
   X,
   Users,
   Shield,
+  Archive,
+  Tag,
 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "motion/react"
 import { useState, useEffect } from "react"
 
 export const SideBar = () => {
@@ -23,7 +26,7 @@ export const SideBar = () => {
   const [isOpen, setIsOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-
+  const [usuario, setUsuario] = useState(null)
   // Detectar si es móvil
   useEffect(() => {
     const checkMobile = () => {
@@ -68,13 +71,26 @@ export const SideBar = () => {
     },
     {
       title: "Gestión Compras",
-      path: "/home/compras",
-      icon: Package
+      icon: Package,
+      key: "compras",
+      subItems: [
+        { title: "Compras", path: "/home/compras", icon: Package },
+        { title: "Proveedores", path: "/home/proveedores", icon: Users },
+      ],
     },
     {
       title: "Gestión Inventario",
       path: "/home/inventario",
       icon: Warehouse
+    },
+    {
+      title: "Gestión Producto",
+      icon: Archive,
+      key: "productos",
+      subItems: [
+        { title: "Productos", path: "/home/productos", icon: Archive },
+        { title: "Categorías", path: "/home/categorias", icon: Tag },
+      ],
     },
   ]
 
@@ -97,16 +113,24 @@ export const SideBar = () => {
     }
   }
 
-  const handleItemClick = (item) => {
-    if (item.subItems && !isMobile && !isOpen) {
-      toggleSubmenu(item.key)
+  // Cargar usuario del localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("usuario")
+    if (storedUser) {
+      try {
+        setUsuario(JSON.parse(storedUser))
+      } catch (error) {
+        console.error("Error al parsear usuario:", error)
+      }
     }
-  }
+  }, [])
 
   const handleLogout = () => {
     localStorage.removeItem("token")
+    localStorage.removeItem("usuario")
     window.location.href = "/"
   }
+
 
   const closeMobileMenu = () => {
     if (isMobile) {
@@ -169,7 +193,7 @@ export const SideBar = () => {
                   exit={{ opacity: 0, x: -10 }}
                   className="min-w-0"
                 >
-                  <h1 className="text-xl font-bold truncate">StepStyle</h1>
+                  <h1 className="text-xl font-bold truncate">Calzados Al Paso</h1>
                   <p className="text-blue-100 text-sm truncate">Calzados Premium</p>
                 </motion.div>
               )}
@@ -283,8 +307,8 @@ export const SideBar = () => {
                                 whileHover={{ scale: 1.02, x: 4 }}
                                 whileTap={{ scale: 0.98 }}
                                 className={`flex items-center p-2 rounded-lg transition-all ${subActive
-                                    ? "bg-blue-500 text-white shadow-md"
-                                    : "text-blue-200 hover:bg-blue-400 hover:text-white"
+                                  ? "bg-blue-500 text-white shadow-md"
+                                  : "text-blue-200 hover:bg-blue-400 hover:text-white"
                                   }`}
                               >
                                 {SubIcon && (
@@ -307,7 +331,15 @@ export const SideBar = () => {
         </nav>
 
         {/* Logout Section */}
-        <div className="p-4 border-t border-blue-500">
+        {/* Logout Section */}
+        <div className="p-4 border-t border-blue-500 space-y-3">
+          {usuario && (
+            <div className="flex flex-col text-sm text-blue-100 mb-2">
+              <span className="font-semibold truncate">{usuario.nombre}</span>
+              <span className="text-xs text-blue-200 truncate">{usuario.email}</span>
+            </div>
+          )}
+
           <button
             onClick={handleLogout}
             className={`flex items-center p-3 rounded-xl text-blue-100 hover:bg-red-500 hover:text-white w-full transition-all group ${!shouldShowExpanded() ? 'justify-center' : ''
@@ -330,6 +362,7 @@ export const SideBar = () => {
             </AnimatePresence>
           </button>
         </div>
+
       </motion.div>
     </>
   )

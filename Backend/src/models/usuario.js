@@ -4,7 +4,7 @@ import sequelize from '../../config/baseDatos.js'
 export const Usuario = sequelize.define('Usuario', {
   id: {
     type: DataTypes.INTEGER,
-    autoIncrementIdentity: true,
+    autoIncrement: true,
     primaryKey: true
   },
   nombre: {

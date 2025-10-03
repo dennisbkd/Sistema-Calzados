@@ -10,6 +10,10 @@ import { AnimatePresence } from "motion/react"
 import { TrancisionLayout } from "./auth/utils/TrancisionLayout"
 import { NotFound } from "./utils/NotFound"
 import { TrancisionPages } from "./auth/utils/TrancisionPages"
+import { GestionUsuario } from "./adminDashboard/usuario/page/GestionUsuario"
+import { GestionCategoria } from "./adminDashboard/categoria/page/GestionCategoria"
+import { GestionProveedor } from "./adminDashboard/proveedor/page/GestionProveedor"
+// import { GestionUsuarios } from "./gestion_Usuario/page/GestionUsuarios"
 
 
 export const AppRouter = () => {
@@ -22,10 +26,12 @@ export const AppRouter = () => {
           <Route path="/" element={<AutorizacionLayout />} />
         </Route>
         {/* RUTAS PARA PAGINAS PROTEGIDAS, USUARIOS QUE TENGAN TOKEN y ROLES */}
-        <Route element={<RutaProtegida permitidos={['administrador']} />}>
+        <Route element={<RutaProtegida permitidos={['administrador', 'vendedor']} />}>
           <Route path="/home" element={<DashboardPage />}>
-            <Route path="usuarios" element={<div>Usuarios</div>} />
+            <Route path="usuarios" element={<GestionUsuario />} />
             <Route path="roles" element={<RolesPage />} />
+            <Route path="categorias" element={<GestionCategoria />} />
+            <Route path="proveedores" element={<GestionProveedor />} />
           </Route>
         </Route>
 
@@ -35,9 +41,7 @@ export const AppRouter = () => {
         </Route>
 
 
-        <Route element={<RutaProtegida permitidos={['vendedor']} />}>
-          <Route path="/ventas" element={<p>ventas</p>} />
-        </Route>
+
 
         <Route path="/clientes" element={<div>Clientes</div>} />
 

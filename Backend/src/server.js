@@ -1,17 +1,20 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/usuario.js'
-import { Rol, Usuario, Bitacora } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor } from './models/index.js'
 import { AutorizacionServicio } from './services/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/bitacora.js'
 import { RolServicio } from './services/rol.js'
+import { CategoriaServicio } from './services/gestion-Categoria/categoria.js'
 
 import { token, mailer } from '../config/autenticacionEmail.js'
 import bcrypt from 'bcrypt'
+import { ProveedorServicio } from './services/gestion-proveedor/proveedor.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
     modeloUsuario: Usuario,
-    modeloRol: Rol
+    modeloRol: Rol,
+    bcrypt
   }
 )
 const autorizacionServicio = new AutorizacionServicio(
@@ -33,5 +36,10 @@ const bitacoraServicio = new BitacoraServicio(
     modeloBitacora: Bitacora
   }
 )
-
-App({ usuarioServicio, autorizacionServicio, rolServicio, bitacoraServicio })
+const categoriaServicio = new CategoriaServicio({
+  modeloCategoria: Categoria
+})
+const proveedorServicio = new ProveedorServicio({
+  modeloProveedor: Proveedor
+})
+App({ usuarioServicio, autorizacionServicio, rolServicio, bitacoraServicio, categoriaServicio, proveedorServicio })
