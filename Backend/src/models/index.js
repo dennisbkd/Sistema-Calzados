@@ -139,5 +139,22 @@ export {
   Usuario,
   Rol,
   UsuarioRol,
-  Bitacora
+  Bitacora,
+  Categoria,
+  Producto,
+  ProductoVariante,
+  Cliente,
+  Compra,
+  DetalleCompra,
+  DetalleVenta,
+  Proveedor,
+  Venta,
+  MovimientoInventario,
+  Promocion,
+  VentaPromocion,
+  MetodoPago,
+  TransaccionPago,
+  UbicacionFisica,
+  ZonaBodega,
+  InventarioUbicacion
 }
