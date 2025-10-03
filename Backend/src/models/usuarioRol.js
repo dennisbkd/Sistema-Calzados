@@ -1,7 +1,7 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../../config/baseDatos.js";
+import { DataTypes } from 'sequelize'
+import sequelize from '../../config/baseDatos.js'
 
-export const UsuarioRol = sequelize.define('UsuarioRol',{
+export const UsuarioRol = sequelize.define('UsuarioRol', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
