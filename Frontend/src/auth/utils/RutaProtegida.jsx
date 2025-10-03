@@ -1,10 +1,9 @@
-import { Navigate, Outlet } from "react-router"
+import { Navigate, Outlet, useLocation } from "react-router"
 
 const rutasPorRol = {
-  inventario: "/inventario",
-  vendedor: "/venta",
-  administrador: "/home"
-  // ACA SE AUMENTA LAS RUTAS PARA EL ROL QUE LO NECESITE.
+  administrador: "/home",
+  vendedor: "/home",
+  inventario: "/inventario"
 }
 
 export const RutaProtegida = ({ permitidos, children, redireccionar = '/' }) => {
@@ -12,30 +11,35 @@ export const RutaProtegida = ({ permitidos, children, redireccionar = '/' }) => 
   const usuarioGuardado = localStorage.getItem('usuario')
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null
   const rolesUsuario = usuario?.roles || []
-
-
+  const location = useLocation()
 
   if (!token) {
-    return <Navigate to={redireccionar} />
+    return <Navigate to={redireccionar} replace />
   }
 
-  if (rolesUsuario.includes("administrador")) {
+  // Verificar acceso
+  const tieneAcceso = rolesUsuario.some(rol => permitidos.includes(rol))
+  if (!tieneAcceso) {
+    return <Navigate to="/clientes" replace />
+  }
+
+  // ✅ SOLUCIÓN SIMPLE: Si está en la ruta correcta, mostrar contenido
+  // Si no, redirigir según su rol principal
+  const estaEnRutaCorrecta = rolesUsuario.some(rol => {
+    const rutaDelRol = rutasPorRol[rol]
+    return rutaDelRol && location.pathname.startsWith(rutaDelRol)
+  })
+
+  if (estaEnRutaCorrecta) {
     return children ? children : <Outlet />
   }
 
-  const esPermitido = rolesUsuario.some(rol => permitidos.includes(rol))
-  // Si tiene token pero no está en los roles permitidos
-  if (!esPermitido) {
-    return <Navigate to="/clientes" />
-  }
-
-  // Si tiene token y está permitido, redirigir segun su rol 
+  // Redirigir a la ruta del primer rol válido
   const primerRolValido = rolesUsuario.find(rol => rutasPorRol[rol])
-  const rutaPorRol = rutasPorRol[primerRolValido]
-
-  if (rutaPorRol && window.location.pathname !== rutaPorRol) {
-    return <Navigate to={rutaPorRol} />
+  if (primerRolValido) {
+    return <Navigate to={rutasPorRol[primerRolValido]} replace />
   }
 
-  return children ? children : <Outlet />
+  // Fallback
+  return <Navigate to="/clientes" replace />
 }
