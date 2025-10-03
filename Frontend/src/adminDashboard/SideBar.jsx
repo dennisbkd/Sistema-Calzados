@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+
 "use client"
 
 import { Link, useLocation } from "react-router"
@@ -14,8 +15,10 @@ import {
   X,
   Users,
   Shield,
+  Archive,
+  Tag,
 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "motion/react"
 import { useState, useEffect } from "react"
 
 export const SideBar = () => {
@@ -76,6 +79,15 @@ export const SideBar = () => {
       path: "/home/inventario",
       icon: Warehouse
     },
+    {
+      title: "Gestión Producto",
+      icon: Archive,
+      key: "productos",
+      subItems: [
+        { title: "Productos", path: "/home/productos", icon: Archive },
+        { title: "Categorías", path: "/home/categorias", icon: Tag },
+      ],
+    },
   ]
 
   const toggleSubmenu = (key) => {
@@ -97,11 +109,6 @@ export const SideBar = () => {
     }
   }
 
-  const handleItemClick = (item) => {
-    if (item.subItems && !isMobile && !isOpen) {
-      toggleSubmenu(item.key)
-    }
-  }
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -169,7 +176,7 @@ export const SideBar = () => {
                   exit={{ opacity: 0, x: -10 }}
                   className="min-w-0"
                 >
-                  <h1 className="text-xl font-bold truncate">StepStyle</h1>
+                  <h1 className="text-xl font-bold truncate">Calzados Al Paso</h1>
                   <p className="text-blue-100 text-sm truncate">Calzados Premium</p>
                 </motion.div>
               )}
@@ -283,8 +290,8 @@ export const SideBar = () => {
                                 whileHover={{ scale: 1.02, x: 4 }}
                                 whileTap={{ scale: 0.98 }}
                                 className={`flex items-center p-2 rounded-lg transition-all ${subActive
-                                    ? "bg-blue-500 text-white shadow-md"
-                                    : "text-blue-200 hover:bg-blue-400 hover:text-white"
+                                  ? "bg-blue-500 text-white shadow-md"
+                                  : "text-blue-200 hover:bg-blue-400 hover:text-white"
                                   }`}
                               >
                                 {SubIcon && (
