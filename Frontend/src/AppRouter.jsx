@@ -12,6 +12,7 @@ import { NotFound } from "./utils/NotFound"
 import { TrancisionPages } from "./auth/utils/TrancisionPages"
 import { GestionUsuario } from "./adminDashboard/usuario/page/GestionUsuario"
 import { GestionCategoria } from "./adminDashboard/categoria/page/GestionCategoria"
+import { GestionProveedor } from "./adminDashboard/proveedor/page/GestionProveedor"
 // import { GestionUsuarios } from "./gestion_Usuario/page/GestionUsuarios"
 
 
@@ -30,6 +31,7 @@ export const AppRouter = () => {
             <Route path="usuarios" element={<GestionUsuario />} />
             <Route path="roles" element={<RolesPage />} />
             <Route path="categorias" element={<GestionCategoria />} />
+            <Route path="proveedores" element={<GestionProveedor />} />
           </Route>
         </Route>
 

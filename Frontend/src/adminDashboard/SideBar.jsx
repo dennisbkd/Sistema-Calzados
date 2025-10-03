@@ -26,7 +26,7 @@ export const SideBar = () => {
   const [isOpen, setIsOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-
+  const [usuario, setUsuario] = useState(null)
   // Detectar si es móvil
   useEffect(() => {
     const checkMobile = () => {
@@ -71,8 +71,12 @@ export const SideBar = () => {
     },
     {
       title: "Gestión Compras",
-      path: "/home/compras",
-      icon: Package
+      icon: Package,
+      key: "compras",
+      subItems: [
+        { title: "Compras", path: "/home/compras", icon: Package },
+        { title: "Proveedores", path: "/home/proveedores", icon: Users },
+      ],
     },
     {
       title: "Gestión Inventario",
@@ -109,11 +113,24 @@ export const SideBar = () => {
     }
   }
 
+  // Cargar usuario del localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("usuario")
+    if (storedUser) {
+      try {
+        setUsuario(JSON.parse(storedUser))
+      } catch (error) {
+        console.error("Error al parsear usuario:", error)
+      }
+    }
+  }, [])
 
   const handleLogout = () => {
     localStorage.removeItem("token")
+    localStorage.removeItem("usuario")
     window.location.href = "/"
   }
+
 
   const closeMobileMenu = () => {
     if (isMobile) {
@@ -314,7 +331,15 @@ export const SideBar = () => {
         </nav>
 
         {/* Logout Section */}
-        <div className="p-4 border-t border-blue-500">
+        {/* Logout Section */}
+        <div className="p-4 border-t border-blue-500 space-y-3">
+          {usuario && (
+            <div className="flex flex-col text-sm text-blue-100 mb-2">
+              <span className="font-semibold truncate">{usuario.nombre}</span>
+              <span className="text-xs text-blue-200 truncate">{usuario.email}</span>
+            </div>
+          )}
+
           <button
             onClick={handleLogout}
             className={`flex items-center p-3 rounded-xl text-blue-100 hover:bg-red-500 hover:text-white w-full transition-all group ${!shouldShowExpanded() ? 'justify-center' : ''
@@ -337,6 +362,7 @@ export const SideBar = () => {
             </AnimatePresence>
           </button>
         </div>
+
       </motion.div>
     </>
   )
