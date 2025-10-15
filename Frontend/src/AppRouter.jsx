@@ -13,7 +13,8 @@ import { TrancisionPages } from "./auth/utils/TrancisionPages"
 import { GestionUsuario } from "./adminDashboard/usuario/page/GestionUsuario"
 import { GestionCategoria } from "./adminDashboard/categoria/page/GestionCategoria"
 import { GestionProveedor } from "./adminDashboard/proveedor/page/GestionProveedor"
-// import { GestionUsuarios } from "./gestion_Usuario/page/GestionUsuarios"
+import GestionCompras from "./adminDashboard/compras/page/GestionCompras"
+import GestionProductos from "./adminDashboard/compras/GestionProductos"
 
 
 export const AppRouter = () => {
@@ -32,6 +33,8 @@ export const AppRouter = () => {
             <Route path="roles" element={<RolesPage />} />
             <Route path="categorias" element={<GestionCategoria />} />
             <Route path="proveedores" element={<GestionProveedor />} />
+            <Route path="compras" element={<GestionCompras />} />
+            <Route path="productos" element={<GestionProductos />} />
           </Route>
         </Route>
 
@@ -39,7 +42,6 @@ export const AppRouter = () => {
           <Route path="/solicitar-recuperamiento" element={<SolicitudPassword />} />
           <Route path="/restablecer-password" element={<RestablecerPassword />} />
         </Route>
-
 
 
 
