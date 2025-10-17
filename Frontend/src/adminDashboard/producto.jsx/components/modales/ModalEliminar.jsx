@@ -3,7 +3,7 @@ import { Modal } from '../../../../global/components/modal/Modal'
 import { AlertTriangle, X, Trash2 } from "lucide-react"
 
 
-export const ModalEliminar = ({ isOpen, cerrar, eliminarProducto }) => {
+export const ModalEliminar = ({ isOpen, cerrar, eliminarProducto, tipo = "elemento", nombre = "" }) => {
 
   const handleEliminar = () => {
     eliminarProducto()
@@ -11,11 +11,11 @@ export const ModalEliminar = ({ isOpen, cerrar, eliminarProducto }) => {
   }
 
   return (
-    <Modal abierto={isOpen} cambiarEstado={cerrar} titulo="Confirmar Eliminación" size="md">
+    <Modal abierto={isOpen} cambiarEstado={cerrar} titulo={`Eliminar ${tipo}`} size="md">
       <div className="flex items-center gap-3 p-4 bg-red-50 rounded-md">
         <AlertTriangle className="h-6 w-6 text-red-600" />
         <p className="text-gray-700">
-          ¿Estás seguro de que deseas eliminar este producto? <br />
+          ¿Estás seguro de que deseas eliminar este {tipo}? <strong>{nombre}</strong><br />
           <span className="text-sm text-gray-500">Esta acción no se puede deshacer.</span>
         </p>
       </div>

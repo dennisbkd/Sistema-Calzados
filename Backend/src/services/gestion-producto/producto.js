@@ -20,7 +20,8 @@ export class ProductoServicio {
             model: this.modeloProductoVariante,
             as: 'variantes'
           }
-        ]
+        ],
+        order: [['id', 'DESC']]
       })
       if (productos.length === 0) return { error: 'no hay productos' }
       const DtoProductos = productos.map((producto) => {

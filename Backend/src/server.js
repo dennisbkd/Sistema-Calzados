@@ -10,6 +10,7 @@ import { token, mailer } from '../config/autenticacionEmail.js'
 import bcrypt from 'bcrypt'
 import { ProveedorServicio } from './services/gestion-proveedor/proveedor.js'
 import { ProductoServicio } from './services/gestion-producto/producto.js'
+import { VarianteServicio } from './services/gestion-producto/variante.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -48,4 +49,17 @@ const productoServicio = new ProductoServicio({
   modeloProductoVariante: ProductoVariante,
   modeloCategoria: Categoria
 })
-App({ usuarioServicio, autorizacionServicio, rolServicio, bitacoraServicio, categoriaServicio, proveedorServicio, productoServicio })
+const varianteServicio = new VarianteServicio({
+  modeloVariante: ProductoVariante,
+  modeloProducto: Producto
+})
+App({
+  usuarioServicio,
+  autorizacionServicio,
+  rolServicio,
+  bitacoraServicio,
+  categoriaServicio,
+  proveedorServicio,
+  productoServicio,
+  varianteServicio
+})
