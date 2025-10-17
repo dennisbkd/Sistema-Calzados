@@ -5,13 +5,19 @@ import { BotonIcon } from "../../../global/components/Boton/BotonIcon"
 import { CardVariante } from "../components/CardVariante"
 export const CardProducto = ({
   producto,
+  estaCambiandoProducto,
+  procesoCambiando,
   calcularStockTotal,
   verDetalleProducto,
   editarProducto,
   editarVariante,
   crearVariante,
   cambiarEstadoProducto,
-  eliminarProducto
+  eliminarProducto,
+  cambiarEstadoVariante,
+  eliminarVariante,
+  estaCambiandoEstado,
+  varianteEnProceso
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden ">
@@ -20,7 +26,7 @@ export const CardProducto = ({
           <div>
             <div className="flex gap-x-3 items-center mb-3">
               <h3 className="text-lg font-semibold text-gray-900">{producto.nombre}</h3>
-              <EstadoEtiqueta activo={producto.estado} textos={{ activo: "Activo", inactivo: "Inactivo" }}
+              <EstadoEtiqueta isLoading={estaCambiandoProducto && procesoCambiando === producto.id} activo={producto.estado} textos={{ activo: "Activo", inactivo: "Inactivo" }}
                 iconos={{ activo: CheckCircle, inactivo: CircleX }} />
             </div>
             <div className="text-sm text-gray-600 flex flex-wrap gap-4">
@@ -57,8 +63,18 @@ export const CardProducto = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {producto.variantes.map((variante) => (
-              <CardVariante key={variante.id} variante={variante} editarVariante={editarVariante} productoId={producto.id} />
+            {producto.variantes.map((variante, index) => (
+              <CardVariante
+                key={variante.id}
+                variante={variante}
+                editarVariante={editarVariante}
+                productoId={producto.id}
+                index={index}
+                cambiarEstadoVariante={cambiarEstadoVariante}
+                estaCambiandoEstado={estaCambiandoEstado}
+                eliminarVariante={eliminarVariante}
+                varianteEnProceso={varianteEnProceso}
+              />
             ))}
           </div>
         )}
