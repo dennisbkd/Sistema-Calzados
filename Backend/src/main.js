@@ -8,6 +8,7 @@ import { rutaProveedor } from './router/preoveedor.js'
 
 import cors from 'cors'
 import { rutaProducto } from './router/producto.js'
+import { rutaVariante } from './router/variante.js'
 
 export const App = ({
   usuarioServicio,
@@ -16,7 +17,8 @@ export const App = ({
   bitacoraServicio,
   categoriaServicio,
   proveedorServicio,
-  productoServicio
+  productoServicio,
+  varianteServicio
 }) => {
   const app = express()
   const port = 3000
@@ -35,6 +37,7 @@ export const App = ({
   app.use('/categorias', rutaCategoria({ categoriaServicio }))
   app.use('/proveedores', rutaProveedor({ proveedorServicio }))
   app.use('/productos', rutaProducto({ productoServicio }))
+  app.use('/variantes', rutaVariante({ varianteServicio }))
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
