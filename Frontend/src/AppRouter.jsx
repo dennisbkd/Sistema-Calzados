@@ -14,7 +14,8 @@ import { GestionUsuario } from "./adminDashboard/usuario/page/GestionUsuario"
 import { GestionCategoria } from "./adminDashboard/categoria/page/GestionCategoria"
 import { GestionProveedor } from "./adminDashboard/proveedor/page/GestionProveedor"
 import GestionCompras from "./adminDashboard/compras/page/GestionCompras"
-import GestionProductos from "./adminDashboard/compras/GestionProductos"
+import { GestionProducto } from "./adminDashboard/producto.jsx/page/GestionProducto"
+import { GestionProductoLayout } from "./adminDashboard/producto.jsx/layout/GestionProductoLayout"
 
 
 export const AppRouter = () => {
@@ -34,7 +35,9 @@ export const AppRouter = () => {
             <Route path="categorias" element={<GestionCategoria />} />
             <Route path="proveedores" element={<GestionProveedor />} />
             <Route path="compras" element={<GestionCompras />} />
-            <Route path="productos" element={<GestionProductos />} />
+            <Route path="productos" element={<GestionProductoLayout />} >
+              <Route index element={<GestionProducto />} />
+            </Route>
           </Route>
         </Route>
 

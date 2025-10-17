@@ -45,7 +45,12 @@ Bitacora.belongsTo(Usuario, { foreignKey: 'usuarioId', as: 'usuario' })
 Categoria.hasMany(Producto, { foreignKey: 'categoriaId', as: 'productos' })
 Producto.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' })
 
-Producto.hasMany(ProductoVariante, { foreignKey: 'productoId', as: 'variantes' })
+Producto.hasMany(ProductoVariante, {
+  foreignKey: 'productoId',
+  as: 'variantes',
+  onDelete: 'CASCADE',
+  hooks: true
+})
 ProductoVariante.belongsTo(Producto, { foreignKey: 'productoId', as: 'producto' })
 
 // Proveedor - Compra

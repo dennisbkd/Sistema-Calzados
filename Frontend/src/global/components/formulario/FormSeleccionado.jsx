@@ -14,9 +14,9 @@ export const FormSeleccionado = ({
         value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
-        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition ${field.state.meta.errors
-            ? "border-red-400 focus:ring-red-300"
-            : "border-gray-300 focus:ring-blue-400"
+        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition ${field.state.meta.errors?.length > 0
+          ? "border-red-400 focus:ring-red-300"
+          : "border-gray-300 focus:ring-blue-400"
           }`}
       >
         <option value="">{placeholder}</option>
@@ -26,8 +26,8 @@ export const FormSeleccionado = ({
           </option>
         ))}
       </select>
-      {field.state.meta.errors && (
-        <p className="text-red-500 text-sm mt-1">{field.state.meta.errors}</p>
+      {field.state.meta.errors?.length > 0 && (
+        <p className="text-red-500 text-sm mt-1">{field.state.meta.errors[0]}</p>
       )}
     </div>
   )

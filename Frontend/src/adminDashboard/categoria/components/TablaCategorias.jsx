@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { motion } from "motion/react"
 import { Edit, Tag, Calendar, FileText, Hash } from "lucide-react"
 import { SpinnerCargando } from "../../../global/components/SpinnerCargando"
