@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { motion } from "motion/react"
 import { useForm } from '@tanstack/react-form'
 
@@ -39,7 +38,7 @@ export const FormModal = ({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className={`bg-white rounded-xl w-full ${sizes[size]} max-h-[90vh] overflow-y-auto`}
+        className={`bg-white rounded-xl w-full ${sizes[size]} max-h-[90vh] overflow-y-auto border border-gray-200 shadow-lg`}
       >
         <div className="p-4 sm:p-6">
           <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">
