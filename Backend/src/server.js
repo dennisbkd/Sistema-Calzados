@@ -1,6 +1,6 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra } from './models/index.js'
 import { AutorizacionServicio } from './services/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/bitacora.js'
 import { RolServicio } from './services/rol.js'
@@ -11,6 +11,7 @@ import bcrypt from 'bcrypt'
 import { ProveedorServicio } from './services/gestion-proveedor/proveedor.js'
 import { ProductoServicio } from './services/gestion-producto/producto.js'
 import { VarianteServicio } from './services/gestion-producto/variante.js'
+import { CompraServicio } from './services/gestion-compra/compra.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -53,6 +54,16 @@ const varianteServicio = new VarianteServicio({
   modeloVariante: ProductoVariante,
   modeloProducto: Producto
 })
+
+const compraServicio = new CompraServicio({
+  modeloCompra: Compra,
+  modeloDetalleCompra: DetalleCompra,
+  modeloProveedor: Proveedor,
+  modeloProducto: Producto,
+  modeloProductoVariante: ProductoVariante,
+  modeloUsuario: Usuario
+})
+
 App({
   usuarioServicio,
   autorizacionServicio,
@@ -61,5 +72,6 @@ App({
   categoriaServicio,
   proveedorServicio,
   productoServicio,
-  varianteServicio
+  varianteServicio,
+  compraServicio
 })

@@ -5,6 +5,7 @@ import { rutaAutorizacion } from './router/autorizacion.js'
 import { rutaRol } from './router/rol.js'
 import { rutaCategoria } from './router/categoria.js'
 import { rutaProveedor } from './router/preoveedor.js'
+import { rutaCompra } from './router/compra.js'
 
 import cors from 'cors'
 import { rutaProducto } from './router/producto.js'
@@ -18,7 +19,8 @@ export const App = ({
   categoriaServicio,
   proveedorServicio,
   productoServicio,
-  varianteServicio
+  varianteServicio,
+  compraServicio
 }) => {
   const app = express()
   const port = 3000
@@ -38,6 +40,7 @@ export const App = ({
   app.use('/proveedores', rutaProveedor({ proveedorServicio }))
   app.use('/productos', rutaProducto({ productoServicio }))
   app.use('/variantes', rutaVariante({ varianteServicio }))
+  app.use('/compras', rutaCompra({ compraServicio, bitacoraServicio }))
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
