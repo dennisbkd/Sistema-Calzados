@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { crearCompra, editarCompra, eliminarCompra, listarCompras, generarCodigoFactura } from '../../../api/compra/compraApi.js'
+import { crearCompra, editarCompra, eliminarCompra, listarCompras, generarCodigoFactura, cambiarEstadoCompraA } from '../../../api/compra/compraApi.js'
 import toast from 'react-hot-toast'
 
 export const useCompra = () => {
@@ -21,7 +21,7 @@ export const useCompra = () => {
   const editar = useMutation({
     mutationFn: (data) => editarCompra(data),
     onSuccess: () => {
-      toast.success('Compra editada correctamente')
+      // toast.success('Compra editada correctamente')
       queryClient.invalidateQueries(['listar-compras'])
     },
     onError: (error) => {
@@ -60,5 +60,16 @@ export const useCompra = () => {
     }
   })
 
-  return { crear, editar, eliminar, listar, generateCodigoFactura }
+ const cambiarEstadoCompra = useMutation({
+    mutationFn: (data) => cambiarEstadoCompraA(data),
+    onSuccess: () => {
+      // toast.success('Estado de la compra cambiado correctamente')
+      queryClient.invalidateQueries(['listar-compras'])
+    },
+    onError: (error) => {
+      toast.error(`Error al cambiar el estado de la compra: ${error.message}`)
+    }
+  })
+      
+  return { crear, editar, eliminar, listar, generateCodigoFactura, cambiarEstadoCompra }
 }
