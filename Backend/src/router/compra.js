@@ -9,5 +9,6 @@ export const rutaCompra = ({ compraServicio, bitacoraServicio }) => {
   router.delete('/eliminar/:id', compraController.eliminarCompra)
   router.get('/listar', compraController.listarCompras)
   router.get('/generarCodigoFactura', compraController.generarCodigoFactura)
+  router.patch('/cambiarEstado', compraController.cambiarEstadoCompra)
   return router
 }

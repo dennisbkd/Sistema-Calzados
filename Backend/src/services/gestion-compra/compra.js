@@ -29,27 +29,60 @@ export class CompraServicio {
   }
 
   editarCompra = async ({ input }) => {
-    const { id, nroFactura, total, estado, proveedorId, usuarioId, detalles } = input
+    const { id, nroFactura, total, estado, proveedorId, usuarioId, detallesEliminar, detallesNuevos } = input
+    const transaction = await this.modeloCompra.sequelize.transaction()
+
     try {
-      const compra = await this.modeloCompra.findByPk(id)
+      const compra = await this.modeloCompra.findByPk(id, { transaction })
       if (!compra) throw new Error('Compra no encontrada')
 
-      await compra.update({ nroFactura, total, estado, proveedorId, usuarioId })
+      // 1. ELIMINAR detalles específicos (con validación de compraId)
+      if (detallesEliminar && detallesEliminar.length > 0) {
+        await this.modeloDetalleCompra.destroy({
+          where: {
+            id: detallesEliminar,
+            compraId: id // ← Importante para seguridad
+          },
+          transaction
+        })
+      }
 
-      if (detalles && detalles.length > 0) {
-        await this.modeloDetalleCompra.destroy({ where: { compraId: id } })
-        const detallesACrear = detalles.map(d => ({
+      // 2. ACTUALIZAR datos de la compra (solo campos proporcionados)
+      const datosActualizar = {}
+      if (nroFactura !== undefined) datosActualizar.nroFactura = nroFactura
+      if (total !== undefined) datosActualizar.total = total
+      if (estado !== undefined) datosActualizar.estado = estado
+      if (proveedorId !== undefined) datosActualizar.proveedorId = proveedorId
+      if (usuarioId !== undefined) datosActualizar.usuarioId = usuarioId
+
+      if (Object.keys(datosActualizar).length > 0) {
+        await compra.update(datosActualizar, { transaction })
+      }
+
+      // 3. CREAR nuevos detalles
+      if (detallesNuevos && detallesNuevos.length > 0) {
+        const detallesACrear = detallesNuevos.map(d => ({
           compraId: id,
           varianteId: d.varianteId,
           cantidad: d.cantidad,
           precioUnitario: d.precioUnitario,
           subtotal: d.subtotal
         }))
-        await this.modeloDetalleCompra.bulkCreate(detallesACrear)
+        await this.modeloDetalleCompra.bulkCreate(detallesACrear, { transaction })
       }
 
-      return { compra, detalles }
+      await transaction.commit()
+      return {
+        compra: await this.modeloCompra.findByPk(id, {
+          include: ['detalles']
+        }),
+        detalles: {
+          eliminados: detallesEliminar || [],
+          nuevos: detallesNuevos || []
+        }
+      }
     } catch (error) {
+      await transaction.rollback()
       throw new Error('Error al editar la compra: ' + error.message)
     }
   }
@@ -120,27 +153,33 @@ export class CompraServicio {
     })
   }
 
-  // genera un codigo unico para la factura
+  // genera un código simple de factura secuencial
   generarCodigoFactura = async () => {
-    let facturaUnica = false
-    let codigoFactura = ''
+    const ultimaCompra = await this.modeloCompra.findOne({
+      order: [['nroFactura', 'DESC']]
+    })
 
-    while (!facturaUnica) {
-      const fecha = new Date()
-      const año = fecha.getFullYear().toString().slice(-2)
-      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0')
-      const dia = fecha.getDate().toString().padStart(2, '0')
-      const hora = fecha.getHours().toString().padStart(2, '0')
-      const min = fecha.getMinutes().toString().padStart(2, '0')
-      const seg = fecha.getSeconds().toString().padStart(2, '0')
-      const random = Math.floor(100 + Math.random() * 900)
+    let nuevoNumero = 1
 
-      codigoFactura = `FAC-${año}${mes}${dia}-${hora}${min}${seg}-${random}`
-
-      const existe = await this.modeloCompra.findOne({ where: { nroFactura: codigoFactura } })
-      if (!existe) facturaUnica = true
+    if (ultimaCompra && ultimaCompra.nroFactura) {
+      const match = ultimaCompra.nroFactura.match(/FAC-(\d+)/)
+      if (match && match[1]) {
+        nuevoNumero = parseInt(match[1], 10) + 1
+      }
     }
-
+    const codigoFactura = `FAC-${nuevoNumero.toString().padStart(3, '0')}`
     return codigoFactura
+  }
+
+  cambiarEstadoCompra = async ({ input }) => {
+    const { id, estado } = input
+    try {
+      const compra = await this.modeloCompra.findByPk(id)
+      if (!compra) throw new Error('Compra no encontrada')
+      await compra.update({ estado })
+      return compra
+    } catch (error) {
+      throw new Error('Error al cambiar el estado de la compra: ' + error.message)
+    }
   }
 }

@@ -97,4 +97,14 @@ export class CompraControlador {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
     }
   }
+
+  cambiarEstadoCompra = async (req, res) => {
+    try {
+      const input = req.body
+      const resultado = await this.compraServicio.cambiarEstadoCompra({ input })
+      return res.status(200).json(resultado)
+    } catch (e) {
+      return res.status(500).json({ error: 'Error en el servidor', e: e.message })
+    }
+  }
 }
