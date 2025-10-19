@@ -105,7 +105,8 @@ export const SideBar = () => {
       key: "bitacora",
       subItems: [
         { title: "Visualizar Registros", path: "/home/bitacora", icon: FileArchive }
-    },
+      ],
+    }
   ]
 
   const toggleSubmenu = (key) => {
