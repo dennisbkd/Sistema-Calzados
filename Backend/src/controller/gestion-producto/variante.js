@@ -5,7 +5,8 @@ export class VarianteControlador {
 
   crearVariante = async (req, res) => {
     const body = req.body
-    const nuevaVariante = await this.varianteServicio.crearVariante(body)
+    const options = req.user
+    const nuevaVariante = await this.varianteServicio.crearVariante(body, options)
     if (nuevaVariante.error) return res.status(400).json(nuevaVariante)
     return res.status(201).json(nuevaVariante)
   }
@@ -19,16 +20,17 @@ export class VarianteControlador {
 
   eliminarVariante = async (req, res) => {
     const { id } = req.params
-    const varianteEliminada = await this.varianteServicio.eliminarVariante(id)
+    const options = req.user
+    const varianteEliminada = await this.varianteServicio.eliminarVariante(id, options)
     if (varianteEliminada.error) return res.status(400).json(varianteEliminada)
     return res.status(200).json(varianteEliminada)
   }
 
   actualizarVariante = async (req, res) => {
     const body = req.body
-    console.log('Controlador ActualizarVariante:', 'ID:', req.params.id, 'body:', body)
+    const options = req.user
     const { id } = req.params
-    const varianteActualizada = await this.varianteServicio.actualizarVariante(id, body)
+    const varianteActualizada = await this.varianteServicio.actualizarVariante(id, body, options)
     if (varianteActualizada.error) return res.status(400).json(varianteActualizada)
     return res.status(200).json(varianteActualizada)
   }

@@ -16,6 +16,8 @@ import { GestionProveedor } from "./adminDashboard/proveedor/page/GestionProveed
 import GestionCompras from "./adminDashboard/compras/page/GestionCompras"
 import { GestionProducto } from "./adminDashboard/producto.jsx/page/GestionProducto"
 import { GestionProductoLayout } from "./adminDashboard/producto.jsx/layout/GestionProductoLayout"
+import DetalleUsuarioBitacora from "./adminDashboard/bitacora/page/DetalleUsuarioBitacora"
+import VistaUsuariosActivos from "./adminDashboard/bitacora/page/BitacoraCompleta"
 
 
 export const AppRouter = () => {
@@ -38,6 +40,8 @@ export const AppRouter = () => {
             <Route path="productos" element={<GestionProductoLayout />} >
               <Route index element={<GestionProducto />} />
             </Route>
+            <Route path="bitacora" element={<VistaUsuariosActivos />} />
+            <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
           </Route>
         </Route>
 
@@ -45,7 +49,6 @@ export const AppRouter = () => {
           <Route path="/solicitar-recuperamiento" element={<SolicitudPassword />} />
           <Route path="/restablecer-password" element={<RestablecerPassword />} />
         </Route>
-
 
 
         <Route path="/clientes" element={<div>Clientes</div>} />

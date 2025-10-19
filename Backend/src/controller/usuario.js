@@ -27,8 +27,9 @@ export class UsuarioControlador {
   editarUsuario = async (req, res) => {
     const body = req.body
     const id = req.params.id
+    const options = req.user
     try {
-      const respuesta = await this.usuarioServicio.editarUsuario(id, { body })
+      const respuesta = await this.usuarioServicio.editarUsuario(id, { body, options })
       if (respuesta.error) return res.status(401).json(respuesta.error)
       return res.status(200).json(respuesta)
     } catch (e) {
