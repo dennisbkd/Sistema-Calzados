@@ -13,6 +13,7 @@ import {
   Shield,
   Archive,
   Tag,
+  FileArchive,
   Truck,
   BarChart,
 } from "lucide-react"
@@ -97,6 +98,13 @@ export const SideBar = () => {
       subItems: [
         { title: "Reportes", path: "/home/reportes", icon: BarChart }
       ],
+    },
+    {
+      title: "Bitacora",
+      icon: FileArchive,
+      key: "bitacora",
+      subItems: [
+        { title: "Visualizar Registros", path: "/home/bitacora", icon: FileArchive }
     },
   ]
 
