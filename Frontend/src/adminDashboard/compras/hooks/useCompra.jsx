@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { crearCompra, editarCompra, eliminarCompra, listarCompras, generarCodigoFactura, cambiarEstadoCompraA } from '../../../api/compra/compraApi.js'
+import { crearCompra, editarCompra, eliminarCompra, listarCompras, generarCodigoFactura, cambiarEstadoCompraA, generarFactura } from '../../../api/compra/compraApi.js'
 import toast from 'react-hot-toast'
 
 export const useCompra = () => {
@@ -9,7 +9,6 @@ export const useCompra = () => {
   const crear = useMutation({
     mutationFn: (data) => crearCompra(data),
     onSuccess: () => {
-      toast.success('Compra registrada correctamente')
       queryClient.invalidateQueries(['listar-compras'])
     },
     onError: (error) => {
@@ -21,7 +20,6 @@ export const useCompra = () => {
   const editar = useMutation({
     mutationFn: (data) => editarCompra(data),
     onSuccess: () => {
-      // toast.success('Compra editada correctamente')
       queryClient.invalidateQueries(['listar-compras'])
     },
     onError: (error) => {
@@ -33,7 +31,6 @@ export const useCompra = () => {
   const eliminar = useMutation({
     mutationFn: (id) => eliminarCompra(id),
     onSuccess: () => {
-      toast.success('Compra eliminada correctamente')
       queryClient.invalidateQueries(['listar-compras'])
     },
     onError: (error) => {
@@ -63,13 +60,19 @@ export const useCompra = () => {
  const cambiarEstadoCompra = useMutation({
     mutationFn: (data) => cambiarEstadoCompraA(data),
     onSuccess: () => {
-      // toast.success('Estado de la compra cambiado correctamente')
       queryClient.invalidateQueries(['listar-compras'])
     },
     onError: (error) => {
       toast.error(`Error al cambiar el estado de la compra: ${error.message}`)
     }
   })
+
+ const generarFacturaCompra = useMutation({
+    mutationFn: (id) => generarFactura(id),
+    onError: (error) => {
+      toast.error(`Error al generar la factura de la compra: ${error.message}`)
+    }
+  })
       
-  return { crear, editar, eliminar, listar, generateCodigoFactura, cambiarEstadoCompra }
+  return { crear, editar, eliminar, listar, generateCodigoFactura, cambiarEstadoCompra, generarFacturaCompra }
 }
