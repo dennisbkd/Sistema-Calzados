@@ -13,6 +13,8 @@ import {
   Shield,
   Archive,
   Tag,
+  Truck,
+  BarChart,
 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import { useState, useEffect } from "react"
@@ -71,7 +73,7 @@ export const SideBar = () => {
       key: "compras",
       subItems: [
         { title: "Compras", path: "/home/compras", icon: Package },
-        { title: "Proveedores", path: "/home/proveedores", icon: Users },
+        { title: "Proveedores", path: "/home/proveedores", icon: Truck },
       ],
     },
     {
@@ -86,6 +88,14 @@ export const SideBar = () => {
       subItems: [
         { title: "Productos", path: "/home/productos", icon: Archive },
         { title: "Categorías", path: "/home/categorias", icon: Tag },
+      ],
+    },
+    {
+      title: "Reportes",
+      icon: BarChart,
+      key: "reportes",
+      subItems: [
+        { title: "Reportes", path: "/home/reportes", icon: BarChart }
       ],
     },
   ]

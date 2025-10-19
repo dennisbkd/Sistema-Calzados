@@ -20,9 +20,17 @@ import {
   ChevronDown,
   X,
   Package,
-  CheckCircle
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  AlertTriangle,
+  Download,
+  Printer
 } from "lucide-react"
 import toast from "react-hot-toast"
+import { generarPDFCompra } from "../facturaCompra/FacturaCompra"
 
 const GestionCompras = () => {
   const { 
@@ -53,6 +61,9 @@ const GestionCompras = () => {
   const [filtroAnio, setFiltroAnio] = useState("")
   const [menuFiltrosAbierto, setMenuFiltrosAbierto] = useState(false)
 
+  const [paginaActual, setPaginaActual] = useState(1)
+  const [itemsPorPagina, setItemsPorPagina] = useState(10)
+
   const [nroFacturaInput, setNroFacturaInput] = useState("")
   const [/*totalInput*/, setTotalInput] = useState("")
   const [estadoInput, setEstadoInput] = useState("REGISTRADA")
@@ -68,6 +79,7 @@ const GestionCompras = () => {
     varianteSeleccionada: null
   })
 
+  // Obtener todas las variantes de productos
   const todasLasVariantes = useMemo(() => {
     return productos.flatMap(producto => 
       (producto.variantes || []).map(variante => ({
@@ -80,6 +92,7 @@ const GestionCompras = () => {
     )
   }, [productos])
 
+  // Calcular total automáticamente
   const totalCalculado = useMemo(() => {
     return detallesInput.reduce((total, detalle) => {
       return total + (detalle.cantidad * detalle.precioUnitario)
@@ -90,6 +103,7 @@ const GestionCompras = () => {
     setTotalInput(totalCalculado.toFixed(2))
   }, [totalCalculado])
 
+  // Obtener años y meses únicos para filtros
   const { años, meses } = useMemo(() => {
     const añosUnicos = [...new Set(compras.map(c => new Date(c.fechaCompra).getFullYear()))].sort((a, b) => b - a)
     const mesesUnicos = [
@@ -101,6 +115,7 @@ const GestionCompras = () => {
     return { años: añosUnicos, meses: mesesUnicos }
   }, [compras])
 
+  // Generar código de factura
   const generarCodigoFacturaF = async () => {
     if (!generateCodigoFactura) return
     setGenerandoCodigo(true)
@@ -110,6 +125,36 @@ const GestionCompras = () => {
     })
   }
 
+  // Generar factura PDF
+  const generarFactura = (compra, opcion) => {
+    try {
+      const datosParaFactura = {
+        nroFactura: compra.nroFactura,
+        fecha: compra.fechaCompra,
+        hora: compra.horaCompra,
+        proveedor: compra.proveedor,
+        usuario: compra.usuario,
+        total: compra.total,
+        detalles: compra.detalles?.map(detalle => ({
+          descripcion: detalle.producto,
+          marca: detalle.marca,
+          codigo: detalle.codigo,
+          color: detalle.color,
+          talla: detalle.talla,
+          cantidad: detalle.cantidad,
+          precioUnitario: detalle.precioUnitario,
+          subtotal: detalle.subtotal
+        })) || []
+      }
+
+      generarPDFCompra(datosParaFactura, opcion)
+    } catch (error) {
+      console.error("Error al generar factura:", error)
+      toast.error("Error al generar la factura")
+    }
+  }
+
+  // Abrir modal para crear/editar
   const openModal = (compra = null) => {
     setNroFacturaInput("")
     setTotalInput("")
@@ -158,6 +203,7 @@ const GestionCompras = () => {
     setShowModal(true)
   }
 
+  // Cerrar modal
   const closeModal = () => {
     setShowModal(false)
     setEditingCompra(null)
@@ -178,16 +224,19 @@ const GestionCompras = () => {
     }, 300)
   }
 
+  // Abrir modal de detalles
   const openDetailsModal = (compra) => {
     setSelectedCompraDetails(compra)
     setShowDetailsModal(true)
   }
 
+  // Cerrar modal de detalles
   const closeDetailsModal = () => {
     setShowDetailsModal(false)
     setSelectedCompraDetails(null)
   }
 
+  // Cambiar estado de compra
   const cambiarEstado = (compra, nuevoEstado) => {
     cambiarEstadoCompra.mutate({
       id: compra.id,
@@ -200,6 +249,7 @@ const GestionCompras = () => {
     })
   }
 
+  // Agregar detalle a la compra
   const agregarDetalle = () => {
     if (!nuevoDetalle.varianteId || !nuevoDetalle.cantidad || nuevoDetalle.cantidad <= 0 || !nuevoDetalle.precioUnitario || nuevoDetalle.precioUnitario <= 0) {
       toast.error("Complete todos los campos del detalle correctamente")
@@ -213,7 +263,7 @@ const GestionCompras = () => {
     }
 
     const detalle = {
-      id: Date.now(), // ID temporal para nuevos detalles
+      id: Date.now(),
       varianteId: nuevoDetalle.varianteId,
       producto: varianteSeleccionada.productoNombre,
       marca: varianteSeleccionada.productoMarca,
@@ -234,11 +284,13 @@ const GestionCompras = () => {
     })
   }
 
+  // Eliminar detalle
   const eliminarDetalle = (index) => {
     const nuevosDetalles = detallesInput.filter((_, i) => i !== index)
     setDetallesInput(nuevosDetalles)
   }
 
+  // Manejar cambio de variante
   const handleVarianteChange = (varianteId) => {
     const varianteSeleccionada = todasLasVariantes.find(v => v.id === parseInt(varianteId))
     if (varianteSeleccionada) {
@@ -251,6 +303,7 @@ const GestionCompras = () => {
     }
   }
 
+  // Crear o editar compra
   const handleCreateOrEdit = () => {
     if (!nroFacturaInput.trim()) {
       toast.error("El número de factura es requerido")
@@ -272,10 +325,8 @@ const GestionCompras = () => {
     }
 
     if (editingCompra) {
-      // --- LÓGICA SIMPLIFICADA PARA EDITAR ---
       const detallesOriginales = editingCompra.detalles || []
       
-      // 1. IDENTIFICAR DETALLES ELIMINADOS
       const detallesEliminar = detallesOriginales
         .filter(detalleOriginal => 
           !detallesInput.some(detalleActual => 
@@ -284,7 +335,6 @@ const GestionCompras = () => {
         )
         .map(detalle => detalle.id)
 
-      // 2. IDENTIFICAR DETALLES NUEVOS (los que tienen ID temporal >= 1000)
       const detallesNuevos = detallesInput
         .filter(detalle => !detalle.id || detalle.id >= 1000)
         .map(detalle => ({
@@ -293,10 +343,6 @@ const GestionCompras = () => {
           precioUnitario: parseFloat(detalle.precioUnitario),
           subtotal: parseFloat(detalle.cantidad * detalle.precioUnitario)
         }))
-
-      console.log("📊 RESUMEN DE CAMBIOS - EDICIÓN:")
-      console.log("🗑️  Eliminar (" + detallesEliminar.length + "):", detallesEliminar)
-      console.log("🆕 Nuevos (" + detallesNuevos.length + "):", detallesNuevos)
 
       const compraData = {
         id: editingCompra.id,
@@ -309,30 +355,23 @@ const GestionCompras = () => {
         detallesNuevos: detallesNuevos
       }
 
-      console.log("📦 Enviando al backend (EDITAR):", compraData)
-
       editar.mutate(compraData, {
         onSuccess: () => {
           toast.success("Compra actualizada correctamente")
           closeModal()
         },
         onError: (error) => {
-          console.error("❌ Error del backend:", error)
           toast.error(`Error al actualizar compra: ${error.message}`)
         }
       })
 
     } else {
-      // --- LÓGICA PARA NUEVA COMPRA ---
       const detallesNuevos = detallesInput.map(detalle => ({
         varianteId: parseInt(detalle.varianteId),
         cantidad: parseInt(detalle.cantidad),
         precioUnitario: parseFloat(detalle.precioUnitario),
         subtotal: parseFloat(detalle.cantidad * detalle.precioUnitario)
       }))
-
-      console.log("📊 RESUMEN - NUEVA COMPRA:")
-      console.log("🆕 Nuevos detalles (" + detallesNuevos.length + "):", detallesNuevos)
 
       const compraData = {
         nroFactura: nroFacturaInput.trim(),
@@ -343,21 +382,19 @@ const GestionCompras = () => {
         detalles: detallesNuevos
       }
 
-      console.log("📦 Enviando al backend (CREAR):", compraData)
-
       crear.mutate(compraData, {
         onSuccess: () => {
           toast.success("Compra creada correctamente")
           closeModal()
         },
         onError: (error) => {
-          console.error("❌ Error del backend:", error)
           toast.error(`Error al crear compra: ${error.message}`)
         }
       })
     }
   }
 
+  // Eliminar compra
   const handleDelete = (compra) => {
     if (compra?.id && eliminar?.mutate) {
       eliminar.mutate(compra.id, {
@@ -371,6 +408,7 @@ const GestionCompras = () => {
     }
   }
 
+  // Seleccionar todas las compras
   const handleSelectAll = () => {
     setSelectedCompras(
       selectedCompras.length === filteredCompras.length
@@ -379,12 +417,14 @@ const GestionCompras = () => {
     )
   }
 
+  // Seleccionar compra individual
   const handleSelectSingle = (id) => {
     setSelectedCompras((prev) =>
       prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
     )
   }
 
+  // Limpiar filtros
   const limpiarFiltros = () => {
     setFiltroEstado("TODAS")
     setFiltroMes("")
@@ -392,6 +432,7 @@ const GestionCompras = () => {
     setSearchTerm("")
   }
 
+  // Obtener color según estado
   const getEstadoColor = (estado) => {
     switch (estado) {
       case "PAGADA": return "bg-green-100 text-green-800 border border-green-200"
@@ -401,6 +442,7 @@ const GestionCompras = () => {
     }
   }
 
+  // Formatear moneda
   const formatCurrency = (amount) => {
     const numAmount = parseFloat(amount) || 0
     return new Intl.NumberFormat('es-BO', {
@@ -409,10 +451,12 @@ const GestionCompras = () => {
     }).format(numAmount)
   }
 
+  // Toggle menú de filtros
   const toggleMenuFiltros = () => {
     setMenuFiltrosAbierto(!menuFiltrosAbierto)
   }
 
+  // Filtrar compras
   const filteredCompras = useMemo(() => {
     return compras.filter((c) => {
       const matchesSearch = 
@@ -430,9 +474,66 @@ const GestionCompras = () => {
     })
   }, [compras, searchTerm, filtroEstado, filtroMes, filtroAnio])
 
+  // Paginación
+  const comprasPaginadas = useMemo(() => {
+    const startIndex = (paginaActual - 1) * itemsPorPagina
+    const endIndex = startIndex + itemsPorPagina
+    return filteredCompras.slice(startIndex, endIndex)
+  }, [filteredCompras, paginaActual, itemsPorPagina])
+
+  const totalPaginas = Math.ceil(filteredCompras.length / itemsPorPagina)
+
+  const paginasParaMostrar = useMemo(() => {
+    const paginas = []
+    const paginasTotales = totalPaginas
+    const paginaActualNum = paginaActual
+    
+    paginas.push(1)
+    
+    for (let i = Math.max(2, paginaActualNum - 1); i <= Math.min(paginasTotales - 1, paginaActualNum + 1); i++) {
+      if (!paginas.includes(i)) paginas.push(i)
+    }
+    
+    if (paginasTotales > 1) {
+      paginas.push(paginasTotales)
+    }
+    
+    return [...new Set(paginas)].sort((a, b) => a - b)
+  }, [paginaActual, totalPaginas])
+
+  const irAPagina = (pagina) => {
+    setPaginaActual(pagina)
+  }
+
+  const paginaAnterior = () => {
+    if (paginaActual > 1) {
+      setPaginaActual(paginaActual - 1)
+    }
+  }
+
+  const paginaSiguiente = () => {
+    if (paginaActual < totalPaginas) {
+      setPaginaActual(paginaActual + 1)
+    }
+  }
+
+  const irAPrimeraPagina = () => {
+    setPaginaActual(1)
+  }
+
+  const irAUltimaPagina = () => {
+    setPaginaActual(totalPaginas)
+  }
+
+  // Resetear paginación cuando cambian los filtros
+  useEffect(() => {
+    setPaginaActual(1)
+  }, [searchTerm, filtroEstado, filtroMes, filtroAnio])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-blue-600 rounded-lg">
@@ -444,6 +545,7 @@ const GestionCompras = () => {
           <div className="w-20 h-1 bg-blue-600 mt-2 ml-11 rounded-full"></div>
         </motion.div>
 
+        {/* Barra de búsqueda y filtros */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 border border-blue-100">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col lg:flex-row gap-4">
@@ -517,6 +619,7 @@ const GestionCompras = () => {
               </button>
             </div>
 
+            {/* Filtros activos */}
             {(filtroEstado !== "TODAS" || filtroMes || filtroAnio) && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="flex flex-wrap gap-2 text-sm">
                 <span className="text-gray-600">Filtros activos:</span>
@@ -529,6 +632,7 @@ const GestionCompras = () => {
           </div>
         </motion.div>
 
+        {/* Estadísticas */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-blue-500"><div className="text-sm text-gray-600">Total Compras</div><div className="text-2xl font-bold text-gray-800">{filteredCompras.length}</div></div>
           <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-green-500"><div className="text-sm text-gray-600">Pagadas</div><div className="text-2xl font-bold text-gray-800">{filteredCompras.filter(c => c.estado === "PAGADA").length}</div></div>
@@ -536,73 +640,359 @@ const GestionCompras = () => {
           <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-red-500"><div className="text-sm text-gray-600">Anuladas</div><div className="text-2xl font-bold text-gray-800">{filteredCompras.filter(c => c.estado === "ANULADA").length}</div></div>
         </motion.div>
 
+        {/* Tabla de compras */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-xl shadow-lg overflow-hidden border border-blue-100">
+          <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
+            <div className="flex items-center gap-4 mb-3 sm:mb-0">
+              <div className="text-sm text-gray-600">
+                Mostrando <span className="font-semibold">{comprasPaginadas.length}</span> de{" "}
+                <span className="font-semibold">{filteredCompras.length}</span> compras
+              </div>
+              
+              <select 
+                value={itemsPorPagina} 
+                onChange={(e) => {
+                  setItemsPorPagina(Number(e.target.value))
+                  setPaginaActual(1)
+                }}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={5}>5 por página</option>
+                <option value={10}>10 por página</option>
+                <option value={20}>20 por página</option>
+                <option value={50}>50 por página</option>
+              </select>
+            </div>
+
+            {/* Controles de paginación superiores */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={irAPrimeraPagina}
+                disabled={paginaActual === 1}
+                className="p-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                title="Primera página"
+              >
+                <ChevronsLeft size={16} />
+              </button>
+              
+              <button
+                onClick={paginaAnterior}
+                disabled={paginaActual === 1}
+                className="p-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                title="Página anterior"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {paginasParaMostrar.map((pagina, index) => (
+                  <div key={pagina} className="flex items-center">
+                    {index > 0 && paginasParaMostrar[index - 1] !== pagina - 1 && (
+                      <span className="px-1 text-gray-400">...</span>
+                    )}
+                    <button
+                      onClick={() => irAPagina(pagina)}
+                      className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                        pagina === paginaActual
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-600 hover:bg-gray-100 border border-gray-300"
+                      }`}
+                    >
+                      {pagina}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={paginaSiguiente}
+                disabled={paginaActual === totalPaginas}
+                className="p-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                title="Página siguiente"
+              >
+                <ChevronRight size={16} />
+              </button>
+              
+              <button
+                onClick={irAUltimaPagina}
+                disabled={paginaActual === totalPaginas}
+                className="p-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                title="Última página"
+              >
+                <ChevronsRight size={16} />
+              </button>
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-                  <th className="text-left p-4"><input type="checkbox" checked={selectedCompras.length === filteredCompras.length && filteredCompras.length > 0} onChange={handleSelectAll} className="h-4 w-4 rounded border-white text-blue-600 focus:ring-blue-500 bg-white" /></th>
-                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider"><div className="flex items-center gap-1"><FileText size={16} />Factura</div></th>
-                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider"><div className="flex items-center gap-1"><Building size={16} />Proveedor</div></th>
-                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider"><div className="flex items-center gap-1"><User size={16} />Usuario</div></th>
-                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider"><div className="flex items-center gap-1"><Calendar size={16} />Fecha</div></th>
+                  <th className="text-left p-4">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedCompras.length === comprasPaginadas.length && comprasPaginadas.length > 0} 
+                      onChange={handleSelectAll} 
+                      className="h-4 w-4 rounded border-white text-blue-600 focus:ring-blue-500 bg-white" 
+                    />
+                  </th>
+                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">
+                    <div className="flex items-center gap-1"><FileText size={16} />Factura</div>
+                  </th>
+                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">
+                    <div className="flex items-center gap-1"><Building size={16} />Proveedor</div>
+                  </th>
+                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">
+                    <div className="flex items-center gap-1"><User size={16} />Usuario</div>
+                  </th>
+                  <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">
+                    <div className="flex items-center gap-1"><Calendar size={16} />Fecha</div>
+                  </th>
                   <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">Total</th>
                   <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">Estado</th>
                   <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredCompras.map((compra, index) => (
-                  <motion.tr key={compra.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className="hover:bg-blue-50 transition-colors">
-                    <td className="p-4"><input type="checkbox" checked={selectedCompras.includes(compra.id)} onChange={() => handleSelectSingle(compra.id)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" /></td>
-                    <td className="p-4"><div className="text-sm font-semibold text-gray-900">{compra.nroFactura}</div></td>
-                    <td className="p-4"><div className="text-sm text-gray-900">{compra.proveedor}</div></td>
-                    <td className="p-4"><div className="text-sm text-gray-600">{compra.usuario}</div></td>
-                    <td className="p-4"><div className="text-sm text-gray-600">{compra.fechaCompra}</div><div className="text-xs text-gray-400">{compra.horaCompra}</div></td>
-                    <td className="p-4"><div className="text-sm font-semibold text-gray-900">{formatCurrency(compra.total)}</div></td>
-                    <td className="p-4"><span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getEstadoColor(compra.estado)}`}>{compra.estado}</span></td>
+                {comprasPaginadas.map((compra, index) => (
+                  <motion.tr 
+                    key={compra.id} 
+                    initial={{ opacity: 0, y: 10 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    transition={{ delay: index * 0.05 }} 
+                    className="hover:bg-blue-50 transition-colors"
+                  >
+                    <td className="p-4">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedCompras.includes(compra.id)} 
+                        onChange={() => handleSelectSingle(compra.id)} 
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm font-semibold text-gray-900">{compra.nroFactura}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm text-gray-900">{compra.proveedor}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm text-gray-600">{compra.usuario}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm text-gray-600">{compra.fechaCompra}</div>
+                      <div className="text-xs text-gray-400">{compra.horaCompra}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm font-semibold text-gray-900">{formatCurrency(compra.total)}</div>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getEstadoColor(compra.estado)}`}>
+                        {compra.estado}
+                      </span>
+                    </td>
                     <td className="p-4">
                       <div className="flex gap-2">
-                        <button onClick={() => openDetailsModal(compra)} className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors" title="Ver detalles"><FileText size={16} /></button>
-                        <button onClick={() => openModal(compra)} className="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50 transition-colors" title="Editar compra"><Pencil size={16} /></button>
+                        <button 
+                          onClick={() => openDetailsModal(compra)} 
+                          className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
+                          title="Ver detalles"
+                        >
+                          <FileText size={16} />
+                        </button>
+                        
+                        <button 
+                          onClick={() => generarFactura(compra)} 
+                          className="text-purple-600 hover:text-purple-700 p-2 rounded-lg hover:bg-purple-50 transition-colors"
+                          title="Generar factura PDF"
+                        >
+                          <Download size={16} />
+                        </button>
+                        
+                        <button 
+                          onClick={() => openModal(compra)} 
+                          disabled={compra.estado === 'PAGADA' || compra.estado === 'ANULADA'}
+                          className={`p-2 rounded-lg transition-colors ${
+                            compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                          }`}
+                          title={
+                            compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
+                              ? 'No se puede editar compras pagadas o anuladas'
+                              : 'Editar compra'
+                          }
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        
                         <div className="relative">
-                          <button onClick={() => setMenuEstadoAbierto(menuEstadoAbierto === compra.id ? null : compra.id)} className={`p-2 rounded-lg transition-colors ${compra.estado === "REGISTRADA" ? "text-blue-600 hover:bg-blue-50" : compra.estado === "PAGADA" ? "text-green-600 hover:bg-green-50" : "text-red-600 hover:bg-red-50"}`} title={`Cambiar estado (Actual: ${compra.estado})`}><RefreshCcw size={16} /></button>
-                          {menuEstadoAbierto === compra.id && (
+                          <button 
+                            onClick={() => setMenuEstadoAbierto(menuEstadoAbierto === compra.id ? null : compra.id)}
+                            disabled={compra.estado === 'PAGADA' || compra.estado === 'ANULADA'}
+                            className={`p-2 rounded-lg transition-colors ${
+                              compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : compra.estado === "REGISTRADA" 
+                                  ? "text-blue-600 hover:bg-blue-50" 
+                                  : "text-gray-600 hover:bg-gray-50"
+                            }`}
+                            title={
+                              compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
+                                ? 'No se puede cambiar el estado de compras pagadas o anuladas'
+                                : `Cambiar estado (Actual: ${compra.estado})`
+                            }
+                          >
+                            <RefreshCcw size={16} />
+                          </button>
+                          
+                          {menuEstadoAbierto === compra.id && compra.estado === 'REGISTRADA' && (
                             <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                              <button onClick={() => cambiarEstado(compra, "REGISTRADA")} className={`w-full text-left px-3 py-2 text-sm rounded-t-lg ${compra.estado === "REGISTRADA" ? "bg-blue-100 text-blue-800 font-semibold" : "text-blue-600 hover:bg-blue-50"}`}>Registrada</button>
-                              <button onClick={() => cambiarEstado(compra, "PAGADA")} className={`w-full text-left px-3 py-2 text-sm ${compra.estado === "PAGADA" ? "bg-green-100 text-green-800 font-semibold" : "text-green-600 hover:bg-green-50"}`}>Pagada</button>
-                              <button onClick={() => cambiarEstado(compra, "ANULADA")} className={`w-full text-left px-3 py-2 text-sm rounded-b-lg ${compra.estado === "ANULADA" ? "bg-red-100 text-red-800 font-semibold" : "text-red-600 hover:bg-red-50"}`}>Anulada</button>
+                              <button 
+                                onClick={() => cambiarEstado(compra, "PAGADA")} 
+                                className="w-full text-left px-3 py-2 text-sm rounded-t-lg text-green-600 hover:bg-green-50"
+                              >
+                                Pagada
+                              </button>
+                              <button 
+                                onClick={() => cambiarEstado(compra, "ANULADA")} 
+                                className="w-full text-left px-3 py-2 text-sm rounded-b-lg text-red-600 hover:bg-red-50"
+                              >
+                                Anulada
+                              </button>
                             </div>
                           )}
                         </div>
-                        <button onClick={() => handleDelete(compra)} className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors" title="Anular compra"><Trash2 size={16} /></button>
+                        
+                        <button 
+                          onClick={() => handleDelete(compra)} 
+                          disabled={compra.estado === 'PAGADA'}
+                          className={`p-2 rounded-lg transition-colors ${
+                            compra.estado === 'PAGADA'
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                          }`}
+                          title={
+                            compra.estado === 'PAGADA'
+                              ? 'No se puede anular compras pagadas'
+                              : 'Anular compra'
+                          }
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </motion.tr>
                 ))}
-                {filteredCompras.length === 0 && (
-                  <tr><td colSpan={8} className="p-8 text-center text-gray-500"><div className="flex flex-col items-center"><FileText size={48} className="text-gray-300 mb-4" />{searchTerm || filtroEstado !== "TODAS" || filtroMes || filtroAnio ? "No se encontraron compras con los filtros aplicados" : "No hay compras registradas"}</div></td></tr>
+                {comprasPaginadas.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-gray-500">
+                      <div className="flex flex-col items-center">
+                        <FileText size={48} className="text-gray-300 mb-4" />
+                        {searchTerm || filtroEstado !== "TODAS" || filtroMes || filtroAnio ? "No se encontraron compras con los filtros aplicados" : "No hay compras registradas"}
+                      </div>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Paginación inferior */}
+          <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-gray-200 bg-gray-50">
+            <div className="text-sm text-gray-600 mb-3 sm:mb-0">
+              Mostrando <span className="font-semibold">{(paginaActual - 1) * itemsPorPagina + 1}</span> -{" "}
+              <span className="font-semibold">
+                {Math.min(paginaActual * itemsPorPagina, filteredCompras.length)}
+              </span> de <span className="font-semibold">{filteredCompras.length}</span> compras
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={irAPrimeraPagina}
+                disabled={paginaActual === 1}
+                className="px-3 py-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors flex items-center gap-1 text-sm"
+              >
+                <ChevronsLeft size={16} />
+                <span className="hidden sm:inline">Primera</span>
+              </button>
+              
+              <button
+                onClick={paginaAnterior}
+                disabled={paginaActual === 1}
+                className="px-3 py-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors flex items-center gap-1 text-sm"
+              >
+                <ChevronLeft size={16} />
+                <span className="hidden sm:inline">Anterior</span>
+              </button>
+
+              <div className="flex items-center gap-1 mx-2">
+                <span className="text-sm text-gray-600">Página</span>
+                <span className="font-semibold">{paginaActual}</span>
+                <span className="text-sm text-gray-600">de</span>
+                <span className="font-semibold">{totalPaginas}</span>
+              </div>
+
+              <button
+                onClick={paginaSiguiente}
+                disabled={paginaActual === totalPaginas}
+                className="px-3 py-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors flex items-center gap-1 text-sm"
+              >
+                <span className="hidden sm:inline">Siguiente</span>
+                <ChevronRight size={16} />
+              </button>
+              
+              <button
+                onClick={irAUltimaPagina}
+                disabled={paginaActual === totalPaginas}
+                className="px-3 py-1 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors flex items-center gap-1 text-sm"
+              >
+                <span className="hidden sm:inline">Última</span>
+                <ChevronsRight size={16} />
+              </button>
+            </div>
+          </div>
         </motion.div>
 
+        {/* Modal para crear/editar compra */}
         <AnimatePresence>
           {showModal && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
               <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-xl shadow-2xl w-full max-w-6xl mx-auto border border-blue-200 max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
+                  {editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA') && (
+                    <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="text-yellow-600" size={24} />
+                        <div>
+                          <h4 className="font-semibold text-yellow-800">Compra {editingCompra.estado.toLowerCase()}</h4>
+                          <p className="text-yellow-700 text-sm">
+                            Esta compra está {editingCompra.estado.toLowerCase()} y no puede ser editada.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-gray-800">{editingCompra ? "Editar Compra" : "Registrar Nueva Compra"}</h3>
-                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
+                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors">
+                      <X size={24} />
+                    </button>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Número de Factura *</label>
                       <div className="relative">
-                        <input type="text" value={nroFacturaInput} onChange={(e) => setNroFacturaInput(e.target.value)} placeholder="Generando código..." className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10" disabled={generandoCodigo} />
+                        <input 
+                          type="text" 
+                          value={nroFacturaInput} 
+                          onChange={(e) => setNroFacturaInput(e.target.value)} 
+                          placeholder="Generando código..." 
+                          disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA') || generandoCodigo}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                        />
                         {generandoCodigo && (<div className="absolute right-3 top-1/2 transform -translate-y-1/2"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div></div>)}
                         {!generandoCodigo && nroFacturaInput && (<CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" size={16} />)}
                       </div>
@@ -611,12 +1001,29 @@ const GestionCompras = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Proveedor *</label>
-                      {cargandoProveedores ? (<div className="flex items-center gap-2 text-gray-500"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>Cargando proveedores...</div>) : (<select value={proveedorInput} onChange={(e) => setProveedorInput(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">Seleccionar proveedor</option>{proveedores.map(proveedor => (<option key={proveedor.id} value={proveedor.nombre}>{proveedor.nombre}</option>))}</select>)}
+                      {cargandoProveedores ? (<div className="flex items-center gap-2 text-gray-500"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>Cargando proveedores...</div>) : (
+                        <select 
+                          value={proveedorInput} 
+                          onChange={(e) => setProveedorInput(e.target.value)} 
+                          disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        >
+                          <option value="">Seleccionar proveedor</option>
+                          {proveedores.map(proveedor => (
+                            <option key={proveedor.id} value={proveedor.nombre}>{proveedor.nombre}</option>
+                          ))}
+                        </select>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                      <select value={estadoInput} onChange={(e) => setEstadoInput(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <select 
+                        value={estadoInput} 
+                        onChange={(e) => setEstadoInput(e.target.value)} 
+                        disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      >
                         <option value="REGISTRADA">Registrada</option>
                         <option value="PAGADA">Pagada</option>
                         <option value="ANULADA">Anulada</option>
@@ -625,18 +1032,97 @@ const GestionCompras = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Compra</label>
-                      <input type="date" value={fechaCompraInput} onChange={(e) => setFechaCompraInput(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <input 
+                        type="date" 
+                        value={fechaCompraInput} 
+                        onChange={(e) => setFechaCompraInput(e.target.value)} 
+                        disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                      />
                     </div>
                   </div>
 
                   <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-blue-50/50">
-                    <h4 className="text-md font-semibold mb-3 text-gray-800 flex items-center gap-2"><Package size={20} className="text-blue-600" />Agregar Productos</h4>
-                    {cargandoProductos ? (<div className="text-center py-4"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p className="text-gray-600 mt-2">Cargando productos...</p></div>) : (<><div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-                      <div><label className="block text-sm font-medium text-gray-700 mb-2">Producto/Variante *</label><select value={nuevoDetalle.varianteId} onChange={(e) => handleVarianteChange(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">Seleccionar variante</option>{todasLasVariantes.map(variante => (<option key={variante.id} value={variante.id}>{variante.productoNombre} - {variante.color} - {variante.talla} ({variante.codigo})</option>))}</select></div>
-                      <div><label className="block text-sm font-medium text-gray-700 mb-2">Cantidad *</label><input type="number" min="1" value={nuevoDetalle.cantidad} onChange={(e) => setNuevoDetalle({...nuevoDetalle, cantidad: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ingrese cantidad" /></div>
-                      <div><label className="block text-sm font-medium text-gray-700 mb-2">Precio Unitario (Bs) *</label><input type="number" step="0.01" min="0" value={nuevoDetalle.precioUnitario} onChange={(e) => setNuevoDetalle({...nuevoDetalle, precioUnitario: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00" /></div>
-                      <div className="flex items-end"><button onClick={agregarDetalle} className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-600/25"><Plus size={16} />Agregar</button></div>
-                    </div>{nuevoDetalle.varianteSeleccionada && (<div className="text-sm text-gray-600 bg-white p-3 rounded-md border border-blue-200"><div className="grid grid-cols-2 md:grid-cols-4 gap-2"><div><strong>Producto:</strong> {nuevoDetalle.varianteSeleccionada.productoNombre}</div><div><strong>Marca:</strong> {nuevoDetalle.varianteSeleccionada.productoMarca}</div><div><strong>Color:</strong> {nuevoDetalle.varianteSeleccionada.color}</div><div><strong>Talla:</strong> {nuevoDetalle.varianteSeleccionada.talla}</div></div><div className="mt-1 text-blue-600"><strong>Código:</strong> {nuevoDetalle.varianteSeleccionada.codigo}</div></div>)}</>)}
+                    <h4 className="text-md font-semibold mb-3 text-gray-800 flex items-center gap-2">
+                      <Package size={20} className="text-blue-600" />
+                      Agregar Productos
+                      {editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA') && (
+                        <span className="text-sm text-yellow-600 font-normal">(No disponible para compras {editingCompra.estado.toLowerCase()}s)</span>
+                      )}
+                    </h4>
+                    {cargandoProductos ? (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                        <p className="text-gray-600 mt-2">Cargando productos...</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Producto/Variante *</label>
+                            <select 
+                              value={nuevoDetalle.varianteId} 
+                              onChange={(e) => handleVarianteChange(e.target.value)} 
+                              disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            >
+                              <option value="">Seleccionar variante</option>
+                              {todasLasVariantes.map(variante => (
+                                <option key={variante.id} value={variante.id}>
+                                  {variante.productoNombre} - {variante.color} - {variante.talla} ({variante.codigo})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Cantidad *</label>
+                            <input 
+                              type="number" 
+                              min="1" 
+                              value={nuevoDetalle.cantidad} 
+                              onChange={(e) => setNuevoDetalle({...nuevoDetalle, cantidad: e.target.value})} 
+                              disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                              placeholder="Ingrese cantidad" 
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Precio Unitario (Bs) *</label>
+                            <input 
+                              type="number" 
+                              step="0.01" 
+                              min="0" 
+                              value={nuevoDetalle.precioUnitario} 
+                              onChange={(e) => setNuevoDetalle({...nuevoDetalle, precioUnitario: e.target.value})} 
+                              disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                              placeholder="0.00" 
+                            />
+                          </div>
+                          <div className="flex items-end">
+                            <button 
+                              onClick={agregarDetalle} 
+                              disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                              className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Plus size={16} />
+                              Agregar
+                            </button>
+                          </div>
+                        </div>
+                        {nuevoDetalle.varianteSeleccionada && (
+                          <div className="text-sm text-gray-600 bg-white p-3 rounded-md border border-blue-200">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                              <div><strong>Producto:</strong> {nuevoDetalle.varianteSeleccionada.productoNombre}</div>
+                              <div><strong>Marca:</strong> {nuevoDetalle.varianteSeleccionada.productoMarca}</div>
+                              <div><strong>Color:</strong> {nuevoDetalle.varianteSeleccionada.color}</div>
+                              <div><strong>Talla:</strong> {nuevoDetalle.varianteSeleccionada.talla}</div>
+                            </div>
+                            <div className="mt-1 text-blue-600"><strong>Código:</strong> {nuevoDetalle.varianteSeleccionada.codigo}</div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   <div className="mb-6">
@@ -657,8 +1143,6 @@ const GestionCompras = () => {
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 text-sm">
-                                  
-                                  {/* Producto/Variante - SOLO LECTURA */}
                                   <div>
                                     <label className="font-medium text-gray-700 text-xs">Producto</label>
                                     <div className="text-sm text-gray-900 p-1">
@@ -666,19 +1150,16 @@ const GestionCompras = () => {
                                     </div>
                                   </div>
 
-                                  {/* Cantidad - SOLO LECTURA */}
                                   <div>
                                     <label className="font-medium text-gray-700 text-xs">Cantidad</label>
                                     <div className="text-sm text-gray-900 p-1">{detalle.cantidad}</div>
                                   </div>
 
-                                  {/* Precio Unitario - SOLO LECTURA */}
                                   <div>
                                     <label className="font-medium text-gray-700 text-xs">Precio Unit.</label>
                                     <div className="text-sm text-gray-900 p-1">{formatCurrency(detalle.precioUnitario)}</div>
                                   </div>
 
-                                  {/* Información adicional */}
                                   <div className="md:col-span-2">
                                     <div className="text-xs text-gray-600">
                                       <div><strong>Marca:</strong> {detalle.marca}</div>
@@ -692,22 +1173,28 @@ const GestionCompras = () => {
                                     </div>
                                   </div>
 
-                                  {/* Subtotal */}
                                   <div>
                                     <label className="font-medium text-gray-700 text-xs">Subtotal</label>
                                     <div className="text-green-600 font-bold text-sm">
                                       {formatCurrency(detalle.subtotal)}
                                     </div>
                                   </div>
-
                                 </div>
                               </div>
                               
-                              {/* Botón Eliminar */}
                               <button 
                                 onClick={() => eliminarDetalle(index)} 
-                                className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors ml-2" 
-                                title="Eliminar producto"
+                                disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
+                                className={`p-2 rounded-lg transition-colors ml-2 ${
+                                  editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                                }`}
+                                title={
+                                  editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')
+                                    ? 'No se puede eliminar productos de compras pagadas o anuladas'
+                                    : 'Eliminar producto'
+                                }
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -726,7 +1213,12 @@ const GestionCompras = () => {
                   <div className="flex gap-3">
                     <button 
                       onClick={handleCreateOrEdit} 
-                      disabled={crear.isLoading || editar.isLoading || detallesInput.length === 0}
+                      disabled={
+                        crear.isLoading || 
+                        editar.isLoading || 
+                        detallesInput.length === 0 ||
+                        (editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA'))
+                      }
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {crear.isLoading || editar.isLoading ? (
@@ -760,6 +1252,7 @@ const GestionCompras = () => {
           )}
         </AnimatePresence>
 
+        {/* Modal de detalles */}
         <AnimatePresence>
           {showDetailsModal && selectedCompraDetails && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
@@ -860,7 +1353,24 @@ const GestionCompras = () => {
                     </table>
                   </div>
 
-                  <div className="flex justify-end mt-6">
+                  <div className="flex justify-end gap-3 mt-6">
+                    <button 
+                      onClick={() => generarFactura(selectedCompraDetails,"descargar")} 
+                      className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <Download size={16} />
+                      Generar Factura PDF
+                    </button>
+
+                    <button 
+                      onClick={() => generarFactura(selectedCompraDetails,"imprimir")} 
+                      className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                      title="Imprimir factura"
+                    >
+                      <Printer size={16} />
+                      Imprimir Factura PDF
+                    </button>
+
                     <button onClick={closeDetailsModal} className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-colors">
                       Cerrar
                     </button>

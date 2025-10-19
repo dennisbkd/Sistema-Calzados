@@ -25,3 +25,8 @@ export const generarCodigoFactura = async () => {
 export const cambiarEstadoCompraA = async (input) => {
   return instancia.patch('/compras/cambiarEstado', input)
 }
+
+export const generarFactura = async (id) => {
+  const res = await instancia.get(`/compras/generarFactura/${id}`)
+  return res.data
+}
