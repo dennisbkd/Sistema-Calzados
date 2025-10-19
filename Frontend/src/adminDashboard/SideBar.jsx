@@ -13,6 +13,7 @@ import {
   Shield,
   Archive,
   Tag,
+  FileArchive,
 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import { useState, useEffect } from "react"
@@ -86,6 +87,14 @@ export const SideBar = () => {
       subItems: [
         { title: "Productos", path: "/home/productos", icon: Archive },
         { title: "Categorías", path: "/home/categorias", icon: Tag },
+      ],
+    },
+    {
+      title: "Bitacora",
+      icon: FileArchive,
+      key: "bitacora",
+      subItems: [
+        { title: "Visualizar Registros", path: "/home/bitacora", icon: FileArchive }
       ],
     },
   ]
