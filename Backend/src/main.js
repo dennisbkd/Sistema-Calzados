@@ -10,6 +10,8 @@ import { rutaCompra } from './router/compra.js'
 import cors from 'cors'
 import { rutaProducto } from './router/producto.js'
 import { rutaVariante } from './router/variante.js'
+import { decodificarToken } from '../middleware/descodificarToken.js'
+import { rutaBitacora } from './router/bitacora.js'
 
 export const App = ({
   usuarioServicio,
@@ -33,15 +35,15 @@ export const App = ({
 
   db()
 
-  app.use('/usuario', rutaUsuario({ usuarioServicio }))
+  app.use('/usuario', decodificarToken, rutaUsuario({ usuarioServicio }))
   app.use('/autorizacion', rutaAutorizacion({ autorizacionServicio }))
-  app.use('/rol', rutaRol({ rolServicio, bitacoraServicio }))
-  app.use('/categorias', rutaCategoria({ categoriaServicio }))
-  app.use('/proveedores', rutaProveedor({ proveedorServicio }))
-  app.use('/productos', rutaProducto({ productoServicio }))
-  app.use('/variantes', rutaVariante({ varianteServicio }))
-  app.use('/compras', rutaCompra({ compraServicio, bitacoraServicio }))
-
+  app.use('/rol', decodificarToken, rutaRol({ rolServicio, bitacoraServicio }))
+  app.use('/categorias', decodificarToken, rutaCategoria({ categoriaServicio }))
+  app.use('/proveedores', decodificarToken, rutaProveedor({ proveedorServicio }))
+  app.use('/productos', decodificarToken, rutaProducto({ productoServicio }))
+  app.use('/variantes', decodificarToken, rutaVariante({ varianteServicio }))
+  app.use('/compras', decodificarToken, rutaCompra({ compraServicio, bitacoraServicio }))
+  app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })

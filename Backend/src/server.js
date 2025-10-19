@@ -12,6 +12,7 @@ import { ProveedorServicio } from './services/gestion-proveedor/proveedor.js'
 import { ProductoServicio } from './services/gestion-producto/producto.js'
 import { VarianteServicio } from './services/gestion-producto/variante.js'
 import { CompraServicio } from './services/gestion-compra/compra.js'
+import sequelize from '../config/baseDatos.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -36,7 +37,9 @@ const rolServicio = new RolServicio(
 )
 const bitacoraServicio = new BitacoraServicio(
   {
-    modeloBitacora: Bitacora
+    modeloBitacora: Bitacora,
+    modeloUsuario: Usuario,
+    sequelize
   }
 )
 const categoriaServicio = new CategoriaServicio({
