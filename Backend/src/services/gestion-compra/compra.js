@@ -41,7 +41,7 @@ export class CompraServicio {
         await this.modeloDetalleCompra.destroy({
           where: {
             id: detallesEliminar,
-            compraId: id // ← Importante para seguridad
+            compraId: id
           },
           transaction
         })
@@ -180,6 +180,65 @@ export class CompraServicio {
       return compra
     } catch (error) {
       throw new Error('Error al cambiar el estado de la compra: ' + error.message)
+    }
+  }
+
+  generarFactura = async ({ input }) => {
+    const { id } = input
+    try {
+      // Traer la compra con proveedor, usuario y detalles
+      const compra = await this.modeloCompra.findByPk(id, {
+        include: [
+          { model: this.modeloProveedor, as: 'proveedor', attributes: ['nombre'] },
+          { model: this.modeloUsuario, as: 'usuario', attributes: ['nombre'] },
+          {
+            model: this.modeloDetalleCompra,
+            as: 'detalles',
+            include: [
+              {
+                model: this.modeloProductoVariante,
+                as: 'variante',
+                attributes: ['talla', 'color', 'codigo', 'precioVenta'],
+                include: [
+                  { model: this.modeloProducto, as: 'producto', attributes: ['nombre', 'marca'] }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+
+      if (!compra) throw new Error('Compra no encontrada')
+
+      // Formatear los detalles
+      const detalles = compra.detalles.map(d => ({
+        descripcion: d.variante?.producto?.nombre || d.variante?.codigo || 'Producto',
+        marca: d.variante?.producto?.marca || '',
+        codigo: d.variante?.codigo || '',
+        color: d.variante?.color || '',
+        talla: d.variante?.talla || '',
+        cantidad: d.cantidad,
+        precioUnitario: d.precioUnitario,
+        subtotal: d.subtotal
+      }))
+
+      const fechaCompra = new Date(compra.createdAt)
+      const fechaFormateada = fechaCompra.toLocaleDateString('es-BO')
+      const horaFormateada = fechaCompra.toLocaleTimeString('es-BO')
+
+      const factura = {
+        nroFactura: compra.nroFactura,
+        fecha: fechaFormateada,
+        hora: horaFormateada,
+        proveedor: compra.proveedor?.nombre || '',
+        usuario: compra.usuario?.nombre || '',
+        total: compra.total,
+        detalles
+      }
+
+      return factura
+    } catch (error) {
+      throw new Error('Error al generar la factura: ' + error.message)
     }
   }
 }

@@ -107,4 +107,14 @@ export class CompraControlador {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
     }
   }
+
+  generarFactura = async (req, res) => {
+    try {
+      const input = req.params
+      const resultado = await this.compraServicio.generarFactura({ input })
+      return res.status(200).json(resultado)
+    } catch (e) {
+      return res.status(500).json({ error: 'Error en el servidor', e: e.message })
+    }
+  }
 }
