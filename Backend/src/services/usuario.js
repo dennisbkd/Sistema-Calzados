@@ -87,9 +87,8 @@ export class UsuarioServicio {
     }
   }
 
-  editarUsuario = async (id, { body }) => {
+  editarUsuario = async (id, { body, options }) => {
     const { nombre, activo, email, password, roles = [] } = body
-    console.log(id, body)
     try {
     // 1. Buscar usuario
       const usuario = await this.modeloUsuario.findByPk(id)
@@ -101,7 +100,7 @@ export class UsuarioServicio {
         activo,
         email,
         ...(password && { password })
-      })
+      }, options)
 
       // 3. Si mandas roles, sincronizar roles del usuario
       if (roles && roles.length > 0) {
@@ -109,7 +108,10 @@ export class UsuarioServicio {
         const rolesDB = await this.modeloRol.findAll({
           where: { nombre: roles }
         })
-        await usuario.setRoles(rolesDB) // reemplaza roles anteriores
+        await usuario.setRoles(rolesDB, {
+          individualHooks: true,
+          context: options
+        }) // reemplaza roles anteriores
       }
 
       // 4. Obtener usuario actualizado con roles

@@ -19,6 +19,7 @@ import { TransaccionPago } from './transaccionPago.js'
 import { UbicacionFisica } from './ubicacionFisica.js'
 import { ZonaBodega } from './zonaBodega.js'
 import { InventarioUbicacion } from './inventarioUbicacion.js'
+import { registrarAuditoriaHooks } from '../utils/registrarAuditoriaHooks.js'
 // Usuario - Rol - UsuarioRol
 
 Usuario.belongsToMany(Rol, {
@@ -139,6 +140,35 @@ InventarioUbicacion.belongsTo(UbicacionFisica, { foreignKey: 'ubicacionId', as: 
 
 ProductoVariante.hasMany(InventarioUbicacion, { foreignKey: 'varianteId', as: 'inventarios' })
 InventarioUbicacion.belongsTo(ProductoVariante, { foreignKey: 'varianteId', as: 'variante' })
+
+const modelos = {
+  Usuario,
+  Rol,
+  UsuarioRol,
+  Categoria,
+  Producto,
+  ProductoVariante,
+  Cliente,
+  Compra,
+  DetalleCompra,
+  DetalleVenta,
+  Proveedor,
+  Venta,
+  MovimientoInventario,
+  Promocion,
+  VentaPromocion,
+  MetodoPago,
+  TransaccionPago,
+  UbicacionFisica,
+  ZonaBodega,
+  InventarioUbicacion,
+  Bitacora
+}
+
+// Aplica auditoría a todos menos Bitácora
+for (const [nombre, modelo] of Object.entries(modelos)) {
+  registrarAuditoriaHooks(modelo, nombre)
+}
 
 export {
   Usuario,

@@ -11,7 +11,8 @@ export class ProductoControlador {
 
   crearProducto = async (req, res) => {
     const body = req.body
-    const nuevoProducto = await this.productoServicio.crearProducto(body)
+    const options = req.user
+    const nuevoProducto = await this.productoServicio.crearProducto(body, options)
     if (nuevoProducto.error) return res.status(400).json(nuevoProducto)
     return res.status(201).json(nuevoProducto)
   }
@@ -19,7 +20,8 @@ export class ProductoControlador {
   editarProducto = async (req, res) => {
     const { id } = req.params
     const body = req.body
-    const productoEditado = await this.productoServicio.editarProducto(id, body)
+    const options = req.user
+    const productoEditado = await this.productoServicio.editarProducto(id, body, options)
     if (productoEditado.error) return res.status(400).json(productoEditado)
     return res.status(200).json(productoEditado)
   }
@@ -33,7 +35,8 @@ export class ProductoControlador {
 
   eliminarProducto = async (req, res) => {
     const { id } = req.params
-    const productoEliminado = await this.productoServicio.eliminarProducto(id)
+    const options = req.user
+    const productoEliminado = await this.productoServicio.eliminarProducto(id, options)
     if (productoEliminado.error) return res.status(400).json(productoEliminado)
     return res.status(200).json(productoEliminado)
   }
