@@ -8,10 +8,10 @@ export class CompraServicio {
     this.modeloProducto = modeloProducto
   }
 
-  registrarCompra = async ({ input }) => {
+  registrarCompra = async ({ input, options }) => {
     const { nroFactura, total, estado, proveedorId, usuarioId, detalles } = input
     try {
-      const nuevaCompra = await this.modeloCompra.create({ nroFactura, total, estado, proveedorId, usuarioId })
+      const nuevaCompra = await this.modeloCompra.create({ nroFactura, total, estado, proveedorId, usuarioId }, options)
       if (detalles && detalles.length > 0) {
         const detallesACrear = detalles.map(d => ({
           compraId: nuevaCompra.id,
@@ -28,26 +28,22 @@ export class CompraServicio {
     }
   }
 
-  editarCompra = async ({ input }) => {
+  editarCompra = async ({ input, options }) => {
     const { id, nroFactura, total, estado, proveedorId, usuarioId, detallesEliminar, detallesNuevos } = input
-    const transaction = await this.modeloCompra.sequelize.transaction()
 
     try {
-      const compra = await this.modeloCompra.findByPk(id, { transaction })
+      const compra = await this.modeloCompra.findByPk(id)
       if (!compra) throw new Error('Compra no encontrada')
 
-      // 1. ELIMINAR detalles específicos (con validación de compraId)
       if (detallesEliminar && detallesEliminar.length > 0) {
         await this.modeloDetalleCompra.destroy({
           where: {
             id: detallesEliminar,
             compraId: id
-          },
-          transaction
+          }
         })
       }
 
-      // 2. ACTUALIZAR datos de la compra (solo campos proporcionados)
       const datosActualizar = {}
       if (nroFactura !== undefined) datosActualizar.nroFactura = nroFactura
       if (total !== undefined) datosActualizar.total = total
@@ -56,7 +52,7 @@ export class CompraServicio {
       if (usuarioId !== undefined) datosActualizar.usuarioId = usuarioId
 
       if (Object.keys(datosActualizar).length > 0) {
-        await compra.update(datosActualizar, { transaction })
+        await compra.update(datosActualizar, options)
       }
 
       // 3. CREAR nuevos detalles
@@ -68,10 +64,9 @@ export class CompraServicio {
           precioUnitario: d.precioUnitario,
           subtotal: d.subtotal
         }))
-        await this.modeloDetalleCompra.bulkCreate(detallesACrear, { transaction })
+        await this.modeloDetalleCompra.bulkCreate(detallesACrear)
       }
 
-      await transaction.commit()
       return {
         compra: await this.modeloCompra.findByPk(id, {
           include: ['detalles']
@@ -82,18 +77,17 @@ export class CompraServicio {
         }
       }
     } catch (error) {
-      await transaction.rollback()
       throw new Error('Error al editar la compra: ' + error.message)
     }
   }
 
-  eliminarCompra = async ({ input }) => {
+  eliminarCompra = async ({ input, options }) => {
     const { id } = input
     try {
       const compra = await this.modeloCompra.findByPk(id)
       if (!compra) throw new Error('Compra no encontrada')
 
-      await compra.update({ estado: 'anulada' })
+      await compra.update({ estado: 'anulada' }, options)
       return compra
     } catch (error) {
       throw new Error('Error al eliminar la compra: ' + error.message)
@@ -171,12 +165,12 @@ export class CompraServicio {
     return codigoFactura
   }
 
-  cambiarEstadoCompra = async ({ input }) => {
+  cambiarEstadoCompra = async ({ input, options }) => {
     const { id, estado } = input
     try {
       const compra = await this.modeloCompra.findByPk(id)
       if (!compra) throw new Error('Compra no encontrada')
-      await compra.update({ estado })
+      await compra.update(estado, options)
       return compra
     } catch (error) {
       throw new Error('Error al cambiar el estado de la compra: ' + error.message)
