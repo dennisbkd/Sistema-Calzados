@@ -30,6 +30,8 @@ export const useFormProducto = () => {
   return {
     modal,
     guardarProducto,
-    formConfigProducto
+    formConfigProducto,
+    estadoCreando: crearProductoMutation.isPending,
+    estadoEditando: editarProductoMutation.isPending,
   }
 }

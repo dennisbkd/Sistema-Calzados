@@ -174,7 +174,7 @@ export class CompraServicio {
     try {
       const compra = await this.modeloCompra.findByPk(id)
       if (!compra) throw new Error('Compra no encontrada')
-      await compra.update(estado, options)
+      await compra.update({ estado }, options)
       return compra
     } catch (error) {
       throw new Error('Error al cambiar el estado de la compra: ' + error.message)
