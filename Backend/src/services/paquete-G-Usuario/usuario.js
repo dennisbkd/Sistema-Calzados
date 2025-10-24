@@ -93,13 +93,13 @@ export class UsuarioServicio {
     // 1. Buscar usuario
       const usuario = await this.modeloUsuario.findByPk(id)
       if (!usuario) return { error: 'Usuario no encontrado' }
-
       // 2. Actualizar datos básicos
+      const hashPassword = password ? await this.bcrypt.hash(password, 10) : null
       await usuario.update({
         nombre,
         activo,
         email,
-        ...(password && { password })
+        ...(password && { password: hashPassword })
       }, options)
 
       // 3. Si mandas roles, sincronizar roles del usuario
