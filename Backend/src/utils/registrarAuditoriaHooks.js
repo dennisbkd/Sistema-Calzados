@@ -1,5 +1,5 @@
 import { Bitacora } from '../models/index.js'
-import { BitacoraServicio } from '../services/bitacora.js'
+import { BitacoraServicio } from '../services/paquete-G-Usuario/bitacora.js'
 
 const bitacoraServicio = new BitacoraServicio({ modeloBitacora: Bitacora })
 

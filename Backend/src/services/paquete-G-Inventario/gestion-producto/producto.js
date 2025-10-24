@@ -42,7 +42,7 @@ export class ProductoServicio {
     }
   }
 
-  crearProducto = async ({ nombre, modelo, marca, descripcion, categoria }) => {
+  crearProducto = async ({ nombre, modelo, marca, descripcion, categoria }, options) => {
     try {
       const existeCategoria = await this.modeloCategoria.findOne({ where: { nombre: categoria } })
       if (!existeCategoria) return { error: 'La categoria no existe' }
@@ -53,14 +53,14 @@ export class ProductoServicio {
         marca,
         descripcion,
         categoriaId: existeCategoria.id
-      })
+      }, options)
       return { mensaje: 'producto creado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  editarProducto = async (id, { nombre, modelo, marca, descripcion, categoria, estado }) => {
+  editarProducto = async (id, { nombre, modelo, marca, descripcion, categoria, estado }, options) => {
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
@@ -73,29 +73,29 @@ export class ProductoServicio {
         descripcion,
         categoriaId: existeCategoria.id,
         activo: estado
-      })
+      }, options)
       return { mensaje: 'producto editado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  toggleEstadoProducto = async (id) => {
+  toggleEstadoProducto = async (id, options) => {
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
-      await producto.update({ activo: !producto.activo })
+      await producto.update({ activo: !producto.activo }, options)
       return { mensaje: 'Estado del producto actualizado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  eliminarProducto = async (id) => {
+  eliminarProducto = async (id, options) => {
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
-      await producto.destroy()
+      await producto.destroy(options)
       return { mensaje: 'Producto eliminado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
