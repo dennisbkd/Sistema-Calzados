@@ -1,5 +1,5 @@
 export class CategoriaServicio {
-  constructor ({ modeloCategoria }) {
+  constructor({ modeloCategoria }) {
     this.modeloCategoria = modeloCategoria
   }
 
@@ -10,7 +10,8 @@ export class CategoriaServicio {
         attributes: ['id', 'nombre', 'descripcion', 'genero', 'activo', 'createdAt']
       })
 
-      if (categorias.length === 0) return { error: 'No hay categorías registradas' }
+      //Retornar array vacío en lugar de objeto con error
+      if (categorias.length === 0) return []
 
       const categoriasDto = categorias.map(cat => {
         const hora = new Date(cat.createdAt).toISOString().substring(11, 16)
@@ -29,8 +30,9 @@ export class CategoriaServicio {
 
       return categoriasDto
     } catch (e) {
-      console.error(e)
-      return { error: 'Error al consultar categorías', e }
+      console.error('Error al consultar categorías:', e)
+      // En caso de error real de base de datos, retornar array vacío
+      return []
     }
   }
 
@@ -55,8 +57,8 @@ export class CategoriaServicio {
         hora
       }
     } catch (e) {
-      console.error(e)
-      return { error: 'Error al consultar la categoría', e }
+      console.error('Error al consultar la categoría:', e)
+      return { error: 'Error al consultar la categoría' }
     }
   }
 
@@ -78,8 +80,8 @@ export class CategoriaServicio {
         hora
       }
     } catch (e) {
-      console.error(e)
-      return { error: 'Error al crear la categoría', e }
+      console.error('Error al crear la categoría:', e)
+      return { error: 'Error al crear la categoría' }
     }
   }
 
@@ -104,8 +106,8 @@ export class CategoriaServicio {
         hora
       }
     } catch (e) {
-      console.error(e)
-      return { error: 'Error al actualizar la categoría', e }
+      console.error('Error al actualizar la categoría:', e)
+      return { error: 'Error al actualizar la categoría' }
     }
   }
 
@@ -118,8 +120,8 @@ export class CategoriaServicio {
       await cat.update({ activo: !cat.activo })
       return { mensaje: `Estado de la categoría actualizado a ${cat.activo ? 'Activo' : 'Inactivo'}` }
     } catch (e) {
-      console.error(e)
-      return { error: 'Error al cambiar estado de la categoría', e }
+      console.error('Error al cambiar estado de la categoría:', e)
+      return { error: 'Error al cambiar estado de la categoría' }
     }
   }
 
@@ -132,8 +134,8 @@ export class CategoriaServicio {
       await cat.destroy()
       return { mensaje: 'Categoría eliminada correctamente' }
     } catch (e) {
-      console.error(e)
-      return { error: 'Error al eliminar categoría', e }
+      console.error('Error al eliminar categoría:', e)
+      return { error: 'Error al eliminar categoría' }
     }
   }
 }

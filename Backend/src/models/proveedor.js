@@ -21,7 +21,7 @@ export const Proveedor = sequelize.define('Proveedor',
       allowNull: true
     },
     telefono: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.STRING(20),
       allowNull: true
     },
     activo: {

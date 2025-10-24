@@ -1,5 +1,5 @@
 export class ProductoServicio {
-  constructor ({ modeloProducto, modeloProductoVariante, modeloCategoria }) {
+  constructor({ modeloProducto, modeloProductoVariante, modeloCategoria }) {
     this.modeloProducto = modeloProducto
     this.modeloProductoVariante = modeloProductoVariante
     this.modeloCategoria = modeloCategoria
@@ -23,7 +23,10 @@ export class ProductoServicio {
         ],
         order: [['id', 'DESC']]
       })
-      if (productos.length === 0) return { error: 'no hay productos' }
+
+      // ✅ CORRECCIÓN: Retornar array vacío en lugar de objeto con error
+      if (productos.length === 0) return []
+
       const DtoProductos = productos.map((producto) => {
         return {
           id: producto.id,
@@ -38,7 +41,9 @@ export class ProductoServicio {
       })
       return DtoProductos
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al consultar productos:', e)
+      // En caso de error real de base de datos, retornar array vacío
+      return []
     }
   }
 
@@ -56,7 +61,8 @@ export class ProductoServicio {
       })
       return { mensaje: 'producto creado con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al crear producto:', e)
+      return { error: 'error al crear el producto' }
     }
   }
 
@@ -76,7 +82,8 @@ export class ProductoServicio {
       })
       return { mensaje: 'producto editado con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al editar producto:', e)
+      return { error: 'error al editar el producto' }
     }
   }
 
@@ -87,7 +94,8 @@ export class ProductoServicio {
       await producto.update({ activo: !producto.activo })
       return { mensaje: 'Estado del producto actualizado con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al cambiar estado del producto:', e)
+      return { error: 'error al cambiar estado del producto' }
     }
   }
 
@@ -98,7 +106,8 @@ export class ProductoServicio {
       await producto.destroy()
       return { mensaje: 'Producto eliminado con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al eliminar producto:', e)
+      return { error: 'error al eliminar el producto' }
     }
   }
 }

@@ -1,5 +1,5 @@
 export class CompraServicio {
-  constructor ({ modeloCompra, modeloUsuario, modeloProveedor, modeloDetalleCompra, modeloProductoVariante, modeloProducto }) {
+  constructor({ modeloCompra, modeloUsuario, modeloProveedor, modeloDetalleCompra, modeloProductoVariante, modeloProducto }) {
     this.modeloCompra = modeloCompra
     this.modeloUsuario = modeloUsuario
     this.modeloProveedor = modeloProveedor
@@ -24,6 +24,7 @@ export class CompraServicio {
       }
       return { compra: nuevaCompra, detalles }
     } catch (error) {
+      console.error('Error al registrar la compra:', error)
       throw new Error('Error al registrar la compra: ' + error.message)
     }
   }
@@ -83,6 +84,7 @@ export class CompraServicio {
       }
     } catch (error) {
       await transaction.rollback()
+      console.error('Error al editar la compra:', error)
       throw new Error('Error al editar la compra: ' + error.message)
     }
   }
@@ -96,79 +98,94 @@ export class CompraServicio {
       await compra.update({ estado: 'anulada' })
       return compra
     } catch (error) {
+      console.error('Error al eliminar la compra:', error)
       throw new Error('Error al eliminar la compra: ' + error.message)
     }
   }
 
   listarCompras = async () => {
-    const compras = await this.modeloCompra.findAll({
-      include: [
-        { model: this.modeloProveedor, attributes: ['nombre'], as: 'proveedor' },
-        { model: this.modeloUsuario, attributes: ['nombre'], as: 'usuario' },
-        {
-          model: this.modeloDetalleCompra,
-          as: 'detalles',
-          include: [
-            {
-              model: this.modeloProductoVariante,
-              as: 'variante',
-              attributes: ['talla', 'color', 'codigo'],
-              include: [
-                { model: this.modeloProducto, as: 'producto', attributes: ['nombre', 'marca'] }
-              ]
-            }
-          ]
+    try {
+      const compras = await this.modeloCompra.findAll({
+        include: [
+          { model: this.modeloProveedor, attributes: ['nombre'], as: 'proveedor' },
+          { model: this.modeloUsuario, attributes: ['nombre'], as: 'usuario' },
+          {
+            model: this.modeloDetalleCompra,
+            as: 'detalles',
+            include: [
+              {
+                model: this.modeloProductoVariante,
+                as: 'variante',
+                attributes: ['talla', 'color', 'codigo'],
+                include: [
+                  { model: this.modeloProducto, as: 'producto', attributes: ['nombre', 'marca'] }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+
+      // ✅ CORRECCIÓN: Retornar array vacío si no hay compras
+      if (compras.length === 0) return []
+
+      return compras.map(c => {
+        const fechaCompra = new Date(c.createdAt)
+        const fechaRegistrada = fechaCompra.toISOString().split('T')[0]
+        const horaCompra = fechaCompra.toTimeString().split(' ')[0]
+
+        const detalles = c.detalles.map(d => ({
+          id: d.id,
+          producto: d.variante?.producto?.nombre || null,
+          marca: d.variante?.producto?.marca || null,
+          codigo: d.variante?.codigo || null,
+          color: d.variante?.color || null,
+          talla: d.variante?.talla || null,
+          cantidad: d.cantidad,
+          precioUnitario: d.precioUnitario,
+          subtotal: d.subtotal
+        }))
+
+        return {
+          id: c.id,
+          nroFactura: c.nroFactura,
+          total: c.total,
+          estado: c.estado,
+          proveedor: c.proveedor?.nombre || null,
+          usuario: c.usuario?.nombre || null,
+          fechaCompra: fechaRegistrada,
+          horaCompra,
+          detalles
         }
-      ]
-    })
-
-    return compras.map(c => {
-      const fechaCompra = new Date(c.createdAt)
-      const fechaRegistrada = fechaCompra.toISOString().split('T')[0]
-      const horaCompra = fechaCompra.toTimeString().split(' ')[0]
-
-      const detalles = c.detalles.map(d => ({
-        id: d.id,
-        producto: d.variante?.producto?.nombre || null,
-        marca: d.variante?.producto?.marca || null,
-        codigo: d.variante?.codigo || null,
-        color: d.variante?.color || null,
-        talla: d.variante?.talla || null,
-        cantidad: d.cantidad,
-        precioUnitario: d.precioUnitario,
-        subtotal: d.subtotal
-      }))
-
-      return {
-        id: c.id,
-        nroFactura: c.nroFactura,
-        total: c.total,
-        estado: c.estado,
-        proveedor: c.proveedor?.nombre || null,
-        usuario: c.usuario?.nombre || null,
-        fechaCompra: fechaRegistrada,
-        horaCompra,
-        detalles
-      }
-    })
+      })
+    } catch (error) {
+      console.error('Error al listar compras:', error)
+      // En caso de error real de base de datos, retornar array vacío
+      return []
+    }
   }
 
   // genera un código simple de factura secuencial
   generarCodigoFactura = async () => {
-    const ultimaCompra = await this.modeloCompra.findOne({
-      order: [['nroFactura', 'DESC']]
-    })
+    try {
+      const ultimaCompra = await this.modeloCompra.findOne({
+        order: [['nroFactura', 'DESC']]
+      })
 
-    let nuevoNumero = 1
+      let nuevoNumero = 1
 
-    if (ultimaCompra && ultimaCompra.nroFactura) {
-      const match = ultimaCompra.nroFactura.match(/FAC-(\d+)/)
-      if (match && match[1]) {
-        nuevoNumero = parseInt(match[1], 10) + 1
+      if (ultimaCompra && ultimaCompra.nroFactura) {
+        const match = ultimaCompra.nroFactura.match(/FAC-(\d+)/)
+        if (match && match[1]) {
+          nuevoNumero = parseInt(match[1], 10) + 1
+        }
       }
+      const codigoFactura = `FAC-${nuevoNumero.toString().padStart(3, '0')}`
+      return codigoFactura
+    } catch (error) {
+      console.error('Error al generar código de factura:', error)
+      throw new Error('Error al generar código de factura: ' + error.message)
     }
-    const codigoFactura = `FAC-${nuevoNumero.toString().padStart(3, '0')}`
-    return codigoFactura
   }
 
   cambiarEstadoCompra = async ({ input }) => {
@@ -179,6 +196,7 @@ export class CompraServicio {
       await compra.update({ estado })
       return compra
     } catch (error) {
+      console.error('Error al cambiar el estado de la compra:', error)
       throw new Error('Error al cambiar el estado de la compra: ' + error.message)
     }
   }
@@ -238,6 +256,7 @@ export class CompraServicio {
 
       return factura
     } catch (error) {
+      console.error('Error al generar la factura:', error)
       throw new Error('Error al generar la factura: ' + error.message)
     }
   }

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { AnimatePresence, motion } from "motion/react"
 import { SideBar } from "./SideBar"
 import { Outlet, useLocation } from "react-router"

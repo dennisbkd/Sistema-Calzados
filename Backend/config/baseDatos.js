@@ -18,6 +18,11 @@ export async function db () {
   try {
     await sequelize.authenticate()
     console.log('Conexión exitosa a la base de datos MySQL')
+    
+    // AGREGAR ESTA LÍNEA PARA CREAR LAS TABLAS
+    await sequelize.sync({ force: false })
+    console.log('✅ Tablas sincronizadas correctamente')
+    
   } catch (error) {
     console.error('Error al conectarse a la base de datos:', error)
     throw new Error('Error al conectarse a la base de datos')

@@ -16,6 +16,7 @@ import {
   FileArchive,
   Truck,
   BarChart,
+  CreditCard,
 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import { useState, useEffect } from "react"
@@ -44,7 +45,8 @@ export const SideBar = () => {
 
   // Estado de submenús
   const [openSubmenus, setOpenSubmenus] = useState({
-    usuarios: location.pathname.startsWith("/home/usuarios") || location.pathname.startsWith("/home/roles")
+    usuarios: location.pathname.startsWith("/home/usuarios") || location.pathname.startsWith("/home/roles"),
+    compras: location.pathname.startsWith("/home/compras") || location.pathname.startsWith("/home/proveedores") || location.pathname.startsWith("/home/metodos-pago")
   })
 
   const menuItems = [
@@ -75,6 +77,7 @@ export const SideBar = () => {
       subItems: [
         { title: "Compras", path: "/home/compras", icon: Package },
         { title: "Proveedores", path: "/home/proveedores", icon: Truck },
+        { title: "Métodos de Pago", path: "/home/metodos-pago", icon: CreditCard },
       ],
     },
     {
@@ -345,7 +348,6 @@ export const SideBar = () => {
           })}
         </nav>
 
-        {/* Logout Section */}
         {/* Logout Section */}
         <div className="p-4 border-t border-blue-500 space-y-3">
           {usuario && (

@@ -1,5 +1,5 @@
 export class VarianteServicio {
-  constructor ({ modeloVariante, modeloProducto }) {
+  constructor({ modeloVariante, modeloProducto }) {
     this.modeloVariante = modeloVariante
     this.modeloProducto = modeloProducto
   }
@@ -19,7 +19,8 @@ export class VarianteServicio {
       })
       return { mensaje: 'Variante creada con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al crear variante:', e)
+      return { error: 'error al crear la variante' }
     }
   }
 
@@ -30,7 +31,8 @@ export class VarianteServicio {
       await variante.update({ activo: !variante.activo })
       return { mensaje: 'Estado de la variante actualizado con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al cambiar estado de variante:', e)
+      return { error: 'error al cambiar estado de la variante' }
     }
   }
 
@@ -41,7 +43,8 @@ export class VarianteServicio {
       await variante.destroy()
       return { mensaje: 'Variante eliminada con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al eliminar variante:', e)
+      return { error: 'error al eliminar la variante' }
     }
   }
 
@@ -61,7 +64,8 @@ export class VarianteServicio {
       }, { where: { id } })
       return { mensaje: 'Variante actualizada con exito' }
     } catch (e) {
-      return { error: 'error al consultar la base de datos', e }
+      console.error('Error al actualizar variante:', e)
+      return { error: 'error al actualizar la variante' }
     }
   }
 }

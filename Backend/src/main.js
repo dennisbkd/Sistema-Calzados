@@ -6,6 +6,8 @@ import { rutaRol } from './router/rol.js'
 import { rutaCategoria } from './router/categoria.js'
 import { rutaProveedor } from './router/preoveedor.js'
 import { rutaCompra } from './router/compra.js'
+import { createMetodoPagoRouter } from './router/metodoPago.js'
+import { createTransaccionPagoRouter } from './router/transaccionPago.js'
 
 import cors from 'cors'
 import { rutaProducto } from './router/producto.js'
@@ -22,7 +24,9 @@ export const App = ({
   proveedorServicio,
   productoServicio,
   varianteServicio,
-  compraServicio
+  compraServicio,
+  metodoPagoServicio,
+  transaccionPagoServicio
 }) => {
   const app = express()
   const port = 3000
@@ -44,6 +48,11 @@ export const App = ({
   app.use('/variantes', decodificarToken, rutaVariante({ varianteServicio }))
   app.use('/compras', decodificarToken, rutaCompra({ compraServicio, bitacoraServicio }))
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
+
+  // Rutas de pagos
+  app.use('/metodo-pago', decodificarToken, createMetodoPagoRouter({ metodoPagoServicio }))
+  app.use('/pago', decodificarToken, createTransaccionPagoRouter({ transaccionPagoServicio }))
+
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })

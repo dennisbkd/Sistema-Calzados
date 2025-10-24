@@ -19,8 +19,7 @@ import { GestionProductoLayout } from "./adminDashboard/producto.jsx/layout/Gest
 import { Reportes } from "./adminDashboard/reporte/ReportePage"
 import DetalleUsuarioBitacora from "./adminDashboard/bitacora/page/DetalleUsuarioBitacora"
 import VistaUsuariosActivos from "./adminDashboard/bitacora/page/BitacoraCompleta"
-
-
+import { GestionMetodoPago } from "./adminDashboard/metodoPago/page/GestionMetodoPago"
 
 export const AppRouter = () => {
   const location = useLocation()
@@ -39,10 +38,11 @@ export const AppRouter = () => {
             <Route path="categorias" element={<GestionCategoria />} />
             <Route path="proveedores" element={<GestionProveedor />} />
             <Route path="compras" element={<GestionCompras />} />
+            <Route path="metodos-pago" element={<GestionMetodoPago />} />
             <Route path="productos" element={<GestionProductoLayout />} >
-            <Route path="reportes" element={<Reportes />} />
               <Route index element={<GestionProducto />} />
             </Route>
+            <Route path="reportes" element={<Reportes />} />
             <Route path="bitacora" element={<VistaUsuariosActivos />} />
             <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
           </Route>
@@ -52,7 +52,6 @@ export const AppRouter = () => {
           <Route path="/solicitar-recuperamiento" element={<SolicitudPassword />} />
           <Route path="/restablecer-password" element={<RestablecerPassword />} />
         </Route>
-
 
         <Route path="/clientes" element={<div>Clientes</div>} />
 

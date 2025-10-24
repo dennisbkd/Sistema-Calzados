@@ -18,7 +18,7 @@ export const Compra = sequelize.define('Compra',
       defaultValue: 0
     },
     estado: {
-      type: DataTypes.ENUM('REGISTRADA', 'PAGADA', 'ANULADA'),
+      type: DataTypes.ENUM('REGISTRADA', 'PAGO_PARCIAL', 'PAGADA', 'ANULADA'),
       allowNull: false,
       defaultValue: 'REGISTRADA'
     },

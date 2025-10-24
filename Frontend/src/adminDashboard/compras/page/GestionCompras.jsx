@@ -5,16 +5,16 @@ import { motion, AnimatePresence } from "motion/react"
 import { useCompra } from "../hooks/useCompra"
 import useProductoManager from "../../producto.jsx/hook/query/useProductoManager"
 import { useProveedores } from "../../proveedor/hooks/useProveedores"
-import { 
-  Pencil, 
-  Plus, 
-  RefreshCcw, 
-  Save, 
-  Search, 
-  Trash2, 
-  FileText, 
-  Calendar, 
-  User, 
+import {
+  Pencil,
+  Plus,
+  RefreshCcw,
+  Save,
+  Search,
+  Trash2,
+  FileText,
+  Calendar,
+  User,
   Building,
   Filter,
   ChevronDown,
@@ -27,24 +27,27 @@ import {
   ChevronsRight,
   AlertTriangle,
   Download,
-  Printer
+  Printer,
+  DollarSign  // ← NUEVO
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { generarPDFCompra } from "../facturaCompra/FacturaCompra"
+import { BadgeEstadoPago } from "../../pago/components/BadgeEstadoPago"  // ← NUEVO
+import { ModalRegistrarPago } from "../../pago/components/ModalRegistrarPago"  // ← NUEVO
 
 const GestionCompras = () => {
-  const { 
-    listar, 
-    crear, 
-    editar, 
-    eliminar, 
+  const {
+    listar,
+    crear,
+    editar,
+    eliminar,
     generateCodigoFactura,
-    cambiarEstadoCompra 
+    cambiarEstadoCompra
   } = useCompra()
-  
+
   const { productos = [], isLoading: cargandoProductos } = useProductoManager()
   const { data: proveedoresData = [], isLoading: cargandoProveedores } = useProveedores()
-  
+
   const compras = listar.data || []
   const proveedores = proveedoresData || []
 
@@ -55,7 +58,7 @@ const GestionCompras = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [selectedCompraDetails, setSelectedCompraDetails] = useState(null)
   const [menuEstadoAbierto, setMenuEstadoAbierto] = useState(null)
-  
+
   const [filtroEstado, setFiltroEstado] = useState("TODAS")
   const [filtroMes, setFiltroMes] = useState("")
   const [filtroAnio, setFiltroAnio] = useState("")
@@ -71,6 +74,23 @@ const GestionCompras = () => {
   const [fechaCompraInput, setFechaCompraInput] = useState("")
   const [detallesInput, setDetallesInput] = useState([])
   const [generandoCodigo, setGenerandoCodigo] = useState(false)
+  const [compraSeleccionadaPago, setCompraSeleccionadaPago] = useState(null)
+  const [modalPagoOpen, setModalPagoOpen] = useState(false)
+
+  const abrirModalPago = (compra) => {
+    setCompraSeleccionadaPago(compra)
+    setModalPagoOpen(true)
+  }
+
+  const cerrarModalPago = () => {
+    setModalPagoOpen(false)
+    setCompraSeleccionadaPago(null)
+  }
+
+  const handlePagoExitoso = () => {
+    listar.refetch()
+    cerrarModalPago()
+  }
 
   const [nuevoDetalle, setNuevoDetalle] = useState({
     varianteId: "",
@@ -81,7 +101,7 @@ const GestionCompras = () => {
 
   // Obtener todas las variantes de productos
   const todasLasVariantes = useMemo(() => {
-    return productos.flatMap(producto => 
+    return productos.flatMap(producto =>
       (producto.variantes || []).map(variante => ({
         ...variante,
         productoId: producto.id,
@@ -168,18 +188,18 @@ const GestionCompras = () => {
       precioUnitario: "",
       varianteSeleccionada: null
     })
-    
+
     setEditingCompra(compra)
-    
+
     if (compra) {
       setNroFacturaInput(compra.nroFactura || "")
       setTotalInput(compra.total?.toString() || "")
       setEstadoInput(compra.estado || "REGISTRADA")
       setProveedorInput(compra.proveedor || "")
-      
+
       const fecha = compra.fechaCompra ? compra.fechaCompra.split('T')[0] : new Date().toISOString().split('T')[0]
       setFechaCompraInput(fecha)
-      
+
       if (compra.detalles && Array.isArray(compra.detalles)) {
         const detallesCargados = compra.detalles.map(detalle => ({
           id: detalle.id,
@@ -326,10 +346,10 @@ const GestionCompras = () => {
 
     if (editingCompra) {
       const detallesOriginales = editingCompra.detalles || []
-      
+
       const detallesEliminar = detallesOriginales
-        .filter(detalleOriginal => 
-          !detallesInput.some(detalleActual => 
+        .filter(detalleOriginal =>
+          !detallesInput.some(detalleActual =>
             detalleActual.id === detalleOriginal.id
           )
         )
@@ -459,7 +479,7 @@ const GestionCompras = () => {
   // Filtrar compras
   const filteredCompras = useMemo(() => {
     return compras.filter((c) => {
-      const matchesSearch = 
+      const matchesSearch =
         c.nroFactura?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.proveedor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.usuario?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -487,17 +507,17 @@ const GestionCompras = () => {
     const paginas = []
     const paginasTotales = totalPaginas
     const paginaActualNum = paginaActual
-    
+
     paginas.push(1)
-    
+
     for (let i = Math.max(2, paginaActualNum - 1); i <= Math.min(paginasTotales - 1, paginaActualNum + 1); i++) {
       if (!paginas.includes(i)) paginas.push(i)
     }
-    
+
     if (paginasTotales > 1) {
       paginas.push(paginasTotales)
     }
-    
+
     return [...new Set(paginas)].sort((a, b) => a - b)
   }, [paginaActual, totalPaginas])
 
@@ -648,9 +668,9 @@ const GestionCompras = () => {
                 Mostrando <span className="font-semibold">{comprasPaginadas.length}</span> de{" "}
                 <span className="font-semibold">{filteredCompras.length}</span> compras
               </div>
-              
-              <select 
-                value={itemsPorPagina} 
+
+              <select
+                value={itemsPorPagina}
                 onChange={(e) => {
                   setItemsPorPagina(Number(e.target.value))
                   setPaginaActual(1)
@@ -674,7 +694,7 @@ const GestionCompras = () => {
               >
                 <ChevronsLeft size={16} />
               </button>
-              
+
               <button
                 onClick={paginaAnterior}
                 disabled={paginaActual === 1}
@@ -692,11 +712,10 @@ const GestionCompras = () => {
                     )}
                     <button
                       onClick={() => irAPagina(pagina)}
-                      className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                        pagina === paginaActual
+                      className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${pagina === paginaActual
                           ? "bg-blue-600 text-white"
                           : "text-gray-600 hover:bg-gray-100 border border-gray-300"
-                      }`}
+                        }`}
                     >
                       {pagina}
                     </button>
@@ -712,7 +731,7 @@ const GestionCompras = () => {
               >
                 <ChevronRight size={16} />
               </button>
-              
+
               <button
                 onClick={irAUltimaPagina}
                 disabled={paginaActual === totalPaginas}
@@ -729,11 +748,11 @@ const GestionCompras = () => {
               <thead>
                 <tr className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
                   <th className="text-left p-4">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedCompras.length === comprasPaginadas.length && comprasPaginadas.length > 0} 
-                      onChange={handleSelectAll} 
-                      className="h-4 w-4 rounded border-white text-blue-600 focus:ring-blue-500 bg-white" 
+                    <input
+                      type="checkbox"
+                      checked={selectedCompras.length === comprasPaginadas.length && comprasPaginadas.length > 0}
+                      onChange={handleSelectAll}
+                      className="h-4 w-4 rounded border-white text-blue-600 focus:ring-blue-500 bg-white"
                     />
                   </th>
                   <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">
@@ -750,24 +769,25 @@ const GestionCompras = () => {
                   </th>
                   <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">Total</th>
                   <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Pago</th>
                   <th className="text-left p-4 text-xs font-medium uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {comprasPaginadas.map((compra, index) => (
-                  <motion.tr 
-                    key={compra.id} 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    transition={{ delay: index * 0.05 }} 
+                  <motion.tr
+                    key={compra.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
                     className="hover:bg-blue-50 transition-colors"
                   >
                     <td className="p-4">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedCompras.includes(compra.id)} 
-                        onChange={() => handleSelectSingle(compra.id)} 
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                      <input
+                        type="checkbox"
+                        checked={selectedCompras.includes(compra.id)}
+                        onChange={() => handleSelectSingle(compra.id)}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                     </td>
                     <td className="p-4">
@@ -791,32 +811,50 @@ const GestionCompras = () => {
                         {compra.estado}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <BadgeEstadoPago estadoPago={compra.estadoPago} />
+                    </td>
                     <td className="p-4">
                       <div className="flex gap-2">
-                        <button 
-                          onClick={() => openDetailsModal(compra)} 
-                          className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
+                        <button
+                          onClick={() => openDetailsModal(compra)}
+                          className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
                           title="Ver detalles"
                         >
                           <FileText size={16} />
                         </button>
-                        
-                        <button 
-                          onClick={() => generarFactura(compra)} 
+
+                        <button
+                          onClick={() => generarFactura(compra)}
                           className="text-purple-600 hover:text-purple-700 p-2 rounded-lg hover:bg-purple-50 transition-colors"
                           title="Generar factura PDF"
                         >
                           <Download size={16} />
                         </button>
-                        
-                        <button 
-                          onClick={() => openModal(compra)} 
+
+                        <button
+                          onClick={() => abrirModalPago(compra)}
+                          disabled={compra.estado === 'ANULADA'}
+                          className={`p-2 rounded-lg transition-colors ${compra.estado === 'ANULADA'
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
+                            }`}
+                          title={
+                            compra.estado === 'ANULADA'
+                              ? 'No se puede registrar pago para compras anuladas'
+                              : 'Registrar pago'
+                          }
+                        >
+                          <DollarSign size={16} />
+                        </button>
+
+                        <button
+                          onClick={() => openModal(compra)}
                           disabled={compra.estado === 'PAGADA' || compra.estado === 'ANULADA'}
-                          className={`p-2 rounded-lg transition-colors ${
-                            compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
+                          className={`p-2 rounded-lg transition-colors ${compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
                               ? 'text-gray-400 cursor-not-allowed'
                               : 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                          }`}
+                            }`}
                           title={
                             compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
                               ? 'No se puede editar compras pagadas o anuladas'
@@ -825,18 +863,17 @@ const GestionCompras = () => {
                         >
                           <Pencil size={16} />
                         </button>
-                        
+
                         <div className="relative">
-                          <button 
+                          <button
                             onClick={() => setMenuEstadoAbierto(menuEstadoAbierto === compra.id ? null : compra.id)}
                             disabled={compra.estado === 'PAGADA' || compra.estado === 'ANULADA'}
-                            className={`p-2 rounded-lg transition-colors ${
-                              compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
+                            className={`p-2 rounded-lg transition-colors ${compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
                                 ? 'text-gray-400 cursor-not-allowed'
-                                : compra.estado === "REGISTRADA" 
-                                  ? "text-blue-600 hover:bg-blue-50" 
+                                : compra.estado === "REGISTRADA"
+                                  ? "text-blue-600 hover:bg-blue-50"
                                   : "text-gray-600 hover:bg-gray-50"
-                            }`}
+                              }`}
                             title={
                               compra.estado === 'PAGADA' || compra.estado === 'ANULADA'
                                 ? 'No se puede cambiar el estado de compras pagadas o anuladas'
@@ -845,17 +882,17 @@ const GestionCompras = () => {
                           >
                             <RefreshCcw size={16} />
                           </button>
-                          
+
                           {menuEstadoAbierto === compra.id && compra.estado === 'REGISTRADA' && (
                             <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                              <button 
-                                onClick={() => cambiarEstado(compra, "PAGADA")} 
+                              <button
+                                onClick={() => cambiarEstado(compra, "PAGADA")}
                                 className="w-full text-left px-3 py-2 text-sm rounded-t-lg text-green-600 hover:bg-green-50"
                               >
                                 Pagada
                               </button>
-                              <button 
-                                onClick={() => cambiarEstado(compra, "ANULADA")} 
+                              <button
+                                onClick={() => cambiarEstado(compra, "ANULADA")}
                                 className="w-full text-left px-3 py-2 text-sm rounded-b-lg text-red-600 hover:bg-red-50"
                               >
                                 Anulada
@@ -863,15 +900,14 @@ const GestionCompras = () => {
                             </div>
                           )}
                         </div>
-                        
-                        <button 
-                          onClick={() => handleDelete(compra)} 
+
+                        <button
+                          onClick={() => handleDelete(compra)}
                           disabled={compra.estado === 'PAGADA'}
-                          className={`p-2 rounded-lg transition-colors ${
-                            compra.estado === 'PAGADA'
+                          className={`p-2 rounded-lg transition-colors ${compra.estado === 'PAGADA'
                               ? 'text-gray-400 cursor-not-allowed'
                               : 'text-red-600 hover:text-red-700 hover:bg-red-50'
-                          }`}
+                            }`}
                           title={
                             compra.estado === 'PAGADA'
                               ? 'No se puede anular compras pagadas'
@@ -916,7 +952,7 @@ const GestionCompras = () => {
                 <ChevronsLeft size={16} />
                 <span className="hidden sm:inline">Primera</span>
               </button>
-              
+
               <button
                 onClick={paginaAnterior}
                 disabled={paginaActual === 1}
@@ -941,7 +977,7 @@ const GestionCompras = () => {
                 <span className="hidden sm:inline">Siguiente</span>
                 <ChevronRight size={16} />
               </button>
-              
+
               <button
                 onClick={irAUltimaPagina}
                 disabled={paginaActual === totalPaginas}
@@ -980,18 +1016,18 @@ const GestionCompras = () => {
                       <X size={24} />
                     </button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Número de Factura *</label>
                       <div className="relative">
-                        <input 
-                          type="text" 
-                          value={nroFacturaInput} 
-                          onChange={(e) => setNroFacturaInput(e.target.value)} 
-                          placeholder="Generando código..." 
+                        <input
+                          type="text"
+                          value={nroFacturaInput}
+                          onChange={(e) => setNroFacturaInput(e.target.value)}
+                          placeholder="Generando código..."
                           disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA') || generandoCodigo}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                         {generandoCodigo && (<div className="absolute right-3 top-1/2 transform -translate-y-1/2"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div></div>)}
                         {!generandoCodigo && nroFacturaInput && (<CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" size={16} />)}
@@ -1002,9 +1038,9 @@ const GestionCompras = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Proveedor *</label>
                       {cargandoProveedores ? (<div className="flex items-center gap-2 text-gray-500"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>Cargando proveedores...</div>) : (
-                        <select 
-                          value={proveedorInput} 
-                          onChange={(e) => setProveedorInput(e.target.value)} 
+                        <select
+                          value={proveedorInput}
+                          onChange={(e) => setProveedorInput(e.target.value)}
                           disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         >
@@ -1018,9 +1054,9 @@ const GestionCompras = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                      <select 
-                        value={estadoInput} 
-                        onChange={(e) => setEstadoInput(e.target.value)} 
+                      <select
+                        value={estadoInput}
+                        onChange={(e) => setEstadoInput(e.target.value)}
                         disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                       >
@@ -1032,12 +1068,12 @@ const GestionCompras = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Compra</label>
-                      <input 
-                        type="date" 
-                        value={fechaCompraInput} 
-                        onChange={(e) => setFechaCompraInput(e.target.value)} 
+                      <input
+                        type="date"
+                        value={fechaCompraInput}
+                        onChange={(e) => setFechaCompraInput(e.target.value)}
                         disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -1060,9 +1096,9 @@ const GestionCompras = () => {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Producto/Variante *</label>
-                            <select 
-                              value={nuevoDetalle.varianteId} 
-                              onChange={(e) => handleVarianteChange(e.target.value)} 
+                            <select
+                              value={nuevoDetalle.varianteId}
+                              onChange={(e) => handleVarianteChange(e.target.value)}
                               disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             >
@@ -1076,32 +1112,32 @@ const GestionCompras = () => {
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Cantidad *</label>
-                            <input 
-                              type="number" 
-                              min="1" 
-                              value={nuevoDetalle.cantidad} 
-                              onChange={(e) => setNuevoDetalle({...nuevoDetalle, cantidad: e.target.value})} 
+                            <input
+                              type="number"
+                              min="1"
+                              value={nuevoDetalle.cantidad}
+                              onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, cantidad: e.target.value })}
                               disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" 
-                              placeholder="Ingrese cantidad" 
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                              placeholder="Ingrese cantidad"
                             />
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Precio Unitario (Bs) *</label>
-                            <input 
-                              type="number" 
-                              step="0.01" 
-                              min="0" 
-                              value={nuevoDetalle.precioUnitario} 
-                              onChange={(e) => setNuevoDetalle({...nuevoDetalle, precioUnitario: e.target.value})} 
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={nuevoDetalle.precioUnitario}
+                              onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, precioUnitario: e.target.value })}
                               disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" 
-                              placeholder="0.00" 
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                              placeholder="0.00"
                             />
                           </div>
                           <div className="flex items-end">
-                            <button 
-                              onClick={agregarDetalle} 
+                            <button
+                              onClick={agregarDetalle}
                               disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
                               className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -1129,7 +1165,7 @@ const GestionCompras = () => {
                     <h4 className="text-md font-semibold mb-3 text-gray-800">
                       Productos en la Compra ({detallesInput.length})
                     </h4>
-                    
+
                     {detallesInput.length === 0 ? (
                       <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
                         <Package size={48} className="text-gray-400 mx-auto mb-3" />
@@ -1181,15 +1217,14 @@ const GestionCompras = () => {
                                   </div>
                                 </div>
                               </div>
-                              
-                              <button 
-                                onClick={() => eliminarDetalle(index)} 
+
+                              <button
+                                onClick={() => eliminarDetalle(index)}
                                 disabled={editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')}
-                                className={`p-2 rounded-lg transition-colors ml-2 ${
-                                  editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')
+                                className={`p-2 rounded-lg transition-colors ml-2 ${editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')
                                     ? 'text-gray-400 cursor-not-allowed'
                                     : 'text-red-600 hover:text-red-700 hover:bg-red-50'
-                                }`}
+                                  }`}
                                 title={
                                   editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA')
                                     ? 'No se puede eliminar productos de compras pagadas o anuladas'
@@ -1211,11 +1246,11 @@ const GestionCompras = () => {
                   </div>
 
                   <div className="flex gap-3">
-                    <button 
-                      onClick={handleCreateOrEdit} 
+                    <button
+                      onClick={handleCreateOrEdit}
                       disabled={
-                        crear.isLoading || 
-                        editar.isLoading || 
+                        crear.isLoading ||
+                        editar.isLoading ||
                         detallesInput.length === 0 ||
                         (editingCompra && (editingCompra.estado === 'PAGADA' || editingCompra.estado === 'ANULADA'))
                       }
@@ -1238,8 +1273,8 @@ const GestionCompras = () => {
                         </>
                       )}
                     </button>
-                    <button 
-                      onClick={closeModal} 
+                    <button
+                      onClick={closeModal}
                       disabled={crear.isLoading || editar.isLoading}
                       className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
@@ -1267,7 +1302,7 @@ const GestionCompras = () => {
                       <X size={24} />
                     </button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center gap-3">
                       <Building size={18} className="text-blue-600" />
@@ -1295,8 +1330,8 @@ const GestionCompras = () => {
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-full ${getEstadoColor(selectedCompraDetails.estado)}`}>
                         <FileText size={18} className={
-                          selectedCompraDetails.estado === "PAGADA" ? "text-green-600" : 
-                          selectedCompraDetails.estado === "ANULADA" ? "text-red-600" : "text-blue-600"
+                          selectedCompraDetails.estado === "PAGADA" ? "text-green-600" :
+                            selectedCompraDetails.estado === "ANULADA" ? "text-red-600" : "text-blue-600"
                         } />
                       </div>
                       <div>
@@ -1354,16 +1389,16 @@ const GestionCompras = () => {
                   </div>
 
                   <div className="flex justify-end gap-3 mt-6">
-                    <button 
-                      onClick={() => generarFactura(selectedCompraDetails,"descargar")} 
+                    <button
+                      onClick={() => generarFactura(selectedCompraDetails, "descargar")}
                       className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
                     >
                       <Download size={16} />
                       Generar Factura PDF
                     </button>
 
-                    <button 
-                      onClick={() => generarFactura(selectedCompraDetails,"imprimir")} 
+                    <button
+                      onClick={() => generarFactura(selectedCompraDetails, "imprimir")}
                       className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
                       title="Imprimir factura"
                     >
@@ -1380,6 +1415,16 @@ const GestionCompras = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Modal de Registrar Pago */}
+        {modalPagoOpen && compraSeleccionadaPago && (
+          <ModalRegistrarPago
+            isOpen={modalPagoOpen}
+            compra={compraSeleccionadaPago}
+            onClose={cerrarModalPago}
+            onSuccess={handlePagoExitoso}
+          />
+        )}
       </div>
     </div>
   )

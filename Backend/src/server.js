@@ -1,6 +1,19 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra } from './models/index.js'
+import {
+  Rol,
+  Usuario,
+  Bitacora,
+  Categoria,
+  Proveedor,
+  Producto,
+  ProductoVariante,
+  Compra,
+  DetalleCompra,
+  MetodoPago,
+  TransaccionPago,
+  Venta
+} from './models/index.js'
 import { AutorizacionServicio } from './services/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/bitacora.js'
 import { RolServicio } from './services/rol.js'
@@ -12,6 +25,8 @@ import { ProveedorServicio } from './services/gestion-proveedor/proveedor.js'
 import { ProductoServicio } from './services/gestion-producto/producto.js'
 import { VarianteServicio } from './services/gestion-producto/variante.js'
 import { CompraServicio } from './services/gestion-compra/compra.js'
+import { MetodoPagoServicio } from './services/gestion-pago/metodoPago.js'
+import { TransaccionPagoServicio } from './services/gestion-pago/transaccionPago.js'
 import sequelize from '../config/baseDatos.js'
 
 const usuarioServicio = new UsuarioServicio(
@@ -67,6 +82,17 @@ const compraServicio = new CompraServicio({
   modeloUsuario: Usuario
 })
 
+const metodoPagoServicio = new MetodoPagoServicio({
+  modeloMetodoPago: MetodoPago
+})
+
+const transaccionPagoServicio = new TransaccionPagoServicio({
+  modeloTransaccionPago: TransaccionPago,
+  modeloMetodoPago: MetodoPago,
+  modeloCompra: Compra,
+  modeloVenta: Venta
+})
+
 App({
   usuarioServicio,
   autorizacionServicio,
@@ -76,5 +102,7 @@ App({
   proveedorServicio,
   productoServicio,
   varianteServicio,
-  compraServicio
+  compraServicio,
+  metodoPagoServicio,
+  transaccionPagoServicio
 })
