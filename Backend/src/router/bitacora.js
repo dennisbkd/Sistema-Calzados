@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { BitacoraControlador } from '../controller/bitacora.js'
+import { BitacoraControlador } from '../controller/Paquete-G-usuario/bitacora.js'
 
 export const rutaBitacora = ({ bitacoraServicio }) => {
   const rutas = Router()

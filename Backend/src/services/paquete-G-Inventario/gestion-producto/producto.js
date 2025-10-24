@@ -42,8 +42,7 @@ export class ProductoServicio {
     }
   }
 
-  crearProducto = async (body, options) => {
-    const { nombre, modelo, marca, descripcion, categoria } = body
+  crearProducto = async ({ nombre, modelo, marca, descripcion, categoria }, options) => {
     try {
       const existeCategoria = await this.modeloCategoria.findOne({ where: { nombre: categoria } })
       if (!existeCategoria) return { error: 'La categoria no existe' }
@@ -61,8 +60,7 @@ export class ProductoServicio {
     }
   }
 
-  editarProducto = async (id, body, options) => {
-    const { nombre, modelo, marca, descripcion, categoria, estado } = body
+  editarProducto = async (id, { nombre, modelo, marca, descripcion, categoria, estado }, options) => {
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
@@ -82,22 +80,22 @@ export class ProductoServicio {
     }
   }
 
-  toggleEstadoProducto = async (id) => {
+  toggleEstadoProducto = async (id, options) => {
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
-      await producto.update({ activo: !producto.activo })
+      await producto.update({ activo: !producto.activo }, options)
       return { mensaje: 'Estado del producto actualizado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  eliminarProducto = async (id) => {
+  eliminarProducto = async (id, options) => {
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
-      await producto.destroy() // no deberia eliminarse -> cambiar a inactivo
+      await producto.destroy(options)
       return { mensaje: 'Producto eliminado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }

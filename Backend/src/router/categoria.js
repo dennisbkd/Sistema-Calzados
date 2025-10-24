@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { CategoriaControlador } from '../controller/gestion-categoria/categoria.js'
+import { CategoriaControlador } from '../controller/Paquete-G-Inventario/gestion-categoria/categoria.js'
 
 export const rutaCategoria = ({ categoriaServicio }) => {
   const ruta = Router()

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { AutorizacionControlador } from '../controller/Auth/autorizacion.js'
+import { AutorizacionControlador } from '../controller/Paquete-G-usuario/Auth/autorizacion.js'
 
 export const rutaAutorizacion = ({ autorizacionServicio }) => {
   const ruta = Router()

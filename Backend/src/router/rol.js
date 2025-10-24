@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { RolControlador } from '../controller/rol.js'
+import { RolControlador } from '../controller/Paquete-G-usuario/Auth/rol.js'
 
 export const rutaRol = ({ rolServicio, bitacoraServicio }) => {
   const ruta = Router()

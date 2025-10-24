@@ -4,8 +4,7 @@ export class VarianteServicio {
     this.modeloProducto = modeloProducto
   }
 
-  crearVariante = async (body, options) => {
-    const { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo } = body
+  crearVariante = async ({ productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo }, options) => {
     try {
       const ExisteProducto = await this.modeloProducto.findByPk(productoId)
       if (!ExisteProducto) {
@@ -24,30 +23,29 @@ export class VarianteServicio {
     }
   }
 
-  toggleEstadoVariante = async (id) => {
+  toggleEstadoVariante = async (id, options) => {
     try {
       const variante = await this.modeloVariante.findByPk(id)
       if (!variante) return { error: 'La variante no existe' }
-      await variante.update({ activo: !variante.activo })
+      await variante.update({ activo: !variante.activo }, options)
       return { mensaje: 'Estado de la variante actualizado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  eliminarVariante = async (id) => {
+  eliminarVariante = async (id, options) => {
     try {
       const variante = await this.modeloVariante.findByPk(id)
       if (!variante) return { error: 'La variante no existe' }
-      await variante.destroy()
+      await variante.destroy(options)
       return { mensaje: 'Variante eliminada con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  actualizarVariante = async (id, body, options) => {
-    const { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo } = body
+  actualizarVariante = async (id, { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo }, options) => {
     console.log('Servicio actualizarVariante:', { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo })
     try {
       const ExisteProducto = await this.modeloProducto.findByPk(productoId)
