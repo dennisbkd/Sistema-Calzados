@@ -31,6 +31,7 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { generarPDFCompra } from "../facturaCompra/FacturaCompra"
+import { SpinnerCargando } from "../../../global/components/SpinnerCargando"
 
 const GestionCompras = () => {
   const {
