@@ -8,7 +8,7 @@ export class CompraServicio {
     this.modeloProducto = modeloProducto
   }
 
-  registrarCompra = async ({ input, options }) => {
+  registrarCompra = async (input, options) => {
     const { nroFactura, total, estado, proveedorId, usuarioId, detalles } = input
     try {
       const nuevaCompra = await this.modeloCompra.create({ nroFactura, total, estado, proveedorId, usuarioId }, options)
@@ -20,15 +20,18 @@ export class CompraServicio {
           precioUnitario: d.precioUnitario,
           subtotal: d.subtotal
         }))
-        await this.modeloDetalleCompra.bulkCreate(detallesACrear)
+        for (const d of detallesACrear) {
+          await this.modeloDetalleCompra.create(d, options)
+        }
       }
       return { compra: nuevaCompra, detalles }
-    } catch (error) {
-      throw new Error('Error al registrar la compra: ' + error.message)
+    } catch (e) {
+      console.log('Error registrarCompra:', e)
+      return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  editarCompra = async ({ input, options }) => {
+  editarCompra = async (input, options) => {
     const { id, nroFactura, total, estado, proveedorId, usuarioId, detallesEliminar, detallesNuevos } = input
 
     try {
@@ -41,7 +44,8 @@ export class CompraServicio {
             id: detallesEliminar,
             compraId: id
           }
-        })
+        },
+        options)
       }
 
       const datosActualizar = {}
@@ -81,7 +85,7 @@ export class CompraServicio {
     }
   }
 
-  eliminarCompra = async ({ input, options }) => {
+  eliminarCompra = async (input, options) => {
     const { id } = input
     try {
       const compra = await this.modeloCompra.findByPk(id)
@@ -165,7 +169,7 @@ export class CompraServicio {
     return codigoFactura
   }
 
-  cambiarEstadoCompra = async ({ input, options }) => {
+  cambiarEstadoCompra = async (input, options) => {
     const { id, estado } = input
     try {
       const compra = await this.modeloCompra.findByPk(id)
