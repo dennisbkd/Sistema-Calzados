@@ -1359,7 +1359,7 @@ const GestionCompras = () => {
                       className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
                     >
                       <Download size={16} />
-                      Generar Factura PDF
+                      Generar Reporte PDF
                     </button>
 
                     <button 
@@ -1368,7 +1368,7 @@ const GestionCompras = () => {
                       title="Imprimir factura"
                     >
                       <Printer size={16} />
-                      Imprimir Factura PDF
+                      Imprimir Reporte PDF
                     </button>
 
                     <button onClick={closeDetailsModal} className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-colors">

@@ -56,10 +56,10 @@ export class RolServicio {
       const roles = await this.modeloRol.findAll({
         attributes: ['id', 'nombre', 'descripcion', 'activo']
       })
-      return roles || [] // nunca devuelvas undefined ni un objeto error
+      return roles || []
     } catch (e) {
       console.error(e)
-      throw e // deja que React Query capture el error
+      throw e
     }
   }
 }
