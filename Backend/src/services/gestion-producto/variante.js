@@ -4,7 +4,8 @@ export class VarianteServicio {
     this.modeloProducto = modeloProducto
   }
 
-  crearVariante = async ({ productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo }) => {
+  crearVariante = async (body, options) => {
+    const { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo } = body
     try {
       const ExisteProducto = await this.modeloProducto.findByPk(productoId)
       if (!ExisteProducto) {
@@ -16,7 +17,7 @@ export class VarianteServicio {
       }
       await this.modeloVariante.create({
         productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo
-      })
+      }, options)
       return { mensaje: 'Variante creada con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
@@ -45,7 +46,8 @@ export class VarianteServicio {
     }
   }
 
-  actualizarVariante = async (id, { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo }) => {
+  actualizarVariante = async (id, body, options) => {
+    const { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo } = body
     console.log('Servicio actualizarVariante:', { productoId, talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo })
     try {
       const ExisteProducto = await this.modeloProducto.findByPk(productoId)
@@ -58,7 +60,7 @@ export class VarianteServicio {
       }
       await this.modeloVariante.update({
         talla, color, codigo, precioVenta, precioCompra, stockActual, stockMinimo
-      }, { where: { id } })
+      }, { where: { id } }, options)
       return { mensaje: 'Variante actualizada con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }

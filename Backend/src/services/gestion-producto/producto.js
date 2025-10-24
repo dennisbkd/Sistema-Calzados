@@ -42,7 +42,8 @@ export class ProductoServicio {
     }
   }
 
-  crearProducto = async ({ nombre, modelo, marca, descripcion, categoria }) => {
+  crearProducto = async (body, options) => {
+    const { nombre, modelo, marca, descripcion, categoria } = body
     try {
       const existeCategoria = await this.modeloCategoria.findOne({ where: { nombre: categoria } })
       if (!existeCategoria) return { error: 'La categoria no existe' }
@@ -53,14 +54,15 @@ export class ProductoServicio {
         marca,
         descripcion,
         categoriaId: existeCategoria.id
-      })
+      }, options)
       return { mensaje: 'producto creado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
     }
   }
 
-  editarProducto = async (id, { nombre, modelo, marca, descripcion, categoria, estado }) => {
+  editarProducto = async (id, body, options) => {
+    const { nombre, modelo, marca, descripcion, categoria, estado } = body
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
@@ -73,7 +75,7 @@ export class ProductoServicio {
         descripcion,
         categoriaId: existeCategoria.id,
         activo: estado
-      })
+      }, options)
       return { mensaje: 'producto editado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }
@@ -95,7 +97,7 @@ export class ProductoServicio {
     try {
       const producto = await this.modeloProducto.findByPk(id)
       if (!producto) return { error: 'El producto no existe' }
-      await producto.destroy()
+      await producto.destroy() // no deberia eliminarse -> cambiar a inactivo
       return { mensaje: 'Producto eliminado con exito' }
     } catch (e) {
       return { error: 'error al consultar la base de datos', e }

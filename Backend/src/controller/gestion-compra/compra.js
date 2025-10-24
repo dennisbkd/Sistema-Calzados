@@ -1,27 +1,14 @@
 export class CompraControlador {
-  constructor ({ compraServicio, bitacoraServicio }) {
+  constructor ({ compraServicio }) {
     this.compraServicio = compraServicio
-    this.bitacoraServicio = bitacoraServicio
   }
 
-  // registrar una nueva compra
   registrarCompra = async (req, res) => {
     try {
       const input = req.body
-      const resultado = await this.compraServicio.registrarCompra({ input })
+      const options = req.user
+      const resultado = await this.compraServicio.registrarCompra({ input, options })
       if (resultado.error) return res.status(400).json(resultado.error)
-
-      const autor = req.user?.id || 1
-      await this.bitacoraServicio.crearBitacora({
-        usuarioId: autor,
-        accion: 'CREAR',
-        tablaAfectada: 'Compra',
-        registroId: resultado.id,
-        datosAnteriores: null,
-        datosNuevos: JSON.stringify(input),
-        ip: req.ip.replace('::ffff:', '')
-      })
-
       return res.status(201).json(resultado)
     } catch (e) {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
@@ -32,23 +19,10 @@ export class CompraControlador {
   editarCompra = async (req, res) => {
     try {
       const input = req.body
+      const options = req.user
       const datos = await this.compraServicio.modeloCompra.findByPk(input.id)
       if (!datos) return res.status(404).json({ error: 'Compra no encontrada' })
-
-      const datosAnteriores = datos.toJSON()
-      const resultado = await this.compraServicio.editarCompra({ input })
-      const autor = req.user?.id || 1
-
-      await this.bitacoraServicio.crearBitacora({
-        usuarioId: autor,
-        accion: 'EDITAR',
-        tablaAfectada: 'Compra',
-        registroId: input.id,
-        datosAnteriores,
-        datosNuevos: JSON.stringify(input),
-        ip: req.ip.replace('::ffff:', '')
-      })
-
+      const resultado = await this.compraServicio.editarCompra({ input, options })
       return res.status(200).json(resultado)
     } catch (e) {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
@@ -59,19 +33,8 @@ export class CompraControlador {
   eliminarCompra = async (req, res) => {
     try {
       const input = req.params
-      const resultado = await this.compraServicio.eliminarCompra({ input })
-      const autor = req.user?.id || 1
-
-      await this.bitacoraServicio.crearBitacora({
-        usuarioId: autor,
-        accion: 'ELIMINAR',
-        tablaAfectada: 'Compra',
-        registroId: input.id,
-        datosAnteriores: null,
-        datosNuevos: null,
-        ip: req.ip.replace('::ffff:', '')
-      })
-
+      const options = req.user
+      const resultado = await this.compraServicio.eliminarCompra({ input, options })
       return res.status(200).json(resultado)
     } catch (e) {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
@@ -101,7 +64,8 @@ export class CompraControlador {
   cambiarEstadoCompra = async (req, res) => {
     try {
       const input = req.body
-      const resultado = await this.compraServicio.cambiarEstadoCompra({ input })
+      const options = req.user
+      const resultado = await this.compraServicio.cambiarEstadoCompra({ input, options })
       return res.status(200).json(resultado)
     } catch (e) {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })

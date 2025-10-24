@@ -20,8 +20,8 @@ export class VarianteControlador {
 
   eliminarVariante = async (req, res) => {
     const { id } = req.params
-    const options = req.user
-    const varianteEliminada = await this.varianteServicio.eliminarVariante(id, options)
+    // const options = req.user
+    const varianteEliminada = await this.varianteServicio.eliminarVariante(id)
     if (varianteEliminada.error) return res.status(400).json(varianteEliminada)
     return res.status(200).json(varianteEliminada)
   }

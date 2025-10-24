@@ -37,12 +37,12 @@ export const App = ({
 
   app.use('/usuario', decodificarToken, rutaUsuario({ usuarioServicio }))
   app.use('/autorizacion', rutaAutorizacion({ autorizacionServicio }))
-  app.use('/rol', decodificarToken, rutaRol({ rolServicio, bitacoraServicio }))
+  app.use('/rol', decodificarToken, rutaRol({ rolServicio }))
   app.use('/categorias', decodificarToken, rutaCategoria({ categoriaServicio }))
   app.use('/proveedores', decodificarToken, rutaProveedor({ proveedorServicio }))
   app.use('/productos', decodificarToken, rutaProducto({ productoServicio }))
   app.use('/variantes', decodificarToken, rutaVariante({ varianteServicio }))
-  app.use('/compras', decodificarToken, rutaCompra({ compraServicio, bitacoraServicio }))
+  app.use('/compras', decodificarToken, rutaCompra({ compraServicio }))
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

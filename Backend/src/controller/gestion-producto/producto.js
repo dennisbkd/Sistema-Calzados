@@ -35,8 +35,7 @@ export class ProductoControlador {
 
   eliminarProducto = async (req, res) => {
     const { id } = req.params
-    const options = req.user
-    const productoEliminado = await this.productoServicio.eliminarProducto(id, options)
+    const productoEliminado = await this.productoServicio.eliminarProducto(id)
     if (productoEliminado.error) return res.status(400).json(productoEliminado)
     return res.status(200).json(productoEliminado)
   }
