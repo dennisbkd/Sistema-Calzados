@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+
 
 import { motion } from "motion/react"
 import { User, Mail, Shield, Lock } from "lucide-react"
@@ -172,6 +172,25 @@ export const GestionUsuario = () => {
 
           </div>
         </motion.div>
+        {(isSaving) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-4 border-1 border-gray-300 shadow-lg">
+              <SpinnerCargando
+                tamaño="lg"
+                texto={
+                  "Guardando usuario..."
+                }
+              />
+              <p className="text-sm text-gray-600">
+                Estamos guardando los cambios...
+              </p>
+            </div>
+          </motion.div>
+        )}
         {/* TABLA */}
         <TablaUsuarios
           usuarios={usuarioFiltrados}

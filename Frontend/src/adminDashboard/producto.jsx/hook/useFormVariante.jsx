@@ -64,6 +64,8 @@ export const useFormVariante = () => {
   return {
     modal,
     guardarVariante,
-    formConfigVariante
+    formConfigVariante,
+    estadocreandoVariante: crearVarianteMutation.isPending,
+    estadoeditandoVariante: actualizarVarianteMutation.isPending,
   }
 }
