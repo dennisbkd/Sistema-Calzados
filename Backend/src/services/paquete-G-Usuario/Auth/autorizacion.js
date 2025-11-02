@@ -27,7 +27,6 @@ export class AutorizacionServicio {
       if (verificarBloqueo && verificarBloqueo > ahora) {
         return { error: `Cuenta bloqueada hasta ${usuarioExistente.bloqueado}` }
       }
-      console.log(verificarBloqueo, ahora)
       const verificarPass = await this.bcrypt.compare(password, usuarioExistente.password)
 
       if (!verificarPass) {
@@ -71,6 +70,7 @@ export class AutorizacionServicio {
       return {
         mensaje: 'Inicio de sesión correcto',
         usuario: {
+          id: usuarioExistente.id,
           nombre: usuarioExistente.nombre,
           email: usuarioExistente.email,
           roles: usuarioExistente.roles.map(roles => roles.nombre)

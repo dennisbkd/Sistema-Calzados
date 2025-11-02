@@ -26,8 +26,8 @@ export const GestionProducto = () => {
   const [productoAEliminar, setProductoAEliminar] = useState(null)
   const [varianteAEliminar, setVarianteAEliminar] = useState(null)
   const [detalleProducto, setDetalleProducto] = useState(null)
-  const { modal, formConfigProducto, guardarProducto } = useFormProducto()
-  const { modal: modalVariante, formConfigVariante, guardarVariante } = useFormVariante()
+  const { modal, formConfigProducto, guardarProducto, estadoCreando: creandoProducto } = useFormProducto()
+  const { modal: modalVariante, formConfigVariante, guardarVariante, estadocreandoVariante: creandoVariante } = useFormVariante()
 
   const {
     productos,
@@ -158,6 +158,32 @@ export const GestionProducto = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Overlay de carga cuando se está creando */}
+      {(creandoProducto || creandoVariante) && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-4 border-1 border-gray-300 shadow-lg">
+            <SpinnerCargando
+              tamaño="lg"
+              texto={
+                creandoProducto
+                  ? "Creando producto..."
+                  : "Creando variante..."
+              }
+            />
+            <p className="text-sm text-gray-600">
+              {creandoProducto
+                ? "Estamos procesando tu producto..."
+                : "Estamos agregando la variante..."}
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       <div className="grid gap-y-4">
         {ProductosFiltrados?.map((prod) => (
           <CardProducto key={prod.id}

@@ -6,12 +6,11 @@ import { rutaRol } from './router/rol.js'
 import { rutaCategoria } from './router/categoria.js'
 import { rutaProveedor } from './router/preoveedor.js'
 import { rutaCompra } from './router/compra.js'
-
-import cors from 'cors'
 import { rutaProducto } from './router/producto.js'
 import { rutaVariante } from './router/variante.js'
 import { decodificarToken } from '../middleware/descodificarToken.js'
 import { rutaBitacora } from './router/bitacora.js'
+import { corsMiddleware } from './utils/corsUrl.js'
 import { rutaReporteIngresoEgreso } from './router/reporteIngresoEgreso.js'
 
 export const App = ({
@@ -27,13 +26,10 @@ export const App = ({
   reporteIngresoEgresoServicio
 }) => {
   const app = express()
-  const port = 3000
+  const port = process.env.PORT || 3000
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
-  app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
-  }))
+  app.use(corsMiddleware())
 
   db()
 

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { UsuarioControlador } from '../controller/usuario.js'
+import { UsuarioControlador } from '../controller/Paquete-G-usuario/usuario.js'
 
 export const rutaUsuario = ({ usuarioServicio }) => {
   const ruta = Router()

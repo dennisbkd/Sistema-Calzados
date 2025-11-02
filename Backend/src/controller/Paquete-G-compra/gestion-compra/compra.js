@@ -6,8 +6,13 @@ export class CompraControlador {
   registrarCompra = async (req, res) => {
     try {
       const input = req.body
-      const options = req.user
-      const resultado = await this.compraServicio.registrarCompra({ input, options })
+      const options = {
+        context: {
+          ip: req.user?.ip,
+          id: req.user?.id
+        }
+      }
+      const resultado = await this.compraServicio.registrarCompra(input, options)
       if (resultado.error) return res.status(400).json(resultado.error)
       return res.status(201).json(resultado)
     } catch (e) {
@@ -19,10 +24,15 @@ export class CompraControlador {
   editarCompra = async (req, res) => {
     try {
       const input = req.body
-      const options = req.user
+      const options = {
+        context: {
+          ip: req.user?.ip,
+          id: req.user?.id
+        }
+      }
       const datos = await this.compraServicio.modeloCompra.findByPk(input.id)
       if (!datos) return res.status(404).json({ error: 'Compra no encontrada' })
-      const resultado = await this.compraServicio.editarCompra({ input, options })
+      const resultado = await this.compraServicio.editarCompra(input, options)
       return res.status(200).json(resultado)
     } catch (e) {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
@@ -33,8 +43,13 @@ export class CompraControlador {
   eliminarCompra = async (req, res) => {
     try {
       const input = req.params
-      const options = req.user
-      const resultado = await this.compraServicio.eliminarCompra({ input, options })
+      const options = {
+        context: {
+          ip: req.user?.ip,
+          id: req.user?.id
+        }
+      }
+      const resultado = await this.compraServicio.eliminarCompra(input, options)
       return res.status(200).json(resultado)
     } catch (e) {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })
@@ -64,8 +79,13 @@ export class CompraControlador {
   cambiarEstadoCompra = async (req, res) => {
     try {
       const input = req.body
-      const options = req.user
-      const resultado = await this.compraServicio.cambiarEstadoCompra({ input, options })
+      const options = {
+        context: {
+          ip: req.user?.ip,
+          id: req.user?.id
+        }
+      }
+      const resultado = await this.compraServicio.cambiarEstadoCompra(input, options)
       return res.status(200).json(resultado)
     } catch (e) {
       return res.status(500).json({ error: 'Error en el servidor', e: e.message })

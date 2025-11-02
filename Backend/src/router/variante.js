@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { VarianteControlador } from '../controller/gestion-producto/variante.js'
+import { VarianteControlador } from '../controller/Paquete-G-Inventario/gestion-producto/variante.js'
 export const rutaVariante = ({ varianteServicio }) => {
   const rutas = Router()
   const varianteControlador = new VarianteControlador({ varianteServicio })

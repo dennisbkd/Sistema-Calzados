@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { CompraControlador } from '../controller/gestion-compra/compra.js'
+import { CompraControlador } from '../controller/Paquete-G-compra/gestion-compra/compra.js'
 
 export const rutaCompra = ({ compraServicio, bitacoraServicio }) => {
   const router = Router()

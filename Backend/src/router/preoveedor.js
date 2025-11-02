@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { ProveedorControlador } from '../controller/gestion-proveedor/proveedor.js'
+import { ProveedorControlador } from '../controller/Paquete-G-compra/gestion-proveedor/proveedor.js'
 
 export const rutaProveedor = ({ proveedorServicio }) => {
   const router = Router()
