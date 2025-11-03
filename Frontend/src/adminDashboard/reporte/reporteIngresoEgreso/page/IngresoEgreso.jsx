@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "motion/react"
 import { useReportes } from "../hooks/useReporteIngresoEgreso"
-import { FileText, TrendingUp, Filter } from "lucide-react" // ✅ Agregar Filter
+import { FileText, TrendingUp, Filter } from "lucide-react"
 import FiltrosReportes from "./../components/FiltrosReportes"
 import ResumenReporte from "./../components/ResumenReportes"
 import TablaCompras from "./TablaCompras"
@@ -11,7 +11,7 @@ import TablaVentas from "./TablaVentas"
 import TabsReportes from "../components/TabsReportes"
 import toast from "react-hot-toast"
 import { generarPDFReporte } from "../utils/generarPDFReporte"
-import { MenuExportar } from "../components/MenuExportar" // ✅ Sin llaves
+import { MenuExportar } from "../components/MenuExportar"
 
 const IngresoEgreso = () => {
   const { obtenerIngresosEgresos, listarPorFecha, listarVentaPorFecha } = useReportes()
@@ -152,9 +152,9 @@ const IngresoEgreso = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Filter className="text-blue-600" size={20} />
+                {/* <Filter className="text-blue-600" size={20} /> */}
               </div>
-              <h2 className="text-lg font-semibold text-gray-800">Filtrar por Periodo</h2>
+              {/* <h2 className="text-lg font-semibold text-gray-800">Filtrar por Periodo</h2> */}
             </div>
             
             {/* Botón de exportar en el header del filtro */}

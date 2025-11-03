@@ -29,9 +29,18 @@ const TablaVentas = ({ ventas, loading }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      {/* Selector de items por página */}
-      <div className="flex justify-end items-center gap-3 mb-4">
-        <div className="flex items-center gap-2">
+      {/* Header unificado */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        {/* Título y estadísticas */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">Ventas del Periodo</h3>
+          <p className="text-sm text-gray-600">
+            Mostrando {ventasPagina.length} de {ventas.length} ventas
+          </p>
+        </div>
+
+        {/* Selector de items por página */}
+        <div className="flex items-center gap-2"> 
           <span className="text-sm text-gray-600">Mostrar:</span>
           <select 
             value={itemsPorPagina}
@@ -53,7 +62,7 @@ const TablaVentas = ({ ventas, loading }) => {
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
-            <tr className="bg-blue-600"> {/* Fondo azul */}
+            <tr className="bg-blue-600">
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
                 Factura
               </th>

@@ -73,9 +73,9 @@ const TabsReportes = ({
 
         {tabActivo === 'ventas' && (
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            {/* <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Ventas del Periodo
-            </h3>
+            </h3> */}
             {/* Aquí irá la tabla de ventas */}
             {loadingVentas ? (
               <div className="text-center py-8">
