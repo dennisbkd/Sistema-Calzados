@@ -96,7 +96,7 @@ export const SideBar = () => {
       icon: BarChart,
       key: "reportes",
       subItems: [
-        { title: "Reportes", path: "/home/reportes", icon: BarChart }
+        { title: "Ingresos-Egresos", path: "/home/reportes/Ingresos-Egresos", icon: BarChart }
       ],
     },
     {
