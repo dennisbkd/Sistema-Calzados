@@ -10,8 +10,8 @@ import TablaCompras from "./TablaCompras"
 import TablaVentas from "./TablaVentas"
 import TabsReportes from "../components/TabsReportes"
 import toast from "react-hot-toast"
-import { generarPDFReporte } from "../utils/generarPDFReporte"
-import { MenuExportar } from "../components/MenuExportar"
+import { generarPDFReporte } from "./../../../../utils/generarPDFReporte"
+import { MenuExportar } from "./../../../../global/components/Menu/MenuExportar"
 
 const IngresoEgreso = () => {
   const { obtenerIngresosEgresos, listarPorFecha, listarVentaPorFecha } = useReportes()
@@ -102,7 +102,8 @@ const IngresoEgreso = () => {
         compras,
         ventas,
         { fechaInicio, fechaFin },
-        "descargar"
+        "descargar",
+        "completo"
       )
       toast.success("PDF descargado exitosamente")
     } catch (error) {
@@ -123,7 +124,8 @@ const IngresoEgreso = () => {
         compras,
         ventas,
         { fechaInicio, fechaFin },
-        "imprimir"
+        "imprimir",
+        "completo"
       )
     } catch (error) {
       console.error("Error imprimiendo:", error)
@@ -150,14 +152,6 @@ const IngresoEgreso = () => {
         {/* Filtros con botón de exportar integrado */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                {/* <Filter className="text-blue-600" size={20} /> */}
-              </div>
-              {/* <h2 className="text-lg font-semibold text-gray-800">Filtrar por Periodo</h2> */}
-            </div>
-            
-            {/* Botón de exportar en el header del filtro */}
             <MenuExportar 
               onDescargarPDF={handleDescargarPDF}
               onImprimir={handleImprimir}

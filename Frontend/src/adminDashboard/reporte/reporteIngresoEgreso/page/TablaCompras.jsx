@@ -63,7 +63,7 @@ const TablaCompras = ({ compras, loading }) => {
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
-            <tr className="bg-blue-600"> {/* Fondo azul */}
+            <tr className="bg-blue-600">
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
                 Factura
               </th>
