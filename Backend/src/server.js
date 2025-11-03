@@ -1,6 +1,6 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/paquete-G-Usuario/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta } from './models/index.js'
 import { AutorizacionServicio } from './services/paquete-G-Usuario/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
@@ -70,7 +70,14 @@ const compraServicio = new CompraServicio({
 
 const reporteIngresoEgresoServicio = new ReporteIngresoEgresoServicio({
   modeloCompra: Compra,
-  modeloVenta: Venta
+  modeloVenta: Venta,
+  modeloDetalleCompra: DetalleCompra,
+  modeloProveedor: Proveedor,
+  modeloProducto: Producto,
+  modeloProductoVariante: ProductoVariante,
+  modeloUsuario: Usuario,
+  modeloCliente: Cliente,
+  modeloDetalleVenta: DetalleVenta
 })
 
 App({
