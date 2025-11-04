@@ -1,9 +1,12 @@
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, Package } from "lucide-react"
+import { ChevronLeft, ChevronRight, Package, Eye } from "lucide-react" // ← Agrega Eye aquí
+import DetalleCompraModal from "../components/DetalleCompraModal" // ← Agrega este import
 
 const TablaCompras = ({ compras, loading }) => {
   const [paginaActual, setPaginaActual] = useState(1)
   const [itemsPorPagina, setItemsPorPagina] = useState(10)
+  const [compraSeleccionada, setCompraSeleccionada] = useState(null)
+  const [modalAbierto, setModalAbierto] = useState(false)
 
   // Calcular items para la página actual
   const indiceInicial = (paginaActual - 1) * itemsPorPagina
@@ -25,6 +28,18 @@ const TablaCompras = ({ compras, loading }) => {
       case 'ANULADA': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  // Función para abrir el modal de detalles
+  const handleVerDetalles = (compra) => {
+    setCompraSeleccionada(compra)
+    setModalAbierto(true)
+  }
+
+  // Función para cerrar el modal
+  const handleCerrarModal = () => {
+    setModalAbierto(false)
+    setCompraSeleccionada(null)
   }
 
   return (
@@ -71,6 +86,9 @@ const TablaCompras = ({ compras, loading }) => {
                 Proveedor
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                Comprador
+              </th>    
+              <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
                 Fecha
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
@@ -83,7 +101,10 @@ const TablaCompras = ({ compras, loading }) => {
                 Total
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                Items
+                <div className="flex items-center gap-1">
+                  <Eye size={14} />
+                  Detalles
+                </div>
               </th>
             </tr>
           </thead>
@@ -95,6 +116,9 @@ const TablaCompras = ({ compras, loading }) => {
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{compra.proveedor}</div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{compra.usuario}</div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{compra.fechaCompra}</div>
@@ -113,15 +137,26 @@ const TablaCompras = ({ compras, loading }) => {
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-600">
-                    {compra.detalles?.length || 0} productos
-                  </div>
+                  <button
+                    onClick={() => handleVerDetalles(compra)}
+                    className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-100 transition-colors"
+                    title="Ver detalles de la compra"
+                  >
+                    <Eye size={16} />
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Modal de detalles - Agrega esto al final del return */}
+      <DetalleCompraModal
+        compra={compraSeleccionada}
+        isOpen={modalAbierto}
+        onClose={handleCerrarModal}
+      />
 
       {/* Paginación */}
       {totalPaginas > 1 && (
