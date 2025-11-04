@@ -21,7 +21,8 @@
     "mysql2": "3.14.4",
     "nodemailer": "7.0.6",
     "sequelize": "6.37.7",
-    "standard": "17.1.2"
+    "standard": "17.1.2",
+    "stripe": "^19.2.0"
   },
   "eslintConfig": {
     "extends": "standard"

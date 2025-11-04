@@ -1,6 +1,7 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/paquete-G-Usuario/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, Venta, DetalleCompra } from './models/index.js'
+
 import { AutorizacionServicio } from './services/paquete-G-Usuario/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
@@ -13,6 +14,19 @@ import { ProductoServicio } from './services/paquete-G-Inventario/gestion-produc
 import { VarianteServicio } from './services/paquete-G-Inventario/gestion-producto/variante.js'
 import { CompraServicio } from './services/paquete-G-compra/gestion-compra/compra.js'
 import sequelize from '../config/baseDatos.js'
+
+import { PagoServicio } from './services/paquete-G-Pago/pago.js'
+import { TransaccionPago, MetodoPago } from './models/index.js'
+
+
+const pagoServicio = new PagoServicio({
+  modeloTransaccion: TransaccionPago,
+  modeloMetodoPago: MetodoPago,
+  modeloCompra: Compra,
+  modeloVenta: Venta
+})
+
+
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -76,5 +90,6 @@ App({
   proveedorServicio,
   productoServicio,
   varianteServicio,
-  compraServicio
+  compraServicio,
+  pagoServicio   //agregado
 })
