@@ -1,6 +1,6 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/paquete-G-Usuario/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta } from './models/index.js'
 import { AutorizacionServicio } from './services/paquete-G-Usuario/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
@@ -13,6 +13,7 @@ import { ProductoServicio } from './services/paquete-G-Inventario/gestion-produc
 import { VarianteServicio } from './services/paquete-G-Inventario/gestion-producto/variante.js'
 import { CompraServicio } from './services/paquete-G-compra/gestion-compra/compra.js'
 import sequelize from '../config/baseDatos.js'
+import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -67,6 +68,18 @@ const compraServicio = new CompraServicio({
   modeloUsuario: Usuario
 })
 
+const reporteIngresoEgresoServicio = new ReporteIngresoEgresoServicio({
+  modeloCompra: Compra,
+  modeloVenta: Venta,
+  modeloDetalleCompra: DetalleCompra,
+  modeloProveedor: Proveedor,
+  modeloProducto: Producto,
+  modeloProductoVariante: ProductoVariante,
+  modeloUsuario: Usuario,
+  modeloCliente: Cliente,
+  modeloDetalleVenta: DetalleVenta
+})
+
 App({
   usuarioServicio,
   autorizacionServicio,
@@ -76,5 +89,6 @@ App({
   proveedorServicio,
   productoServicio,
   varianteServicio,
-  compraServicio
+  compraServicio,
+  reporteIngresoEgresoServicio
 })

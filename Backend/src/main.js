@@ -11,6 +11,7 @@ import { rutaVariante } from './router/variante.js'
 import { decodificarToken } from '../middleware/descodificarToken.js'
 import { rutaBitacora } from './router/bitacora.js'
 import { corsMiddleware } from './utils/corsUrl.js'
+import { rutaReporteIngresoEgreso } from './router/reporteIngresoEgreso.js'
 
 export const App = ({
   usuarioServicio,
@@ -21,7 +22,8 @@ export const App = ({
   proveedorServicio,
   productoServicio,
   varianteServicio,
-  compraServicio
+  compraServicio,
+  reporteIngresoEgresoServicio
 }) => {
   const app = express()
   const port = process.env.PORT || 3000
@@ -40,6 +42,7 @@ export const App = ({
   app.use('/variantes', decodificarToken, rutaVariante({ varianteServicio }))
   app.use('/compras', decodificarToken, rutaCompra({ compraServicio }))
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
+  app.use('/reportes', decodificarToken, rutaReporteIngresoEgreso({ reporteIngresoEgresoServicio }))
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { crearCompra, editarCompra, eliminarCompra, listarCompras, generarCodigoFactura, cambiarEstadoCompraA, generarFactura } from '../../../api/compra/compraApi.js'
+import { crearCompra, editarCompra, eliminarCompra, listarCompras, 
+generarCodigoFactura, cambiarEstadoCompraA, generarFactura } from '../../../api/compra/compraApi.js'
 import toast from 'react-hot-toast'
 
 export const useCompra = () => {
