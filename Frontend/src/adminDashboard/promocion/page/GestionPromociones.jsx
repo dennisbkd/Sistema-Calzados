@@ -193,6 +193,10 @@ export const GestionPromociones = () => {
             payload.aplicaProducto = values.alcance === 'PRODUCTO';
             payload.categoriaId = values.alcance === 'CATEGORIA' ? Number(values.referencia) || null : null;
             payload.productoId = values.alcance === 'PRODUCTO' ? Number(values.referencia) || null : null;
+            // Normalizar valorDescuento para BOGO
+            if (values.tipo === '2X1' || values.tipo === '3X2') {
+              payload.valorDescuento = null;
+            }
 
             if (modoEdicion && values.id) {
               await editarPromocion({ id: values.id, datos: payload });
@@ -218,7 +222,18 @@ export const GestionPromociones = () => {
               <form.Field name="tipo" validators={{ onChange: ({ value }) => { if (!value) return 'Seleccione un tipo' } }} children={(field) => (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                  <select className="w-full border rounded-lg px-3 py-2" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)}>
+                  <select
+                    className="w-full border rounded-lg px-3 py-2"
+                    value={field.state.value}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      field.handleChange(v)
+                      // Si el usuario cambia a 2x1/3x2, limpiar el valor de descuento
+                      if (v === '2X1' || v === '3X2') {
+                        form.setFieldValue('valorDescuento', '')
+                      }
+                    }}
+                  >
                     <option value="">Seleccionar</option>
                     <option value="PORCENTAJE">Porcentaje</option>
                     <option value="MONTO_FIJO">Monto Fijo</option>
@@ -267,9 +282,79 @@ export const GestionPromociones = () => {
                 </div>
               )} />
 
-              <form.Field name="valorDescuento" validators={{ onChange: ({ value }) => { if (!value) return 'Requerido' } }} children={(field) => (
-                <FormInput field={field} type="number" label="Valor Descuento" placeholder="Ej: 10" />
-              )} />
+              <form.Field
+                name="valorDescuento"
+                validators={{
+                  onChange: () => {
+                    const tipo = form.state.values.tipo
+                    const v = form.state.values.valorDescuento
+                    if (tipo === 'PORCENTAJE') {
+                      if (v === '' || v === null || v === undefined) return 'Ingrese un porcentaje'
+                      const n = Number(v)
+                      if (!Number.isFinite(n)) return 'Porcentaje inválido'
+                      if (n <= 0 || n > 100) return 'Debe estar entre 1 y 100'
+                    } else if (tipo === 'MONTO_FIJO') {
+                      if (v === '' || v === null || v === undefined) return 'Ingrese un monto'
+                      const n = Number(v)
+                      if (!Number.isFinite(n)) return 'Monto inválido'
+                      if (n <= 0) return 'Debe ser mayor a 0'
+                    } else if (tipo === '2X1' || tipo === '3X2') {
+                      // No requerido
+                      return undefined
+                    } else {
+                      return 'Seleccione un tipo'
+                    }
+                  }
+                }}
+                children={(field) => {
+                  const tipo = form.state.values.tipo
+                  const isBogo = tipo === '2X1' || tipo === '3X2'
+                  const isPorcentaje = tipo === 'PORCENTAJE'
+                  const label = isPorcentaje
+                    ? 'Porcentaje (%)'
+                    : tipo === 'MONTO_FIJO'
+                      ? 'Monto fijo ($)'
+                      : 'Valor de descuento'
+                  const placeholder = isPorcentaje
+                    ? 'Ej: 10 (usa 10 para 10%)'
+                    : tipo === 'MONTO_FIJO'
+                      ? 'Ej: 1500'
+                      : 'No requerido para 2x1 / 3x2'
+
+                  return (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                      <input
+                        type="number"
+                        name={field.name}
+                        value={field.state.value || ''}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isBogo}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                          isBogo
+                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200'
+                            : field.state.meta.errors?.length > 0
+                              ? 'border-red-400 focus:ring-red-300'
+                              : 'border-gray-300 focus:ring-blue-400'
+                        }`}
+                        placeholder={placeholder}
+                      />
+                      {tipo === '2X1' && (
+                        <p className="text-xs text-gray-500 mt-1">No requiere valor. Equivale aprox. a 50% por pares.</p>
+                      )}
+                      {tipo === '3X2' && (
+                        <p className="text-xs text-gray-500 mt-1">No requiere valor. Equivale aprox. a 33,3% por ternas.</p>
+                      )}
+                      {field.state.meta.errors?.length > 0 && (
+                        <p className="text-red-500 text-sm mt-1">{field.state.meta.errors[0]}</p>
+                      )}
+                    </div>
+                  )
+                }}
+              />
+
+              
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <form.Field name="fechaInicio" children={(field) => (

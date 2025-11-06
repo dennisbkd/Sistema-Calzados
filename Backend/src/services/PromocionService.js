@@ -3,12 +3,31 @@ import { Op } from 'sequelize';
 
 export class PromocionService {
   async crearPromocion(datos) {
-    // Validar fechas según caso de uso
+    // Validar fechas
     if (datos.fechaFin < datos.fechaInicio) {
       throw new Error('La fecha de fin no puede ser anterior a la fecha de inicio');
     }
 
-    return await Promocion.create(datos);
+    // Normalizar/validar valorDescuento según tipo sin cambiar la BD
+    const payload = { ...datos }
+    const tipo = String(payload.tipo || '').toUpperCase()
+
+    if (tipo === 'PORCENTAJE') {
+      const v = Number(payload.valorDescuento)
+      if (!Number.isFinite(v)) throw new Error('Ingrese un porcentaje válido')
+      if (v <= 0 || v > 100) throw new Error('El porcentaje debe ser mayor a 0 y hasta 100')
+      payload.valorDescuento = v
+    } else if (tipo === 'MONTO_FIJO') {
+      const v = Number(payload.valorDescuento)
+      if (!Number.isFinite(v)) throw new Error('Ingrese un monto válido')
+      if (v <= 0) throw new Error('El monto fijo debe ser mayor a 0')
+      payload.valorDescuento = v
+    } else if (tipo === '2X1' || tipo === '3X2') {
+      // No se requiere valor; guardamos null para evitar confusiones
+      payload.valorDescuento = null
+    }
+
+    return await Promocion.create(payload);
   }
 
   async listarPromociones(filtros = {}) {
@@ -38,7 +57,25 @@ export class PromocionService {
     if (!promocion) {
       throw new Error('Promoción no encontrada');
     }
-    return await promocion.update(datos);
+    // Aplicar la misma normalización que en crear
+    const payload = { ...datos }
+    if (payload.tipo) {
+      const tipo = String(payload.tipo).toUpperCase()
+      if (tipo === 'PORCENTAJE') {
+        const v = Number(payload.valorDescuento)
+        if (!Number.isFinite(v)) throw new Error('Ingrese un porcentaje válido')
+        if (v <= 0 || v > 100) throw new Error('El porcentaje debe ser mayor a 0 y hasta 100')
+        payload.valorDescuento = v
+      } else if (tipo === 'MONTO_FIJO') {
+        const v = Number(payload.valorDescuento)
+        if (!Number.isFinite(v)) throw new Error('Ingrese un monto válido')
+        if (v <= 0) throw new Error('El monto fijo debe ser mayor a 0')
+        payload.valorDescuento = v
+      } else if (tipo === '2X1' || tipo === '3X2') {
+        payload.valorDescuento = null
+      }
+    }
+    return await promocion.update(payload);
   }
 
   async eliminarPromocion(id) {

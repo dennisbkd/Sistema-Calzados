@@ -43,7 +43,13 @@ export const TablaPromociones = ({ promociones, onEditar, onEliminar }) => {
               <td className="p-4">{promocion.tipo}</td>
               <td className="p-4">{promocion.alcance || 'GENERAL'}</td>
               <td className="p-4">{promocion.referencia || '-'}</td>
-              <td className="p-4">{promocion.valorDescuento}</td>
+              <td className="p-4">
+                {promocion.tipo === 'PORCENTAJE' && promocion.valorDescuento != null && promocion.valorDescuento !== ''
+                  ? `${promocion.valorDescuento}%`
+                  : promocion.tipo === 'MONTO_FIJO' && promocion.valorDescuento != null && promocion.valorDescuento !== ''
+                    ? `$ ${promocion.valorDescuento}`
+                    : '—'}
+              </td>
               <td className="p-4">{promocion.fechaInicio}</td>
               <td className="p-4">{promocion.fechaFin}</td>
               <td className="p-4">
