@@ -1,6 +1,6 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/paquete-G-Usuario/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta, Promocion, TransaccionPago, MovimientoInventario, VentaPromocion, MetodoPago } from './models/index.js'
 import { AutorizacionServicio } from './services/paquete-G-Usuario/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
@@ -14,6 +14,7 @@ import { VarianteServicio } from './services/paquete-G-Inventario/gestion-produc
 import { CompraServicio } from './services/paquete-G-compra/gestion-compra/compra.js'
 import sequelize from '../config/baseDatos.js'
 import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
+import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -80,6 +81,23 @@ const reporteIngresoEgresoServicio = new ReporteIngresoEgresoServicio({
   modeloDetalleVenta: DetalleVenta
 })
 
+const ventaServicio = new VentaServicio(
+  {
+    modeloVenta: Venta,
+    modeloProducto: Producto,
+    modeloCategoria: Categoria,
+    modeloProductoVariante: ProductoVariante,
+    modeloPromocion: Promocion,
+    modeloCliente: Cliente,
+    modeloDetalleVenta: DetalleVenta,
+    modeloTransaccionPago: TransaccionPago,
+    modeloMovimientoInventario: MovimientoInventario,
+    modeloVentaPromocion: VentaPromocion,
+    modeloUsuario: Usuario,
+    modeloMetodoPago: MetodoPago
+  }
+)
+
 App({
   usuarioServicio,
   autorizacionServicio,
@@ -90,5 +108,6 @@ App({
   productoServicio,
   varianteServicio,
   compraServicio,
-  reporteIngresoEgresoServicio
+  reporteIngresoEgresoServicio,
+  ventaServicio
 })
