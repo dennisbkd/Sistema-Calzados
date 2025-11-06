@@ -10,7 +10,7 @@ const useProductoManager = () => {
   const eliminarMutation = useEliminarProducto()
 
   const categoriasActivas = categorias.filter(cat => cat.activo).map(
-    (cat) => ({ value: cat.nombre, label: cat.nombre })
+    (cat) => ({ id: cat.id, value: cat.nombre, label: cat.nombre })
   )
 
   const toggleEstadoProducto = (id) => {
