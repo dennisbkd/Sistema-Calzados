@@ -1,9 +1,12 @@
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, Package, User } from "lucide-react"
+import { ChevronLeft, ChevronRight, Package, User, Eye, UserCheck } from "lucide-react"
+import DetalleVentaModal from "../components/DetalleVentaModal" // ← Agrega este import
 
 const TablaVentas = ({ ventas, loading }) => {
   const [paginaActual, setPaginaActual] = useState(1)
   const [itemsPorPagina, setItemsPorPagina] = useState(10)
+  const [ventaSeleccionada, setVentaSeleccionada] = useState(null) // ← Estado para el modal
+  const [modalAbierto, setModalAbierto] = useState(false) // ← Estado para controlar el modal
 
   // Calcular items para la página actual
   const indiceInicial = (paginaActual - 1) * itemsPorPagina
@@ -27,11 +30,22 @@ const TablaVentas = ({ ventas, loading }) => {
     }
   }
 
+  // Función para abrir el modal de detalles
+  const handleVerDetalles = (venta) => {
+    setVentaSeleccionada(venta)
+    setModalAbierto(true)
+  }
+
+  // Función para cerrar el modal
+  const handleCerrarModal = () => {
+    setModalAbierto(false)
+    setVentaSeleccionada(null)
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       {/* Header unificado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        {/* Título y estadísticas */}
         <div>
           <h3 className="text-lg font-semibold text-gray-800">Ventas del Periodo</h3>
           <p className="text-sm text-gray-600">
@@ -39,7 +53,6 @@ const TablaVentas = ({ ventas, loading }) => {
           </p>
         </div>
 
-        {/* Selector de items por página */}
         <div className="flex items-center gap-2"> 
           <span className="text-sm text-gray-600">Mostrar:</span>
           <select 
@@ -70,6 +83,12 @@ const TablaVentas = ({ ventas, loading }) => {
                 Cliente
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                <div className="flex items-center gap-1">
+                  <UserCheck size={14} />
+                  Vendedor
+                </div>
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
                 Fecha
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
@@ -88,7 +107,10 @@ const TablaVentas = ({ ventas, loading }) => {
                 Total
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                Items
+                <div className="flex items-center gap-1">
+                  <Eye size={14} />
+                  Detalles
+                </div>
               </th>
             </tr>
           </thead>
@@ -106,6 +128,14 @@ const TablaVentas = ({ ventas, loading }) => {
                       {venta.ciCliente && (
                         <div className="text-xs text-gray-500">CI: {venta.ciCliente}</div>
                       )}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    <UserCheck size={14} className="text-blue-500" />
+                    <div className="text-sm text-gray-700 font-medium">
+                      {venta.usuario || "N/A"}
                     </div>
                   </div>
                 </td>
@@ -136,15 +166,26 @@ const TablaVentas = ({ ventas, loading }) => {
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-600">
-                    {venta.detalles?.length || 0} productos
-                  </div>
+                  <button
+                    onClick={() => handleVerDetalles(venta)}
+                    className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-100 transition-colors"
+                    title="Ver detalles de la venta"
+                  >
+                    <Eye size={16} />
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Modal de detalles */}
+      <DetalleVentaModal
+        venta={ventaSeleccionada}
+        isOpen={modalAbierto}
+        onClose={handleCerrarModal}
+      />
 
       {/* Paginación */}
       {totalPaginas > 1 && (
@@ -163,7 +204,6 @@ const TablaVentas = ({ ventas, loading }) => {
               Anterior
             </button>
             
-            {/* Números de página */}
             <div className="flex gap-1">
               {[...Array(totalPaginas)].map((_, index) => {
                 const pagina = index + 1
