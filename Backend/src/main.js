@@ -14,6 +14,8 @@ import { rutaProducto } from './router/producto.js'
 import { rutaVariante } from './router/variante.js'
 import { decodificarToken } from '../middleware/descodificarToken.js'
 import { rutaBitacora } from './router/bitacora.js'
+import ventasRouter from './router/ventas.js'
+import promocionesRouter from './router/promociones.js'
 
 export const App = ({
   usuarioServicio,
@@ -48,6 +50,9 @@ export const App = ({
   app.use('/variantes', decodificarToken, rutaVariante({ varianteServicio }))
   app.use('/compras', decodificarToken, rutaCompra({ compraServicio, bitacoraServicio }))
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
+  // Ventas y Promociones
+  app.use('/ventas', decodificarToken, ventasRouter)
+  app.use('/promociones', decodificarToken, promocionesRouter)
 
   // Rutas de pagos
   app.use('/metodo-pago', decodificarToken, createMetodoPagoRouter({ metodoPagoServicio }))

@@ -46,7 +46,8 @@ export const SideBar = () => {
   // Estado de submenús
   const [openSubmenus, setOpenSubmenus] = useState({
     usuarios: location.pathname.startsWith("/home/usuarios") || location.pathname.startsWith("/home/roles"),
-    compras: location.pathname.startsWith("/home/compras") || location.pathname.startsWith("/home/proveedores") || location.pathname.startsWith("/home/metodos-pago")
+    compras: location.pathname.startsWith("/home/compras") || location.pathname.startsWith("/home/proveedores") || location.pathname.startsWith("/home/metodos-pago"),
+    ventas: location.pathname.startsWith("/home/historial-ventas") || location.pathname.startsWith("/home/promociones")
   })
 
   const menuItems = [
@@ -67,8 +68,12 @@ export const SideBar = () => {
     },
     {
       title: "Gestión Ventas",
-      path: "/home/ventas",
-      icon: ShoppingCart
+      icon: ShoppingCart,
+      key: "ventas",
+      subItems: [
+        { title: "Historial de Ventas", path: "/home/historial-ventas", icon: ShoppingCart },
+        { title: "Promociones", path: "/home/promociones", icon: Tag },
+      ],
     },
     {
       title: "Gestión Compras",

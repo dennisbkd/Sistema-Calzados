@@ -20,6 +20,8 @@ import { Reportes } from "./adminDashboard/reporte/ReportePage"
 import DetalleUsuarioBitacora from "./adminDashboard/bitacora/page/DetalleUsuarioBitacora"
 import VistaUsuariosActivos from "./adminDashboard/bitacora/page/BitacoraCompleta"
 import { GestionMetodoPago } from "./adminDashboard/metodoPago/page/GestionMetodoPago"
+import { GestionPromociones } from "./adminDashboard/promocion/page/GestionPromociones"
+import { HistorialVentas } from "./adminDashboard/ventas/page/HistorialVentas"
 
 export const AppRouter = () => {
   const location = useLocation()
@@ -45,6 +47,8 @@ export const AppRouter = () => {
             <Route path="reportes" element={<Reportes />} />
             <Route path="bitacora" element={<VistaUsuariosActivos />} />
             <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
+            <Route path="promociones" element={<GestionPromociones />} />
+            <Route path="historial-ventas" element={<HistorialVentas />} />
           </Route>
         </Route>
 
