@@ -19,6 +19,10 @@ import { GestionProductoLayout } from "./adminDashboard/producto.jsx/layout/Gest
 import IngresoEgreso from "./adminDashboard/reporte/reporteIngresoEgreso/page/IngresoEgreso"
 import DetalleUsuarioBitacora from "./adminDashboard/bitacora/page/DetalleUsuarioBitacora"
 import VistaUsuariosActivos from "./adminDashboard/bitacora/page/BitacoraCompleta"
+import { GestionVenta } from "./adminDashboard/venta/Page/GestionVenta"
+import { NuevaVentaLayout } from "./adminDashboard/venta/Layout/NuevaVentaLayout"
+import { ListaVentas } from "./adminDashboard/venta/Page/ListaVentaPage"
+import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta.JSX"
 
 
 
@@ -40,10 +44,14 @@ export const AppRouter = () => {
             <Route path="proveedores" element={<GestionProveedor />} />
             <Route path="compras" element={<GestionCompras />} />
             <Route path="productos" element={<GestionProductoLayout />} >
-
               <Route index element={<GestionProducto />} />
             </Route>
             <Route path="reportes/Ingresos-Egresos" element={<IngresoEgreso />} />
+            <Route path="ventas" element={<NuevaVentaLayout />}>
+              <Route path="nueva" element={<GestionVenta />} />
+            </Route>
+            <Route path="ventas/historial" element={<ListaVentas />} />
+            <Route path="ventas/detalle/:id" element={<DetalleVenta />} />
             <Route path="bitacora" element={<VistaUsuariosActivos />} />
             <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
           </Route>

@@ -12,8 +12,8 @@ export const registrarAuditoriaHooks = (modelo, nombreModelo) => {
 
   modelo.addHook('afterUpdate', async (instancia, options) => {
     await bitacoraServicio.crearBitacora({
-      usuarioId: options?.id || 1,
-      ip: options?.ip || '0.0.0.0',
+      usuarioId: options?.context?.id || 1,
+      ip: options?.context?.ip || '0.0.0.0',
       accion: 'UPDATE',
       tablaAfectada: nombreModelo,
       registroId: instancia.id,
