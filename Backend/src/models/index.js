@@ -118,6 +118,13 @@ Promocion.belongsToMany(Venta, {
   otherKey: 'ventaId',
   as: 'ventas'
 })
+// Producto - Promocion
+Producto.hasMany(Promocion, { foreignKey: 'productoId', as: 'promociones' })
+Promocion.belongsTo(Producto, { foreignKey: 'productoId', as: 'producto' })
+
+// Categoria - Promocion
+Categoria.hasMany(Promocion, { foreignKey: 'categoriaId', as: 'promociones' })
+Promocion.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' })
 
 // MetodoPago - TransaccionPago
 
