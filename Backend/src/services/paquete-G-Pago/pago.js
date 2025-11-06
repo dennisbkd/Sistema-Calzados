@@ -15,11 +15,11 @@ export class PagoServicio {
       throw new Error("Datos incompletos");
     }
 
-    // Validar método de pago existe
+    // ✅ Validar método de pago existe
     const metodo = await this.modeloMetodoPago.findByPk(metodoPagoId);
     if (!metodo) throw new Error("Método de pago inválido");
 
-    // Validar transacción depende si es compra o venta
+    // ✅ Validar transacción (Compra o Venta)
     if (tipoTransaccion === "COMPRA") {
       const compra = await this.modeloCompra.findByPk(idReferencia);
       if (!compra) throw new Error("Compra no encontrada");
@@ -30,24 +30,37 @@ export class PagoServicio {
       if (!venta) throw new Error("Venta no encontrada");
     }
 
-    // Simular pago externo
-    const resultado = await pasarelaFake.procesarPago(monto, metodoPagoId, referencia);
+    // 🟦 Determinar tipo de pasarela
+    let comprobante = referencia;
 
-    if (!resultado.success) throw new Error("Pago rechazado por pasarela");
+    if (metodo.nombre.toUpperCase() === "FAKE" || metodo.nombre.toUpperCase() === "EFECTIVO") {
+      // 🟨 Pago simulado (Fake o Efectivo)
+      const resultado = await pasarelaFake.procesarPago(monto, metodoPagoId, referencia);
+      if (!resultado.success) throw new Error("Pago rechazado por pasarela");
+      comprobante = resultado.comprobante;
+    } else if (metodo.nombre.toUpperCase() === "STRIPE") {
+      // 🟩 Pago real con Stripe ya confirmado en el frontend
+      // (Aquí no procesamos, solo registramos la referencia del paymentIntent)
+      if (!referencia) throw new Error("Referencia Stripe requerida");
+    } else {
+      throw new Error(`Método de pago no soportado: ${metodo.nombre}`);
+    }
 
-    // Guardar pago
-    await this.modeloTransaccion.create({
+    // ✅ Guardar transacción en la base de datos
+    const nuevaTransaccion = await this.modeloTransaccion.create({
       tipoTransaccion,
       compraId: tipoTransaccion === "COMPRA" ? idReferencia : null,
       ventaId: tipoTransaccion === "VENTA" ? idReferencia : null,
       metodoPagoId,
       monto,
-      referencia: resultado.comprobante
+      referencia: comprobante,
+      usuarioId: adminId || null
     });
 
     return {
       message: "Pago registrado exitosamente",
-      comprobante: resultado.comprobante
+      comprobante: comprobante,
+      id: nuevaTransaccion.id
     };
   }
 }

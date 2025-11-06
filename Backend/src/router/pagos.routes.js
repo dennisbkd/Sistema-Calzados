@@ -1,20 +1,20 @@
 import { Router } from "express";
-import { registrarPago } from "../controller/pagos.controller.js";
+import { registrarPago, crearIntentoPagoStripe } from "../controller/pagos.controller.js";
 
 export const rutaPagos = ({ pagoServicio }) => {
   const router = Router();
 
-  router.post("/registrar", async (req, res) => {
-    try {
-      const adminId = req.usuario?.id; // viene del token
-      const data = req.body;
-      const resultado = await pagoServicio.registrarPago(data, adminId);
-      res.json(resultado);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
+  // Middleware para pasar el servicio al controller
+  router.use((req, res, next) => {
+    req.pagoServicio = pagoServicio;
+    next();
   });
+
+  // Stripe
+  router.post("/stripe/crear-intento", crearIntentoPagoStripe);
+
+  // Registrar pago (fake o Stripe confirmado)
+  router.post("/registrar", registrarPago);
 
   return router;
 };
-

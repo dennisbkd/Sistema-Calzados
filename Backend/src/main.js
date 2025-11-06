@@ -12,8 +12,9 @@ import { decodificarToken } from '../middleware/descodificarToken.js'
 import { rutaBitacora } from './router/bitacora.js'
 import { corsMiddleware } from './utils/corsUrl.js'
 
+// ✅ Pagos
 import { rutaPagos } from "./router/pagos.routes.js"
-
+import { crearIntentoPagoStripe } from "./controller/pagos.controller.js"
 
 export const App = ({
   usuarioServicio,
@@ -27,14 +28,17 @@ export const App = ({
   compraServicio,
   pagoServicio
 }) => {
+
   const app = express()
   const port = process.env.PORT || 3000
+
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use(corsMiddleware())
 
-  db()
+  db() // Conexión BD
 
+  // ✅ RUTAS DEL SISTEMA
   app.use('/usuario', decodificarToken, rutaUsuario({ usuarioServicio }))
   app.use('/autorizacion', rutaAutorizacion({ autorizacionServicio }))
   app.use('/rol', decodificarToken, rutaRol({ rolServicio }))
@@ -44,8 +48,15 @@ export const App = ({
   app.use('/variantes', decodificarToken, rutaVariante({ varianteServicio }))
   app.use('/compras', decodificarToken, rutaCompra({ compraServicio }))
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
-  app.use('/pagos', decodificarToken, rutaPagos({ pagoServicio }))
+
+  // ✅ Rutas de pagos (FAKE + BD)
+  app.use('/pagos', rutaPagos({ pagoServicio }))
+
+  // ✅ ENDPOINT Stripe (sin token por pruebas)
+  app.post("/pagos/stripe", crearIntentoPagoStripe)
+
+  // ✅ Servidor
   app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`Servidor corriendo en puerto ${port}`)
   })
 }
