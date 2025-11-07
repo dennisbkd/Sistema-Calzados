@@ -93,7 +93,7 @@ export class AutorizacionServicio {
         id: usuario.id,
         tipo: 'reset'
       })
-      const URL = process.env.EMAILURL || 'http://localhost:5173'
+      const URL = process.env.FRONTEND_URL || 'http://localhost:5173'
       await this.mailer.enviar(
         {
           to: email,
