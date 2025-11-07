@@ -27,6 +27,7 @@ import { ModalPagarVenta } from "../components/ModalPagarVenta";
 import { ModalAnularVenta } from "../components/ModalAnularVenta";
 import toast from "react-hot-toast";
 import { useAnularVenta, useMarcarComoPagada, useObtenerVenta } from "../hooks/useVentaQuery";
+import { generarPDFVenta } from "../utils/GenerarPdfVenta";
 
 
 export const DetalleVenta = () => {
@@ -39,6 +40,7 @@ export const DetalleVenta = () => {
   const { data: venta, isLoading, error } = useObtenerVenta(id);
   const { mutate: anularVenta, isPending: anulando } = useAnularVenta();
   const { mutate: marcarComoPagada, isPending: marcandoComoPagada } = useMarcarComoPagada();
+  console.log('Venta cargada:', venta);
 
   // Función para formatear fecha
   const formatearFecha = (fecha) => {
@@ -108,6 +110,16 @@ export const DetalleVenta = () => {
   };
 
   const handleDescargar = () => {
+    if (!venta) {
+      toast.error('No hay datos de venta para descargar');
+      return;
+    }
+
+    if (!venta.detalles || venta.detalles.length === 0) {
+      toast.error('La venta no tiene productos para generar el PDF');
+      return;
+    }
+    generarPDFVenta(venta, "descargar");
     toast.success('Funcionalidad de descarga en desarrollo');
   };
 
