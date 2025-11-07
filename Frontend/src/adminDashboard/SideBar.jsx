@@ -70,7 +70,6 @@ export const SideBar = () => {
       path: "/home/ventas",
       icon: ShoppingCart,
       subItems: [
-        { title: "Ventas", path: "/home/ventas/test", icon: ShoppingCart },
         { title: "Nueva Venta", path: "/home/ventas/nueva", icon: Plus },
         { title: "Historial Ventas", path: "/home/ventas/historial", icon: History },
       ]

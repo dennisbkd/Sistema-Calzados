@@ -13,6 +13,7 @@ import { rutaBitacora } from './router/bitacora.js'
 import { corsMiddleware } from './utils/corsUrl.js'
 import { rutaReporteIngresoEgreso } from './router/reporteIngresoEgreso.js'
 import { rutaVenta } from './router/venta.js'
+import { crearStripeWebhook } from './utils/webhookStripe.js'
 
 export const App = ({
   usuarioServicio,
@@ -25,10 +26,14 @@ export const App = ({
   varianteServicio,
   compraServicio,
   reporteIngresoEgresoServicio,
-  ventaServicio
+  ventaServicio,
+  stripeServicio
 }) => {
   const app = express()
   const port = process.env.PORT || 3000
+
+  app.use('/webhook', crearStripeWebhook({ ventaServicio, stripeServicio }))
+
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use(corsMiddleware())
@@ -45,7 +50,7 @@ export const App = ({
   app.use('/compras', decodificarToken, rutaCompra({ compraServicio }))
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
   app.use('/reportes', decodificarToken, rutaReporteIngresoEgreso({ reporteIngresoEgresoServicio }))
-  app.use('/ventas', decodificarToken, rutaVenta({ ventaServicio }))
+  app.use('/ventas', decodificarToken, rutaVenta({ ventaServicio, stripeServicio }))
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

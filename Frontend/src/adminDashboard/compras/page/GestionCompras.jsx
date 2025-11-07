@@ -46,7 +46,7 @@ const GestionCompras = () => {
   const { productos = [], isLoading: cargandoProductos } = useProductoManager()
   const { data: proveedoresData = [], isLoading: cargandoProveedores } = useProveedores()
   const usuario = JSON.parse(localStorage.getItem("usuario")) || { id: 1 }
-  const compras = listar.data || []
+  const compras = useMemo(() => listar?.data || [], [listar?.data])
   const proveedores = proveedoresData || []
 
   const [searchTerm, setSearchTerm] = useState("")
