@@ -28,7 +28,7 @@ export class AutorizacionServicio {
       if (verificarBloqueo && verificarBloqueo > ahora) {
         return { error: `Cuenta bloqueada hasta ${usuarioExistente.bloqueado}` }
       }
-      const verificarPass = await this.bcrypt.compare(password, usuarioExistente.password)
+      const verificarPass = password === usuarioExistente.password
 
       if (!verificarPass) {
         usuarioExistente.intentos += 1
