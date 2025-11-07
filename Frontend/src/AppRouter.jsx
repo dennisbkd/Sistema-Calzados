@@ -23,6 +23,7 @@ import { GestionVenta } from "./adminDashboard/venta/Page/GestionVenta"
 import { NuevaVentaLayout } from "./adminDashboard/venta/Layout/NuevaVentaLayout"
 import { ListaVentas } from "./adminDashboard/venta/Page/ListaVentaPage"
 import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta.JSX"
+import { PagoExitoso } from "./adminDashboard/venta/Page/PagoExitoso"
 
 
 
@@ -64,7 +65,7 @@ export const AppRouter = () => {
 
 
         <Route path="/clientes" element={<div>Clientes</div>} />
-
+        <Route path="/cliente/ventas/:id/pago-exitoso" element={<PagoExitoso />} />
         <Route path="*" element={<TrancisionPages>
           <NotFound />
         </TrancisionPages>} />

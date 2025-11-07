@@ -17,3 +17,7 @@ export const mailer = new Mailer({
   user: process.env.SMTP_USER || 'prueba@gmail.com',
   pass: process.env.SMTP_PASS || 'XYZ'
 })
+
+export const stripeConfig = {
+  claveSecreta: process.env.STRIPE_SECRET_KEY
+}

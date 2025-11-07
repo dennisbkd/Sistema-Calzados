@@ -1,7 +1,8 @@
 // controller/ventaControlador.js
 export class VentaControlador {
-  constructor ({ ventaServicio }) {
+  constructor ({ ventaServicio, stripeServicio }) {
     this.ventaServicio = ventaServicio
+    this.stripeServicio = stripeServicio
   }
 
   // Funciones existentes
@@ -146,6 +147,78 @@ export class VentaControlador {
         return res.status(404).json({ error: 'Cliente no encontrado' })
       }
       return res.status(200).json(cliente)
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }
+  }
+  // funciones de stripe
+
+  crearSessionPago = async (req, res) => {
+    try {
+      const { id } = req.params
+      const venta = await this.ventaServicio.obtenerVentaPorId(id)
+
+      if (!venta) {
+        return res.status(404).json({ error: 'Venta no encontrada' })
+      }
+
+      if (venta.estado !== 'REGISTRADA') {
+        return res.status(400).json({ error: 'Solo se pueden pagar ventas en estado REGISTRADA' })
+      }
+      const successUrl = `${process.env.FRONTEND_URL}/cliente/ventas/${id}/pago-exitoso?session_id={CHECKOUT_SESSION_ID}`
+      const cancelUrl = `${process.env.FRONTEND_URL}/cliente/${id}`
+
+      const session = await this.stripeServicio.crearSessionCheckout(venta, successUrl, cancelUrl)
+
+      // Actualizar venta con session ID
+      await this.ventaServicio.actualizarSessionPago(venta.id, session.id)
+
+      return res.status(200).json({
+        sessionId: session.id,
+        urlPago: session.url
+      })
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }
+  }
+
+  webhookStripe = async (req, res) => {
+    const sig = req.headers['stripe-signature']
+    let event
+
+    try {
+      event = this.stripeServicio.stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      )
+    } catch (err) {
+      return res.status(400).send(`Webhook Error: ${err.message}`)
+    }
+
+    // Manejar el evento de checkout completado
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object
+
+      try {
+        await this.ventaServicio.procesarPagoExitoso(
+          parseInt(session.metadata.venta_id),
+          session.id,
+          session.payment_intent
+        )
+      } catch (error) {
+        console.error('Error procesando pago:', error)
+      }
+    }
+
+    res.json({ received: true })
+  }
+
+  verificarEstadoPago = async (req, res) => {
+    try {
+      const { id } = req.params
+      const resultado = await this.ventaServicio.verificarEstadoPagoStripe(id)
+      return res.status(200).json(resultado)
     } catch (error) {
       return res.status(500).json({ error: error.message })
     }

@@ -4,7 +4,7 @@ export class VentaServicio {
   constructor ({
     modeloVenta, modeloProducto, modeloCategoria,
     modeloProductoVariante, modeloPromocion, modeloCliente, modeloDetalleVenta, modeloTransaccionPago,
-    modeloMovimientoInventario, modeloVentaPromocion, modeloUsuario, modeloMetodoPago
+    modeloMovimientoInventario, modeloVentaPromocion, modeloUsuario, modeloMetodoPago, stripeServicio, mailer
   }) {
     this.modeloVenta = modeloVenta
     this.modeloProducto = modeloProducto
@@ -18,6 +18,8 @@ export class VentaServicio {
     this.modeloVentaPromocion = modeloVentaPromocion
     this.modeloUsuario = modeloUsuario
     this.modeloMetodoPago = modeloMetodoPago
+    this.stripeServicio = stripeServicio
+    this.mailer = mailer
   }
 
   FiltrarProductoPorCategoria = async (id) => {
@@ -697,6 +699,320 @@ export class VentaServicio {
     } catch (error) {
       await transaction.rollback()
       throw new Error(`Error al marcar venta como pagada: ${error.message}`)
+    }
+  }
+
+  // funciones para stripe
+
+  actualizarSessionPago = async (ventaId, sessionId) => {
+    try {
+      await this.modeloVenta.update(
+        { sessionPagoId: sessionId },
+        { where: { id: ventaId } }
+      )
+    } catch (error) {
+      throw new Error(`Error actualizando session de pago: ${error.message}`)
+    }
+  }
+
+  procesarPagoExitoso = async (ventaId, sessionId, paymentIntentId) => {
+    const transaction = await sequelize.transaction()
+
+    try {
+      const venta = await this.modeloVenta.findByPk(ventaId, {
+        include: [
+          {
+            model: this.modeloDetalleVenta,
+            as: 'detalles',
+            include: [{
+              model: this.modeloProductoVariante,
+              as: 'variante',
+              include: [{
+                model: this.modeloProducto,
+                as: 'producto'
+              }]
+            }]
+          },
+          {
+            model: this.modeloCliente,
+            as: 'cliente'
+          }
+        ]
+      })
+
+      if (!venta) {
+        throw new Error('Venta no encontrada')
+      }
+      // Registrar transacción de pago
+      await this.registrarTransaccionPagoVenta({
+        ventaId,
+        metodoPagoId: 2,
+        monto: parseFloat(venta.total),
+        referencia: `STRIPE-${paymentIntentId.id}`
+      }, transaction)
+
+      // Registrar movimientos de inventario
+      await this.registrarMovimientoInventarioPorVenta(
+        ventaId,
+        venta.detalles.map(detalle => ({
+          varianteId: detalle.varianteId,
+          cantidad: detalle.cantidad,
+          precioUnitario: detalle.precioUnitario
+        })),
+        venta.usuarioId,
+        venta.nroFactura,
+        transaction
+      )
+
+      // Actualizar venta
+      await this.modeloVenta.update(
+        {
+          estado: 'PAGADA',
+          sessionPagoId: sessionId
+        },
+        { where: { id: ventaId }, transaction }
+      )
+
+      await transaction.commit()
+
+      await this.enviarEmailConfirmacion(venta)
+
+      return venta
+    } catch (error) {
+      await transaction.rollback()
+      throw new Error(`Error procesando pago exitoso: ${error.message}`)
+    }
+  }
+
+  // En VentaServicio - función verificarEstadoPagoStripe
+  verificarEstadoPagoStripe = async (ventaId) => {
+    try {
+      const venta = await this.modeloVenta.findByPk(ventaId)
+
+      if (!venta) {
+        return { estado: 'venta_no_encontrada' }
+      }
+
+      // Si ya está pagada, retornar directamente
+      if (venta.estado === 'PAGADA') {
+        return { estado: 'pagado', venta }
+      }
+
+      // Si no tiene sessionPagoId, no podemos verificar con Stripe
+      if (!venta.sessionPagoId) {
+        return { estado: 'no_session', venta }
+      }
+
+      // Verificar con Stripe
+      const session = await this.stripeServicio.verificarPago(venta.sessionPagoId)
+
+      // Si el pago está completo en Stripe pero no en nuestra DB, procesarlo
+      if (session.payment_status === 'paid' && venta.estado !== 'PAGADA') {
+        await this.procesarPagoExitoso(
+          ventaId,
+          venta.sessionPagoId,
+          session.payment_intent
+        )
+        return { estado: 'pagado', venta: await this.modeloVenta.findByPk(ventaId) }
+      }
+
+      return {
+        estado: session.payment_status,
+        session,
+        venta
+      }
+    } catch (error) {
+      console.error('Error verificando estado de pago:', error)
+      return { estado: 'error', error: error.message }
+    }
+  }
+
+  // En tu VentaServicio - agrega esta función
+  enviarEmailConfirmacion = async (venta) => {
+    try {
+      if (!this.mailer) {
+        console.warn('Mailer no configurado, omitiendo envío de email')
+        return
+      }
+
+      // ✅ VERIFICAR QUE TENEMOS LOS DATOS NECESARIOS
+      if (!venta.detalles || venta.detalles.length === 0) {
+        console.warn('Venta sin detalles, no se puede enviar email')
+        return
+      }
+
+      const cliente = venta?.cliente || await this.modeloCliente.findByPk(venta.clienteId)
+
+      if (!cliente?.contacto) {
+        console.warn('No hay email de contacto para el cliente')
+        return
+      }
+
+      // ✅ MANEJAR POSIBLES VALORES NULOS EN LOS DETALLES
+      const detallesProductos = venta.detalles.map(detalle => {
+        const productoNombre = detalle.variante?.producto?.nombre || 'Producto no disponible'
+        const talla = detalle.variante?.talla || 'N/A'
+        const color = detalle.variante?.color || 'N/A'
+        const precioUnitario = parseFloat(detalle.precioUnitario || 0).toFixed(2)
+        const subtotal = parseFloat(detalle.subtotal || 0).toFixed(2)
+
+        return `
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #eee;">
+          ${productoNombre} - 
+          Talla: ${talla}, 
+          Color: ${color}
+        </td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">
+          ${detalle.cantidad || 0}
+        </td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">
+          Bs ${precioUnitario}
+        </td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">
+          Bs ${subtotal}
+        </td>
+      </tr>
+      `
+      }).join('')
+
+      // Construir el HTML del email (tu código existente)
+      const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .success-icon { font-size: 48px; margin-bottom: 20px; }
+          .details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          table { width: 100%; border-collapse: collapse; }
+          th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; }
+          .total { font-size: 18px; font-weight: bold; color: #28a745; }
+          .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>¡Pago Confirmado!</h1>
+            <p>Tu compra ha sido procesada exitosamente</p>
+          </div>
+          
+          <div class="content">
+            <div class="details">
+              <h2>Detalles de la Compra</h2>
+              
+              <p><strong>Número de Factura:</strong> ${venta.nroFactura}</p>
+              <p><strong>Fecha:</strong> ${new Date(venta.createdAt).toLocaleDateString('es-BO', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</p>
+              <p><strong>Cliente:</strong> ${cliente?.nombre || 'Cliente'}</p>
+              
+              <h3 style="margin-top: 25px;">Productos Comprados</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th style="text-align: center;">Cantidad</th>
+                    <th style="text-align: right;">Precio Unit.</th>
+                    <th style="text-align: right;">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${detallesProductos}
+                </tbody>
+              </table>
+              
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                <table>
+                  <tr>
+                    <td style="padding: 8px; text-align: right;"><strong>Subtotal:</strong></td>
+                    <td style="padding: 8px; text-align: right; width: 100px;">Bs ${parseFloat(venta.subtotal || 0).toFixed(2)}</td>
+                  </tr>
+                  ${parseFloat(venta.descuento || 0) > 0
+? `
+                  <tr>
+                    <td style="padding: 8px; text-align: right;"><strong>Descuento:</strong></td>
+                    <td style="padding: 8px; text-align: right; color: #dc3545;">-Bs ${parseFloat(venta.descuento).toFixed(2)}</td>
+                  </tr>
+                  `
+: ''}
+                  <tr>
+                    <td style="padding: 8px; text-align: right;"><strong class="total">Total Pagado:</strong></td>
+                    <td style="padding: 8px; text-align: right;" class="total">Bs ${parseFloat(venta.total || 0).toFixed(2)}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            
+            <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">
+              <h3 style="margin: 0 0 10px 0; color: #0056b3;">📦 Información de Entrega</h3>
+              <p style="margin: 0;">Tu pedido está siendo procesado y será enviado pronto.</p>
+              <p style="margin: 10px 0 0 0;">Recibirás una notificación cuando tu pedido sea despachado.</p>
+            </div>
+            
+            <div class="footer">
+              <p>Gracias por tu compra en <strong>${process.env.APP_NAME || 'Nuestra Tienda'}</strong></p>
+              <p>Si tienes alguna pregunta, contáctanos en ${process.env.SUPPORT_EMAIL || 'soporte@tienda.com'}</p>
+              <p style="font-size: 12px; color: #999;">
+                Este es un email automático, por favor no respondas a este mensaje.
+              </p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+      // Versión texto plano
+      const textContent = `
+      CONFIRMACIÓN DE PAGO EXITOSO
+      
+      ¡Gracias por tu compra!
+      
+      Número de Factura: ${venta.nroFactura}
+      Fecha: ${new Date(venta.createdAt).toLocaleDateString('es-BO')}
+      Cliente: ${cliente?.nombre || 'Cliente'}
+      
+      DETALLES DE LA COMPRA:
+      ${venta.detalles.map(detalle => {
+        const productoNombre = detalle.variante?.producto?.nombre || 'Producto no disponible'
+        const talla = detalle.variante?.talla || 'N/A'
+        const color = detalle.variante?.color || 'N/A'
+        return `- ${productoNombre} (Talla: ${talla}, Color: ${color}): ${detalle.cantidad} x Bs ${parseFloat(detalle.precioUnitario || 0).toFixed(2)} = Bs ${parseFloat(detalle.subtotal || 0).toFixed(2)}`
+      }).join('\n')}
+      
+      RESUMEN:
+      Subtotal: Bs ${parseFloat(venta.subtotal || 0).toFixed(2)}
+      ${parseFloat(venta.descuento || 0) > 0 ? `Descuento: -Bs ${parseFloat(venta.descuento).toFixed(2)}` : ''}
+      TOTAL PAGADO: Bs ${parseFloat(venta.total || 0).toFixed(2)}
+      
+      Tu pedido está siendo procesado y te notificaremos cuando sea enviado.
+      
+      Si tienes preguntas, contacta a: ${process.env.SUPPORT_EMAIL || 'soporte@tienda.com'}
+      
+      Este es un email automático, por favor no respondas.
+    `
+
+      // Enviar el email
+      await this.mailer.enviar({
+        from: `"Confirmación de Pago" <${process.env.SMTP_USER}>`,
+        to: cliente?.contacto,
+        subject: `✅ Confirmación de Pago - Factura ${venta.nroFactura}`,
+        text: textContent,
+        html: htmlContent
+      })
+    } catch (error) {
+      console.error('❌ Error enviando email de confirmación:', error)
     }
   }
 }
