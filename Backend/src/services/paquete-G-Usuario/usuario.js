@@ -43,7 +43,7 @@ export class UsuarioServicio {
         return { error: 'El email ya está registrado' }
       }
       // 1. Hashear la contraseña
-      const hashedPassword = await this.bcrypt.hash(password, 10)
+      const hashedPassword = password
 
       // 2. Crear usuario
       const nuevoUsuario = await this.modeloUsuario.create({
@@ -94,7 +94,7 @@ export class UsuarioServicio {
       const usuario = await this.modeloUsuario.findByPk(id)
       if (!usuario) return { error: 'Usuario no encontrado' }
       // 2. Actualizar datos básicos
-      const hashPassword = password ? await this.bcrypt.hash(password, 10) : null
+      const hashPassword = password || null
       await usuario.update({
         nombre,
         activo,
