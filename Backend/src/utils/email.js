@@ -12,7 +12,7 @@ export class Mailer {
 
   enviar = async ({ to, subject, html }) => {
     await this.transporter.sendMail({
-      from: '"Example Team" <prueba@gmail.com>',
+      from: `sistema de ventas <${process.env.SMTP_USER}>`,
       to,
       subject,
       html

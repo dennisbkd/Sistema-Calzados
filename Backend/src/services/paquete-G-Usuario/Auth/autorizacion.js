@@ -20,6 +20,7 @@ export class AutorizacionServicio {
         },
         where: { nombre }
       })
+      console.log('usuario existente', usuarioExistente)
       if (usuarioExistente === null) return { error: 'El usuario no existe o error al escribir la contraseña' }
 
       const verificarBloqueo = usuarioExistente.bloqueado ? new Date(usuarioExistente.bloqueado) : null
@@ -93,6 +94,8 @@ export class AutorizacionServicio {
         id: usuario.id,
         tipo: 'reset'
       })
+      console.log('usuario', usuario)
+      console.log('token', tokenTemporal)
       const URL = process.env.FRONTEND_URL || 'http://localhost:5173'
       await this.mailer.enviar(
         {
