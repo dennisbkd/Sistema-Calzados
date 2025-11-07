@@ -6,7 +6,7 @@ import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
 import { CategoriaServicio } from './services/paquete-G-Inventario/gestion-Categoria/categoria.js'
 
-import { token, mailer, stripeConfig } from '../config/autenticacionEmail.js'
+import { token, stripeConfig, mailerResend } from '../config/autenticacionEmail.js'
 import bcrypt from 'bcrypt'
 import { ProveedorServicio } from './services/paquete-G-compra/gestion-proveedor/proveedor.js'
 import { ProductoServicio } from './services/paquete-G-Inventario/gestion-producto/producto.js'
@@ -29,7 +29,7 @@ const autorizacionServicio = new AutorizacionServicio(
     modeloUsuario: Usuario,
     modeloRol: Rol,
     token,
-    mailer,
+    mailer: mailerResend,
     bcrypt
   }
 )
@@ -100,7 +100,7 @@ const ventaServicio = new VentaServicio(
     modeloUsuario: Usuario,
     modeloMetodoPago: MetodoPago,
     stripeServicio,
-    mailer
+    mailer: mailerResend
   }
 )
 
