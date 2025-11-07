@@ -22,8 +22,8 @@ import VistaUsuariosActivos from "./adminDashboard/bitacora/page/BitacoraComplet
 import { GestionVenta } from "./adminDashboard/venta/Page/GestionVenta"
 import { NuevaVentaLayout } from "./adminDashboard/venta/Layout/NuevaVentaLayout"
 import { ListaVentas } from "./adminDashboard/venta/Page/ListaVentaPage"
-import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta.JSX"
 import { PagoExitoso } from "./adminDashboard/venta/Page/PagoExitoso"
+import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta"
 
 
 
