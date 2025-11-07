@@ -30,6 +30,10 @@ export const Venta = sequelize.define('Venta',
       type: DataTypes.ENUM('REGISTRADA', 'PAGADA', 'ANULADA'),
       defaultValue: 'REGISTRADA'
     },
+    sessionPagoId: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     clienteId: {
       type: DataTypes.INTEGER,
       allowNull: true,

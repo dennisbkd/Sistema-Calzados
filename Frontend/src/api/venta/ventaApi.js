@@ -82,3 +82,13 @@ export const obtenerClientePorId = async (clienteId) => {
   const res = await instancia.get(`/ventas/clientes/${clienteId}`);
   return res.data;
 }
+
+export const crearSessionPagoStripe = async (ventaId) => {
+  const res = await instancia.post(`/ventas/${ventaId}/stripe-session`);
+  return res.data;
+}
+
+export const verificarEstadoPagoStripe = async (ventaId) => {
+  const res = await instancia.get(`/ventas/${ventaId}/verificar-pago`);
+  return res.data;
+}

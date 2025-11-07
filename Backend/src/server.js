@@ -6,7 +6,7 @@ import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
 import { CategoriaServicio } from './services/paquete-G-Inventario/gestion-Categoria/categoria.js'
 
-import { token, mailer } from '../config/autenticacionEmail.js'
+import { token, mailer, stripeConfig } from '../config/autenticacionEmail.js'
 import bcrypt from 'bcrypt'
 import { ProveedorServicio } from './services/paquete-G-compra/gestion-proveedor/proveedor.js'
 import { ProductoServicio } from './services/paquete-G-Inventario/gestion-producto/producto.js'
@@ -15,6 +15,7 @@ import { CompraServicio } from './services/paquete-G-compra/gestion-compra/compr
 import sequelize from '../config/baseDatos.js'
 import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
 import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
+import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -81,6 +82,9 @@ const reporteIngresoEgresoServicio = new ReporteIngresoEgresoServicio({
   modeloDetalleVenta: DetalleVenta
 })
 
+const stripeServicio = new StripeServicio({
+  stripeClaveSecreta: stripeConfig.claveSecreta
+})
 const ventaServicio = new VentaServicio(
   {
     modeloVenta: Venta,
@@ -94,7 +98,9 @@ const ventaServicio = new VentaServicio(
     modeloMovimientoInventario: MovimientoInventario,
     modeloVentaPromocion: VentaPromocion,
     modeloUsuario: Usuario,
-    modeloMetodoPago: MetodoPago
+    modeloMetodoPago: MetodoPago,
+    stripeServicio,
+    mailer
   }
 )
 
@@ -109,5 +115,6 @@ App({
   varianteServicio,
   compraServicio,
   reporteIngresoEgresoServicio,
-  ventaServicio
+  ventaServicio,
+  stripeServicio
 })
