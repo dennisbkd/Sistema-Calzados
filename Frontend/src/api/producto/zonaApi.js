@@ -48,3 +48,28 @@ export const crearUbicacion = async (data) => {
   const response = await instancia.post('/zonas/crear-ubicacion', data)
   return response.data
 }
+
+export const actualizarLayoutZona = async (zonaId, layoutConfig) => {
+  const response = await instancia.put(`/zonas/${zonaId}/layout`, {
+    layoutConfig
+  })
+  return response.data
+}
+
+// En ubicacionApi.js - agregar esta función
+export const actualizarZonaCompleta = async (zonaId, data) => {
+  const response = await instancia.put(`/zonas/actualizar/${zonaId}`, data)
+  return response.data
+}
+
+export const eliminarZona = async (zonaId, forzado = false) => {
+  const response = await instancia.delete(`/zonas/eliminar/${zonaId}`, {
+    params: { forzado }
+  })
+  return response.data
+}
+
+export const eliminarUbicacion = async (ubicacionId) => {
+  const response = await instancia.delete(`/zonas/eliminar-ubicacion/${ubicacionId}`)
+  return response.data
+}

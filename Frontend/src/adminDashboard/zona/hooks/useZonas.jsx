@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
-import { agregarVariantesUbicacion, crearUbicacion, crearZona, listarZonas, obtenerUbicacionesPorZona, obtenerVariantesDisponibles, obtenerVariantesEnUbicacion, removerVariantesUbicacion } from '../../../api/producto/zonaApi'
+import { actualizarLayoutZona, actualizarZonaCompleta, agregarVariantesUbicacion, crearUbicacion, crearZona, eliminarUbicacion, eliminarZona, listarZonas, obtenerUbicacionesPorZona, obtenerVariantesDisponibles, obtenerVariantesEnUbicacion, removerVariantesUbicacion } from '../../../api/producto/zonaApi'
 
 
 // Hook para listar todas las zonas
@@ -113,6 +113,75 @@ export const useCrearUbicacion = () => {
     onError: (error) => {
       toast.error(`Error creando ubicación: ${error.response?.data?.error || error.message}`);
       console.error('Error creando ubicación:', error)
+    },
+  })
+}
+
+export const useActualizarLayoutZona = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ zonaId, layoutConfig }) =>
+      actualizarLayoutZona(zonaId, layoutConfig),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['zonas'])
+      toast.success('Layout actualizado correctamente')
+    },
+    onError: (error) => {
+      toast.error('Error al actualizar el layout')
+      console.error('Error actualizando layout:', error)
+    },
+  })
+}
+
+// En useZonas.js - agregar este hook
+export const useActualizarZonaCompleta = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ zonaId, data }) =>
+      actualizarZonaCompleta(zonaId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['zonas'])
+      toast.success('Zona actualizada correctamente')
+    },
+    onError: (error) => {
+      toast.error('Error al actualizar la zona')
+      console.error('Error actualizando zona:', error)
+    },
+  })
+}
+
+export const useEliminarZona = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ zonaId, forzado = false }) =>
+      eliminarZona(zonaId, forzado),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['zonas'])
+      toast.success('Zona eliminada correctamente')
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.error || 'Error al eliminar la zona')
+      console.error('Error eliminando zona:', error)
+    },
+  })
+}
+
+export const useEliminarUbicacion = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (ubicacionId) => eliminarUbicacion(ubicacionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['ubicaciones', 'zona'])
+      queryClient.invalidateQueries(['zonas'])
+      toast.success('Ubicación eliminada correctamente')
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.error || 'Error al eliminar la ubicación')
+      console.error('Error eliminando ubicación:', error)
     },
   })
 }
