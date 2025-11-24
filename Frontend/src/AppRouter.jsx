@@ -24,6 +24,7 @@ import { NuevaVentaLayout } from "./adminDashboard/venta/Layout/NuevaVentaLayout
 import { ListaVentas } from "./adminDashboard/venta/Page/ListaVentaPage"
 import { PagoExitoso } from "./adminDashboard/venta/Page/PagoExitoso"
 import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta"
+import { GestionUbicaciones } from "./adminDashboard/zona/page/GestionUbicacion"
 
 
 
@@ -55,6 +56,7 @@ export const AppRouter = () => {
             <Route path="ventas/detalle/:id" element={<DetalleVenta />} />
             <Route path="bitacora" element={<VistaUsuariosActivos />} />
             <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
+            <Route path="ubicaciones" element={<GestionUbicaciones />} />
           </Route>
         </Route>
 

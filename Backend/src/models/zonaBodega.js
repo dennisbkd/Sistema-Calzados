@@ -24,3 +24,6 @@ export const ZonaBodega = sequelize.define('ZonaBodega', {
   timestamps: true,
   tableName: 'ZonaBodega'
 })
+// layout_config JSON DEFAULT NULL,
+// color VARCHAR(7) DEFAULT '#3B82F6',
+// icono VARCHAR(50) DEFAULT 'warehouse',
