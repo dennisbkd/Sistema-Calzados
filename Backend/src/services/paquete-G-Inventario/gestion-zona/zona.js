@@ -19,7 +19,16 @@ export class UbicacionServicio {
   listarZonas = async () => {
     try {
       const zonas = await this.modeloZonaBodega.findAll({
-        attributes: ['id', 'nombre', 'descripcion', 'activa'],
+        attributes: [
+          'id',
+          'nombre',
+          'descripcion',
+          'color',
+          'icono',
+          'layout_config',
+          'activa',
+          'createdAt'
+        ],
         include: [{
           model: this.modeloUbicacionFisica,
           as: 'ubicaciones',
@@ -30,7 +39,8 @@ export class UbicacionServicio {
             attributes: ['varianteId']
           }]
         }],
-        where: { activa: true }
+        where: { activa: true },
+        order: [['createdAt', 'ASC']]
       })
 
       if (zonas.length === 0) return { error: 'No hay zonas registradas' }
@@ -44,12 +54,23 @@ export class UbicacionServicio {
           })
         })
 
+        // Layout por defecto si no existe
+        const layoutConfig = zona.layout_config || {
+          size: 'normal',
+          position: { row: 0, col: 0 },
+          span: { rows: 1, cols: 1 }
+        }
+
         return {
           id: zona.id,
           nombre: zona.nombre,
           descripcion: zona.descripcion,
+          color: zona.color,
+          icono: zona.icono,
+          layoutConfig,
           activa: zona.activa,
-          cantidadVariantes: variantesCount.size
+          cantidadVariantes: variantesCount.size,
+          createdAt: zona.createdAt
         }
       })
 
@@ -394,10 +415,9 @@ export class UbicacionServicio {
     }
   }
 
-  // Crear nueva zona
   crearZona = async (datosZona) => {
     try {
-      const { nombre, descripcion } = datosZona
+      const { nombre, descripcion, color = '#3B82F6', icono = 'warehouse', layoutConfig = null } = datosZona
 
       // Verificar que el nombre sea único
       const zonaExistente = await this.modeloZonaBodega.findOne({
@@ -408,10 +428,20 @@ export class UbicacionServicio {
         return { error: 'Ya existe una zona con este nombre' }
       }
 
+      // Configuración de layout por defecto
+      const defaultLayout = {
+        size: 'normal', // 'normal', 'wide', 'tall', 'large', 'custom'
+        position: { row: 0, col: 0 },
+        span: { rows: 1, cols: 1 }
+      }
+
       // Crear la zona
       const nuevaZona = await this.modeloZonaBodega.create({
         nombre,
         descripcion,
+        color,
+        icono,
+        layout_config: layoutConfig || defaultLayout,
         activa: true
       })
 
@@ -419,12 +449,185 @@ export class UbicacionServicio {
         id: nuevaZona.id,
         nombre: nuevaZona.nombre,
         descripcion: nuevaZona.descripcion,
+        color: nuevaZona.color,
+        icono: nuevaZona.icono,
+        layoutConfig: nuevaZona.layout_config,
         activa: nuevaZona.activa,
-        cantidadVariantes: 0, // Nueva zona, sin variantes
+        cantidadVariantes: 0,
         createdAt: nuevaZona.createdAt
       }
     } catch (e) {
       return { error: 'Error al crear la zona', e }
+    }
+  }
+
+  // Actualizar layout de una zona
+  actualizarLayoutZona = async (zonaId, layoutConfig) => {
+    try {
+      const zona = await this.modeloZonaBodega.findByPk(zonaId)
+      if (!zona) {
+        return { error: 'Zona no encontrada' }
+      }
+
+      await zona.update({
+        layout_config: layoutConfig
+      })
+
+      return {
+        id: zona.id,
+        layoutConfig: zona.layout_config
+      }
+    } catch (e) {
+      return { error: 'Error al actualizar el layout', e }
+    }
+  }
+
+  actualizarZonaCompleta = async (zonaId, datosActualizados) => {
+    try {
+      const zona = await this.modeloZonaBodega.findByPk(zonaId)
+      if (!zona) {
+        return { error: 'Zona no encontrada' }
+      }
+
+      // Actualizar los campos permitidos
+      const camposPermitidos = ['color', 'icono', 'layout_config', 'descripcion']
+      const datosParaActualizar = {}
+
+      camposPermitidos.forEach(campo => {
+        if (datosActualizados[campo] !== undefined) {
+          datosParaActualizar[campo] = datosActualizados[campo]
+        }
+      })
+
+      await zona.update(datosParaActualizar)
+
+      // Obtener la zona actualizada
+      const zonaActualizada = await this.modeloZonaBodega.findByPk(zonaId, {
+        attributes: [
+          'id',
+          'nombre',
+          'descripcion',
+          'color',
+          'icono',
+          'layout_config',
+          'activa',
+          'createdAt'
+        ]
+      })
+
+      return {
+        id: zonaActualizada.id,
+        nombre: zonaActualizada.nombre,
+        descripcion: zonaActualizada.descripcion,
+        color: zonaActualizada.color,
+        icono: zonaActualizada.icono,
+        layoutConfig: zonaActualizada.layout_config,
+        activa: zonaActualizada.activa,
+        cantidadVariantes: zona.cantidadVariantes || 0 // Esto debería calcularse
+      }
+    } catch (e) {
+      return { error: 'Error al actualizar la zona', e }
+    }
+  }
+
+  // Eliminar zona (soft delete)
+  eliminarZona = async (zonaId) => {
+    try {
+      const zona = await this.modeloZonaBodega.findByPk(zonaId)
+      if (!zona) {
+        return { error: 'Zona no encontrada' }
+      }
+
+      // Verificar si la zona tiene ubicaciones activas
+      const ubicacionesCount = await this.modeloUbicacionFisica.count({
+        where: {
+          zonaBodegaId: zonaId,
+          activa: true
+        }
+      })
+
+      if (ubicacionesCount > 0) {
+        return { error: 'No se puede eliminar la zona porque tiene ubicaciones activas' }
+      }
+
+      // Soft delete - marcar como inactiva
+      await zona.update({ activa: false })
+
+      return {
+        mensaje: 'Zona eliminada correctamente',
+        zonaId: zona.id
+      }
+    } catch (e) {
+      return { error: 'Error al eliminar la zona', e }
+    }
+  }
+
+  // Eliminar ubicación (soft delete)
+  eliminarUbicacion = async (ubicacionId) => {
+    try {
+      const ubicacion = await this.modeloUbicacionFisica.findByPk(ubicacionId)
+      if (!ubicacion) {
+        return { error: 'Ubicación no encontrada' }
+      }
+
+      // Verificar si la ubicación tiene inventario
+      const inventarioCount = await this.modeloInventarioUbicacion.count({
+        where: { ubicacionId }
+      })
+
+      if (inventarioCount > 0) {
+        return { error: 'No se puede eliminar la ubicación porque tiene variantes asignadas' }
+      }
+
+      // Soft delete - marcar como inactiva
+      await ubicacion.update({ activa: false })
+
+      return {
+        mensaje: 'Ubicación eliminada correctamente',
+        ubicacionId: ubicacion.id
+      }
+    } catch (e) {
+      return { error: 'Error al eliminar la ubicación', e }
+    }
+  }
+
+  // Eliminar zona forzadamente (incluyendo sus ubicaciones)
+  eliminarZonaForzado = async (zonaId) => {
+    try {
+      const zona = await this.modeloZonaBodega.findByPk(zonaId)
+      if (!zona) {
+        return { error: 'Zona no encontrada' }
+      }
+
+      // Usar transacción para asegurar consistencia
+      const transaction = await this.modeloZonaBodega.sequelize.transaction()
+
+      try {
+      // 1. Desactivar todas las ubicaciones de la zona
+        await this.modeloUbicacionFisica.update(
+          { activa: false },
+          {
+            where: { zonaBodegaId: zonaId },
+            transaction
+          }
+        )
+
+        // 2. Desactivar la zona
+        await zona.update({ activa: false }, { transaction })
+
+        // 3. Confirmar transacción
+        await transaction.commit()
+
+        return {
+          mensaje: 'Zona y sus ubicaciones eliminadas correctamente',
+          zonaId: zona.id
+        }
+      } catch (e) {
+        await transaction.rollback()
+        throw e
+      }
+    } catch (e) {
+      return { error: 'Error al eliminar la zona', e }
     }
   }
 }

@@ -108,4 +108,67 @@ export class UbicacionControlador {
       return res.status(500).json({ error: `Error en el servidor: ${e.message}` })
     }
   }
+
+  actualizarLayoutZona = async (req, res) => {
+    const { zonaId } = req.params
+    const { layoutConfig } = req.body
+
+    try {
+      const respuesta = await this.ubicacionServicio.actualizarLayoutZona(
+        parseInt(zonaId),
+        layoutConfig
+      )
+      if (respuesta.error) return res.status(400).json(respuesta)
+      return res.status(200).json(respuesta)
+    } catch (e) {
+      return res.status(500).json({ error: `Error en el servidor: ${e.message}` })
+    }
+  }
+
+  actualizarZonaCompleta = async (req, res) => {
+    const { zonaId } = req.params
+    const body = req.body
+
+    try {
+      const respuesta = await this.ubicacionServicio.actualizarZonaCompleta(
+        parseInt(zonaId),
+        body
+      )
+      if (respuesta.error) return res.status(400).json(respuesta)
+      return res.status(200).json(respuesta)
+    } catch (e) {
+      return res.status(500).json({ error: `Error en el servidor: ${e.message}` })
+    }
+  }
+
+  eliminarZona = async (req, res) => {
+    const { zonaId } = req.params
+    const { forzado } = req.query
+
+    try {
+      let respuesta
+      if (forzado === 'true') {
+        respuesta = await this.ubicacionServicio.eliminarZonaForzado(parseInt(zonaId))
+      } else {
+        respuesta = await this.ubicacionServicio.eliminarZona(parseInt(zonaId))
+      }
+
+      if (respuesta.error) return res.status(400).json(respuesta)
+      return res.status(200).json(respuesta)
+    } catch (e) {
+      return res.status(500).json({ error: `Error en el servidor: ${e.message}` })
+    }
+  }
+
+  eliminarUbicacion = async (req, res) => {
+    const { ubicacionId } = req.params
+
+    try {
+      const respuesta = await this.ubicacionServicio.eliminarUbicacion(parseInt(ubicacionId))
+      if (respuesta.error) return res.status(400).json(respuesta)
+      return res.status(200).json(respuesta)
+    } catch (e) {
+      return res.status(500).json({ error: `Error en el servidor: ${e.message}` })
+    }
+  }
 }

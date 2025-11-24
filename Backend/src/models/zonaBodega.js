@@ -15,6 +15,21 @@ export const ZonaBodega = sequelize.define('ZonaBodega', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  layout_config: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: null
+  },
+  color: {
+    type: DataTypes.STRING(7),
+    allowNull: false,
+    defaultValue: '#3B82F6'
+  },
+  icono: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'warehouse'
+  },
   activa: {
     type: DataTypes.BOOLEAN,
     allowNull: false,

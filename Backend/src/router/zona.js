@@ -13,6 +13,9 @@ export const rutaUbicacion = ({ ubicacionServicio }) => {
   ruta.delete('/ubicaciones/:ubicacionId/variantes', ubicacionControlador.removerVariantesUbicacion)
   ruta.get('/ubicaciones/:ubicacionId/variantes-disponibles', ubicacionControlador.obtenerVariantesDisponibles)
   ruta.get('/ubicaciones/:ubicacionId/variantes', ubicacionControlador.obtenerVariantesEnUbicacion)
-
+  ruta.put('/:zonaId/layout', ubicacionControlador.actualizarLayoutZona) // Nueva ruta
+  ruta.put('/actualizar/:zonaId', ubicacionControlador.actualizarZonaCompleta)
+  ruta.delete('/eliminar/:zonaId', ubicacionControlador.eliminarZona)
+  ruta.delete('/eliminar-ubicacion/:ubicacionId', ubicacionControlador.eliminarUbicacion)
   return ruta
 }
