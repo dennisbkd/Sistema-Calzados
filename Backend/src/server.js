@@ -1,6 +1,6 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/paquete-G-Usuario/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta, Promocion, TransaccionPago, MovimientoInventario, VentaPromocion, MetodoPago } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta, Promocion, TransaccionPago, MovimientoInventario, VentaPromocion, MetodoPago, ZonaBodega, InventarioUbicacion, UbicacionFisica } from './models/index.js'
 import { AutorizacionServicio } from './services/paquete-G-Usuario/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
@@ -16,6 +16,7 @@ import sequelize from '../config/baseDatos.js'
 import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
 import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
 import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
+import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -103,6 +104,13 @@ const ventaServicio = new VentaServicio(
     mailer: mailerResend
   }
 )
+const ubicacionServicio = new UbicacionServicio({
+  modeloZonaBodega: ZonaBodega,
+  modeloInventarioUbicacion: InventarioUbicacion,
+  modeloProductoVariante: ProductoVariante,
+  modeloUbicacionFisica: UbicacionFisica,
+  modeloProducto: Producto
+})
 
 App({
   usuarioServicio,
@@ -116,5 +124,6 @@ App({
   compraServicio,
   reporteIngresoEgresoServicio,
   ventaServicio,
-  stripeServicio
+  stripeServicio,
+  ubicacionServicio
 })

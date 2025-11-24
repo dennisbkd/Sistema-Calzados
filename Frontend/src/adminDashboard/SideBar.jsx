@@ -95,6 +95,7 @@ export const SideBar = () => {
       subItems: [
         { title: "Productos", path: "/home/productos", icon: Archive },
         { title: "Categorías", path: "/home/categorias", icon: Tag },
+        { title: "Ubicaciones", path: "/home/ubicaciones", icon: Warehouse }
       ],
     },
     {
