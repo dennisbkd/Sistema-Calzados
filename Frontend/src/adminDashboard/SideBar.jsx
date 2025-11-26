@@ -18,6 +18,7 @@ import {
   BarChart,
   Plus,
   History,
+  DollarSign,
 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import { useState, useEffect } from "react"
@@ -72,7 +73,8 @@ export const SideBar = () => {
       subItems: [
         { title: "Nueva Venta", path: "/home/ventas/nueva", icon: Plus },
         { title: "Historial Ventas", path: "/home/ventas/historial", icon: History },
-        { title: "Promociones", path: "/home/promociones", icon: Tag }
+        { title: "Promociones", path: "/home/promociones", icon: Tag },
+        { title: "Caja Diaria", path: "/home/caja", icon: DollarSign }
       ]
     },
     {

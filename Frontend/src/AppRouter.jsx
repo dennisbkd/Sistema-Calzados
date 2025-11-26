@@ -27,6 +27,7 @@ import { Inventario } from "./adminDashboard/inventario/page/Inventario"
 import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta"
 import { GestionUbicaciones } from "./adminDashboard/zona/page/GestionUbicacion"
 import { GestionPromociones } from "./adminDashboard/promocion/page/GestionPromociones"
+import { GestionCajaDiaria } from "./adminDashboard/caja/page/GestionCajaDiaria"
 
 
 
@@ -61,6 +62,7 @@ export const AppRouter = () => {
           <Route path="bitacora" element={<VistaUsuariosActivos />} />
           <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
           <Route path="ubicaciones" element={<GestionUbicaciones />} />
+          <Route path="caja" element={<GestionCajaDiaria />} />
         </Route>
         {/* </Route> */}
 
