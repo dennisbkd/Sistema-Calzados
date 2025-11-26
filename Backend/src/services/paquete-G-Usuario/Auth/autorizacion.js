@@ -20,6 +20,7 @@ export class AutorizacionServicio {
         },
         where: { nombre }
       })
+      console.log('usuario existente', usuarioExistente)
       if (usuarioExistente === null) return { error: 'El usuario no existe o error al escribir la contraseña' }
 
       const verificarBloqueo = usuarioExistente.bloqueado ? new Date(usuarioExistente.bloqueado) : null
@@ -27,7 +28,7 @@ export class AutorizacionServicio {
       if (verificarBloqueo && verificarBloqueo > ahora) {
         return { error: `Cuenta bloqueada hasta ${usuarioExistente.bloqueado}` }
       }
-      const verificarPass = await this.bcrypt.compare(password, usuarioExistente.password)
+      const verificarPass = password === usuarioExistente.password
 
       if (!verificarPass) {
         usuarioExistente.intentos += 1
@@ -87,29 +88,47 @@ export class AutorizacionServicio {
       const usuario = await this.modeloUsuario.findOne({
         where: { email }
       })
-      if (!usuario) return { mensaje: 'Si el email existe, se enviará un enlace' }
+      if (!usuario) {
+        console.log('❌ Usuario no encontrado con email:', email)
+        return { mensaje: 'Si el email existe, se enviará un enlace' }
+      }
 
       const tokenTemporal = this.token.crearToken({
         id: usuario.id,
         tipo: 'reset'
       })
+
+      console.log('✅ Usuario encontrado:', usuario.nombre)
+      console.log('✅ Token generado')
+
       const URL = process.env.FRONTEND_URL || 'http://localhost:5173'
-      await this.mailer.enviar(
-        {
+
+      console.log('📧 Intentando enviar email a:', email)
+
+      // AGREGA ESTE TRY-CATCH ESPECÍFICO PARA EL EMAIL
+      try {
+        await this.mailer.enviar({
           to: email,
-          subject: 'Restablecer constraseña',
+          subject: 'Restablecer contraseña',
           html: `
-          <p>Has solicitado restablecer tu contraseña.</p>
-          <p>Haz clic en el siguiente enlace (válido por 15 minutos):</p>
-          <a href = "${URL}/restablecer-password?token=${tokenTemporal}" >
-            Restablecer contraseña
-          </a>
-          `
-        }
-      )
+        <p>Has solicitado restablecer tu contraseña.</p>
+        <p>Haz clic en el siguiente enlace (válido por 15 minutos):</p>
+        <a href="${URL}/restablecer-password?token=${tokenTemporal}">
+          Restablecer contraseña
+        </a>
+        `
+        })
+        console.log('✅ Email enviado exitosamente a:', email)
+      } catch (emailError) {
+        console.error('❌ Error CRÍTICO enviando email:', emailError.message)
+        console.error('Detalles del error:', emailError)
+      // No relances el error, solo retorna el mensaje genérico
+      }
+
       return { mensaje: 'Si el email existe, se enviará un enlace' }
     } catch (e) {
-      return { error: `Error al encontrar al encontrar el email ${e.message}` }
+      console.error('💥 Error general en recuperación:', e.message)
+      return { mensaje: 'Si el email existe, se enviará un enlace' }
     }
   }
 
