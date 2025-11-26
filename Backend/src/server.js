@@ -16,8 +16,10 @@ import sequelize from '../config/baseDatos.js'
 import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
 import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
 import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
-import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
 import { InventarioServicio } from './services/paquete-G-Inventario/reporte-Inventario/Inventario.js'
+import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
+import { PromocionServicio } from './services/paquete-G-Venta/gestion-promocion/promocion.js'
+import { CajaDiariaServicio } from './services/paquete-G-Venta/gestion-Venta/cajaDiaria.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -105,13 +107,6 @@ const ventaServicio = new VentaServicio(
     mailer: mailerResend
   }
 )
-const ubicacionServicio = new UbicacionServicio({
-  modeloZonaBodega: ZonaBodega,
-  modeloInventarioUbicacion: InventarioUbicacion,
-  modeloProductoVariante: ProductoVariante,
-  modeloUbicacionFisica: UbicacionFisica,
-  modeloProducto: Producto
-})
 const inventarioServicio = new InventarioServicio(
   {
     modeloProductoVariante: ProductoVariante,
@@ -120,6 +115,26 @@ const inventarioServicio = new InventarioServicio(
     modeloMovimientoInventario: MovimientoInventario
   }
 )
+const ubicacionServicio = new UbicacionServicio({
+  modeloZonaBodega: ZonaBodega,
+  modeloInventarioUbicacion: InventarioUbicacion,
+  modeloProductoVariante: ProductoVariante,
+  modeloUbicacionFisica: UbicacionFisica,
+  modeloProducto: Producto
+})
+const promocionServicio = new PromocionServicio({
+  modeloPromocion: Promocion,
+  modeloCategoria: Categoria,
+  modeloProducto: Producto,
+  modeloVentaPromocion: VentaPromocion
+})
+const cajaDiariaServicio = new CajaDiariaServicio({
+  modeloCompra: Compra,
+  modeloVenta: Venta,
+  modeloTransaccionPago: TransaccionPago,
+  modeloMetodoPago: MetodoPago,
+  modeloUsuario: Usuario
+})
 
 App({
   usuarioServicio,
@@ -134,6 +149,8 @@ App({
   reporteIngresoEgresoServicio,
   ventaServicio,
   stripeServicio,
+  inventarioServicio,
   ubicacionServicio,
-  inventarioServicio
+  promocionServicio,
+  cajaDiariaServicio
 })

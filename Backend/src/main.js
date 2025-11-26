@@ -14,8 +14,10 @@ import { corsMiddleware } from './utils/corsUrl.js'
 import { rutaReporteIngresoEgreso } from './router/reporteIngresoEgreso.js'
 import { rutaVenta } from './router/venta.js'
 import { crearStripeWebhook } from './utils/webhookStripe.js'
+import { rutaInventario } from './router/Inventario.js'
 import { rutaUbicacion } from './router/zona.js'
-import { rutaInventario } from './router/inventario.js'
+import { rutaPromocion } from './router/promociones.js'
+import { rutaCajaDiaria } from './router/cajaDiaria.js'
 
 export const App = ({
   usuarioServicio,
@@ -30,8 +32,10 @@ export const App = ({
   reporteIngresoEgresoServicio,
   ventaServicio,
   stripeServicio,
+  inventarioServicio,
+  promocionServicio,
   ubicacionServicio,
-  inventarioServicio
+  cajaDiariaServicio
 }) => {
   const app = express()
   const port = process.env.PORT || 3000
@@ -55,8 +59,10 @@ export const App = ({
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
   app.use('/reportes', decodificarToken, rutaReporteIngresoEgreso({ reporteIngresoEgresoServicio }))
   app.use('/ventas', decodificarToken, rutaVenta({ ventaServicio, stripeServicio }))
-  app.use('/zonas', rutaUbicacion({ ubicacionServicio }))
   app.use('/inventario', decodificarToken, rutaInventario({ inventarioServicio }))
+  app.use('/zonas', rutaUbicacion({ ubicacionServicio }))
+  app.use('/promociones', rutaPromocion({ promocionServicio }))
+  app.use('/caja', rutaCajaDiaria({ cajaDiariaServicio }))
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
