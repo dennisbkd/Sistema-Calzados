@@ -20,6 +20,7 @@
     "jsonwebtoken": "9.0.2",
     "mysql2": "3.14.4",
     "nodemailer": "7.0.6",
+    "resend": "^6.4.1",
     "sequelize": "6.37.7",
     "standard": "17.1.2",
     "stripe": "19.3.0"

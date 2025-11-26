@@ -1,12 +1,12 @@
 import { App } from './main.js'
 import { UsuarioServicio } from './services/paquete-G-Usuario/usuario.js'
-import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta, Promocion, TransaccionPago, MovimientoInventario, VentaPromocion, MetodoPago } from './models/index.js'
+import { Rol, Usuario, Bitacora, Categoria, Proveedor, Producto, ProductoVariante, Compra, DetalleCompra, Venta, Cliente, DetalleVenta, Promocion, TransaccionPago, MovimientoInventario, VentaPromocion, MetodoPago, ZonaBodega, InventarioUbicacion, UbicacionFisica } from './models/index.js'
 import { AutorizacionServicio } from './services/paquete-G-Usuario/Auth/autorizacion.js'
 import { BitacoraServicio } from './services/paquete-G-Usuario/bitacora.js'
 import { RolServicio } from './services/paquete-G-Usuario/rol.js'
 import { CategoriaServicio } from './services/paquete-G-Inventario/gestion-Categoria/categoria.js'
 
-import { token, mailer, stripeConfig } from '../config/autenticacionEmail.js'
+import { token, stripeConfig, mailerResend } from '../config/autenticacionEmail.js'
 import bcrypt from 'bcrypt'
 import { ProveedorServicio } from './services/paquete-G-compra/gestion-proveedor/proveedor.js'
 import { ProductoServicio } from './services/paquete-G-Inventario/gestion-producto/producto.js'
@@ -16,7 +16,7 @@ import sequelize from '../config/baseDatos.js'
 import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
 import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
 import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
-import { InventarioServicio } from './services/paquete-G-Inventario/reporte-Inventario/Inventario.js'
+import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -30,7 +30,7 @@ const autorizacionServicio = new AutorizacionServicio(
     modeloUsuario: Usuario,
     modeloRol: Rol,
     token,
-    mailer,
+    mailer: mailerResend,
     bcrypt
   }
 )
@@ -101,17 +101,16 @@ const ventaServicio = new VentaServicio(
     modeloUsuario: Usuario,
     modeloMetodoPago: MetodoPago,
     stripeServicio,
-    mailer
+    mailer: mailerResend
   }
 )
-const inventarioServicio = new InventarioServicio(
-  {
-    modeloProductoVariante: ProductoVariante,
-    modeloProducto: Producto,
-    modeloCategoria: Categoria,
-    modeloMovimientoInventario: MovimientoInventario
-  }
-)
+const ubicacionServicio = new UbicacionServicio({
+  modeloZonaBodega: ZonaBodega,
+  modeloInventarioUbicacion: InventarioUbicacion,
+  modeloProductoVariante: ProductoVariante,
+  modeloUbicacionFisica: UbicacionFisica,
+  modeloProducto: Producto
+})
 
 App({
   usuarioServicio,
@@ -126,5 +125,5 @@ App({
   reporteIngresoEgresoServicio,
   ventaServicio,
   stripeServicio,
-  inventarioServicio
+  ubicacionServicio
 })

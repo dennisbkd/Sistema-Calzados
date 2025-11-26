@@ -146,6 +146,41 @@ export class VentaServicio {
       return { error: `error al buscar productos: ${e}` }
     }
   }
+  // En tu VentaServicio, agrega esta función después de registrarMovimientoInventarioPorVenta
+
+  actualizarStockVariantes = async (productos, transaction = null, options) => {
+    try {
+      for (const producto of productos) {
+        const variante = await this.modeloProductoVariante.findByPk(producto.varianteId, {
+          transaction,
+          ...options
+        })
+
+        if (!variante) {
+          throw new Error(`Variante con ID ${producto.varianteId} no encontrada`)
+        }
+
+        const nuevoStock = variante.stockActual - parseInt(producto.cantidad)
+
+        if (nuevoStock < 0) {
+          throw new Error(`Stock insuficiente para ${variante.nombre}. Stock actual: ${variante.stockActual}, solicitado: ${producto.cantidad}`)
+        }
+
+        await this.modeloProductoVariante.update(
+          { stockActual: nuevoStock },
+          {
+            where: { id: producto.varianteId },
+            transaction,
+            ...options
+          }
+        )
+
+        console.log(`📦 Stock actualizado: ${variante.nombre} - ${variante.stockActual} → ${nuevoStock}`)
+      }
+    } catch (error) {
+      throw new Error(`Error al actualizar stock: ${error.message}`)
+    }
+  }
 
   // 1. CREAR VENTA
   crearVenta = async (datosVenta, usuarioId, options) => {
@@ -158,14 +193,15 @@ export class VentaServicio {
       // Calcular descuentos y promociones aplicadas
       const { descuentoTotal, promocionesAplicadas } =
       await this.calcularDescuentosVenta(datosVenta.productos)
-      // CALCULAR TOTAL CORRECTAMENTE
-      // Calcular subtotal real desde productos (evita depender del frontend)
+
+      // Calcular subtotal real desde productos
       const subtotalCalculado = datosVenta.productos.reduce(
         (acc, p) => acc + parseFloat(p.precioUnitario) * parseInt(p.cantidad),
         0
       )
       const total = subtotalCalculado - parseFloat(descuentoTotal)
-      // Crear la venta principal con subtotal y total reales
+
+      // Crear la venta principal
       const venta = await this.modeloVenta.create({
         nroFactura,
         subtotal: parseFloat(subtotalCalculado.toFixed(2)),
@@ -179,26 +215,37 @@ export class VentaServicio {
       // Registrar detalles de venta
       await this.registrarDetalleVenta(venta.id, datosVenta.productos, transaction, options)
 
+      // ✅ ACTUALIZAR STOCK DE LAS VARIANTES
+      await this.actualizarStockVariantes(datosVenta.productos, transaction, options)
+
       // Si el estado es PAGADA, registrar transacción de pago
       if (datosVenta.estado === 'PAGADA') {
-        // Registrar transacción de pago - CON MONTO CORRECTO
         await this.registrarTransaccionPagoVenta({
           ventaId: venta.id,
           metodoPagoId: datosVenta.metodoPagoId,
-          monto: total, // USAR EL TOTAL CALCULADO
+          monto: total,
           referencia: datosVenta.referenciaPago || `PAGO-${nroFactura}`
         }, transaction, options)
 
-        // Registrar movimientos de inventario - SIN DUPLICADOS
         await this.registrarMovimientoInventarioPorVenta(
           venta.id,
           datosVenta.productos,
-          datosVenta.usuarioId,
+          usuarioId,
+          nroFactura,
+          transaction,
+          options
+        )
+      } else {
+        await this.registrarMovimientoInventarioPorVenta(
+          venta.id,
+          datosVenta.productos,
+          usuarioId,
           nroFactura,
           transaction,
           options
         )
       }
+
       // Registrar promociones aplicadas
       if (promocionesAplicadas.length > 0) {
         for (const promo of promocionesAplicadas) {
@@ -272,7 +319,7 @@ export class VentaServicio {
   }
 
   // 4. REGISTRAR MOVIMIENTO INVENTARIO POR VENTA - CORREGIDA
-  registrarMovimientoInventarioPorVenta = async (ventaId, productos, usuarioId, documentoRef, transaction = null, options) => {
+  registrarMovimientoInventarioPorVenta = async (ventaId, productos, usuarioId, documentoRef, transaction = null, options, tipoMovimiento = 'SALIDA_VENTA') => {
     try {
       const movimientos = []
 
@@ -284,9 +331,10 @@ export class VentaServicio {
           where: {
             ventaId,
             varianteId: producto.varianteId,
-            tipoMovimiento: 'SALIDA_VENTA'
+            tipoMovimiento
           },
-          transaction
+          transaction,
+          ...options
         })
 
         if (movimientoExistente) {
