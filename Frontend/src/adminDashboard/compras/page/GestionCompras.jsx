@@ -30,7 +30,7 @@ import {
   Printer
 } from "lucide-react"
 import toast from "react-hot-toast"
-import { generarPDFCompra } from "../../../utils/generarPDFCompra"
+import { generarPDF } from "./../../../utils/servicePDF"
 import { SpinnerCargando } from "../../../global/components/SpinnerCargando"
 
 const GestionCompras = () => {
@@ -129,26 +129,37 @@ const GestionCompras = () => {
   // Generar factura PDF
   const generarFactura = (compra, opcion) => {
     try {
-      const datosParaFactura = {
-        nroFactura: compra.nroFactura,
-        fecha: compra.fechaCompra,
-        hora: compra.horaCompra,
-        proveedor: compra.proveedor,
-        usuario: compra.usuario,
-        total: compra.total,
-        detalles: compra.detalles?.map(detalle => ({
-          descripcion: detalle.producto,
-          marca: detalle.marca,
-          codigo: detalle.codigo,
-          color: detalle.color,
-          talla: detalle.talla,
-          cantidad: detalle.cantidad,
-          precioUnitario: detalle.precioUnitario,
-          subtotal: detalle.subtotal
-        })) || []
-      }
-
-      generarPDFCompra(datosParaFactura, opcion)
+      generarPDF({
+        titulo: "FACTURA DE COMPRA",
+        metadata: {
+          "Número de Factura": compra.nroFactura,
+          "Fecha": compra.fechaCompra,
+          "Hora": compra.horaCompra,
+          "Proveedor": compra.proveedor,
+          "Comprador": compra.usuario,
+          "Total": `Bs. ${parseFloat(compra.total || 0).toFixed(2)}`
+        },
+        secciones: [
+          {
+            titulo: "Detalles de la Compra",
+            tipo: "tabla",
+            datos: compra.detalles || [],
+            columnas: ['PRODUCTO', 'MARCA', 'CÓDIGO', 'COLOR', 'TALLA', 'CANTIDAD', 'PRECIO UNITARIO', 'SUBTOTAL'],
+            color: [41, 128, 185]
+          },
+          {
+            titulo: "Resumen de la Factura",
+            tipo: "resumen", 
+            datos: {
+              "Subtotal": `Bs. ${parseFloat(compra.subtotal || compra.total || 0).toFixed(2)}`,
+              "Descuentos": `Bs. ${parseFloat(compra.descuento || 0).toFixed(2)}`,
+              "Total General": `Bs. ${parseFloat(compra.total || 0).toFixed(2)}`
+            }
+          }
+        ],
+        nombreArchivo: `factura_${compra.nroFactura}.pdf`,
+        opcion: opcion
+      })
     } catch (error) {
       console.error("Error al generar factura:", error)
       toast.error("Error al generar la factura")

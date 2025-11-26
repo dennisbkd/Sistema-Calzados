@@ -6,11 +6,12 @@ import { useReportes } from "../hooks/useReporteIngresoEgreso"
 import { FileText, TrendingUp, Filter } from "lucide-react"
 import FiltrosReportes from "./../components/FiltrosReportes"
 import ResumenReporte from "./../components/ResumenReportes"
-import TablaCompras from "./TablaCompras"
-import TablaVentas from "./TablaVentas"
+import TablaCompras from "./../components/TablaCompras"
+import TablaVentas from "./../components/TablaVentas"
 import TabsReportes from "../components/TabsReportes"
 import toast from "react-hot-toast"
-import { generarPDFReporte } from "./../../../../utils/generarPDFReporte"
+import { generarPDF } from "./../../../../utils/servicePDF"
+import { generarExcel } from "./../../../../utils/serviceExcel" // ✅ Agregar import
 import { MenuExportar } from "./../../../../global/components/Menu/MenuExportar"
 
 const IngresoEgreso = () => {
@@ -32,6 +33,7 @@ const IngresoEgreso = () => {
   const [fechaFin, setFechaFin] = useState(fechasPorDefecto.fin)
   const [reporteGenerado, setReporteGenerado] = useState(false)
   const [tabActivo, setTabActivo] = useState('compras')
+  const [inicializado, setInicializado] = useState(false) // ✅ Nuevo estado para controlar inicialización
 
   const reporte = obtenerIngresosEgresos.data
   const compras = listarPorFecha.data || []
@@ -41,23 +43,28 @@ const IngresoEgreso = () => {
     setTabActivo(tab)
   }
 
+  // ✅ Efecto para generar reporte automático al cargar el componente
   useEffect(() => {
-    generarReporteAutomatico()
-  }, [])
-
-  const generarReporteAutomatico = async () => {
-    try {
-      console.log(fechasPorDefecto.inicio)
-      await Promise.all([
-        obtenerIngresosEgresos.mutateAsync({ fechaInicio: fechasPorDefecto.inicio, fechaFin: fechasPorDefecto.fin }),
-        listarPorFecha.mutateAsync({ fechaInicio: fechasPorDefecto.inicio, fechaFin: fechasPorDefecto.fin }),
-        listarVentaPorFecha.mutateAsync({ fechaInicio: fechasPorDefecto.inicio, fechaFin: fechasPorDefecto.fin })
-      ])
-      setReporteGenerado(true)
-    } catch (error) {
-      console.error("Error generando reporte automático:", error)
+    const generarReporteAutomatico = async () => {
+      if (!inicializado) {
+        try {
+          await Promise.all([
+            obtenerIngresosEgresos.mutateAsync({ fechaInicio: '', fechaFin: '' }), // ✅ Fechas vacías para todos los datos
+            listarPorFecha.mutateAsync({ fechaInicio: '', fechaFin: '' }),
+            listarVentaPorFecha.mutateAsync({ fechaInicio: '', fechaFin: '' })
+          ])
+          setReporteGenerado(true)
+          setInicializado(true)
+          console.log("Reporte inicializado automáticamente - Mostrando todos los registros")
+        } catch (error) {
+          console.error("Error generando reporte automático:", error)
+          setInicializado(true) // Marcar como inicializado aunque falle
+        }
+      }
     }
-  }
+
+    generarReporteAutomatico()
+  }, []) 
 
   const generarReporte = async () => {
     if (!fechaInicio || !fechaFin) {
@@ -84,52 +91,182 @@ const IngresoEgreso = () => {
     setTabActivo('compras')
     setFechaInicio(fechasPorDefecto.inicio)
     setFechaFin(fechasPorDefecto.fin)
-    listarPorFecha.reset()
-    listarVentaPorFecha.reset()
-    obtenerIngresosEgresos.reset()
-    toast.success("Filtros restablecidos al mes actual")
+    
+    // ✅ Recargar datos sin filtros (todos los registros)
+    obtenerIngresosEgresos.mutate({ fechaInicio: '', fechaFin: '' })
+    listarPorFecha.mutate({ fechaInicio: '', fechaFin: '' })
+    listarVentaPorFecha.mutate({ fechaInicio: '', fechaFin: '' })
+    
+    setReporteGenerado(true)
+    toast.success("Mostrando todos los registros disponibles")
   }
 
-  const handleDescargarPDF = () => {
+  // ✅ Función para exportar PDF
+  const handleExportarPDF = (opcion = "descargar") => {
     if (!reporteGenerado || !reporte) {
       toast.error("Primero genere un reporte")
       return
     }
 
     try {
-      generarPDFReporte(
-        reporte,
-        compras,
-        ventas,
-        { fechaInicio, fechaFin },
-        "descargar",
-        "completo"
-      )
-      toast.success("PDF descargado exitosamente")
+      // ✅ Función para mapear datos de compras
+      const mapearDatosCompras = (compra) => {
+        return [
+          compra.nroFactura || '-',
+          compra.proveedor || '-',
+          compra.usuario || '-',
+          compra.fechaCompra ? new Date(compra.fechaCompra).toLocaleDateString('es-ES') : '-',
+          compra.horaCompra || '-',
+          compra.estado || '-',
+          `Bs. ${parseFloat(compra.total || 0).toFixed(2)}`
+        ]
+      }
+
+      // ✅ Función para mapear datos de ventas
+      const mapearDatosVentas = (venta) => {
+        return [
+          venta.nroFactura || '-',
+          venta.cliente || '-',
+          venta.usuario || '-',
+          venta.fechaVenta ? new Date(venta.fechaVenta).toLocaleDateString('es-ES') : '-',
+          venta.horaVenta || '-',
+          venta.estado || '-',
+          `Bs. ${parseFloat(venta.subtotal || 0).toFixed(2)}`,
+          `Bs. ${parseFloat(venta.descuento || 0).toFixed(2)}`,
+          `Bs. ${parseFloat(venta.total || 0).toFixed(2)}`
+        ]
+      }
+
+      generarPDF({
+        titulo: "REPORTE DE INGRESOS Y EGRESOS",
+        metadata: {
+          "Periodo": fechaInicio && fechaFin ? `${fechaInicio} a ${fechaFin}` : "Todos los registros",
+          "Generado por": "Sistema",
+          "Fecha generación": new Date().toLocaleDateString(),
+          "Sucursal": "Central"
+        },
+        secciones: [
+          {
+            titulo: "Resumen Financiero",
+            tipo: "resumen",
+            datos: {
+              "Total Ingresos": `Bs. ${reporte.resumen?.totalIngresos?.toFixed(2) || '0.00'}`,
+              "Total Egresos": `Bs. ${reporte.resumen?.totalEgresos?.toFixed(2) || '0.00'}`,
+              "Balance Neto": `Bs. ${reporte.resumen?.balance?.toFixed(2) || '0.00'}`,
+              "Margen": `${reporte.resumen?.margen || '0'}%`,
+              "Ventas realizadas": reporte.resumen?.cantidadVentas || '0',
+              "Compras realizadas": reporte.resumen?.cantidadCompras || '0'
+            }
+          },
+          ...(compras.length > 0 ? [{
+            titulo: "Compras del Periodo",
+            tipo: "tabla",
+            datos: compras,
+            columnas: ['FACTURA', 'PROVEEDOR','USUARIO', 'FECHA','HORA', 'ESTADO', 'TOTAL'],
+            mapearDatos: mapearDatosCompras, // ✅ Agregar mapeo personalizado
+            color: [41, 128, 185]
+          }] : []),
+          ...(ventas.length > 0 ? [{
+            titulo: "Ventas del Periodo",
+            tipo: "tabla",
+            datos: ventas,
+            columnas: ['FACTURA', 'CLIENTE','USUARIO' ,'FECHA', 'HORA','ESTADO','SUBTOTAL', 'DESCUENTO', 'TOTAL'],
+            mapearDatos: mapearDatosVentas, // ✅ Agregar mapeo personalizado
+            color: [34, 153, 84]
+          }] : [])
+        ],
+        nombreArchivo: `reporte_ingresos_egresos_${new Date().toISOString().split('T')[0]}.pdf`,
+        opcion: opcion
+      })
+
+      if (opcion === "descargar") {
+        toast.success("PDF descargado exitosamente")
+      }
     } catch (error) {
       console.error("Error generando PDF:", error)
-      toast.error("Error al descargar PDF")
+      toast.error(`Error al ${opcion === 'descargar' ? 'descargar' : 'imprimir'} PDF`)
     }
   }
 
-  const handleImprimir = () => {
+  // ✅ Nueva función para exportar Excel
+  const handleExportarExcel = () => {
     if (!reporteGenerado || !reporte) {
       toast.error("Primero genere un reporte")
       return
     }
 
     try {
-      generarPDFReporte(
-        reporte,
-        compras,
-        ventas,
-        { fechaInicio, fechaFin },
-        "imprimir",
-        "completo"
-      )
+      // ✅ Función para mapear datos de compras para Excel
+      const mapearDatosComprasExcel = (compra) => {
+        return {
+          'FACTURA': compra.nroFactura || '-',
+          'PROVEEDOR': compra.proveedor || '-',
+          'USUARIO': compra.usuario || '-',
+          'FECHA': compra.fechaCompra ? new Date(compra.fechaCompra).toLocaleDateString('es-ES') : '-',
+          'HORA': compra.horaCompra || '-',
+          'ESTADO': compra.estado || '-',
+          'TOTAL': parseFloat(compra.total || 0)
+        }
+      }
+
+      // ✅ Función para mapear datos de ventas para Excel
+      const mapearDatosVentasExcel = (venta) => {
+        return {
+          'FACTURA': venta.nroFactura || '-',
+          'CLIENTE': venta.cliente || '-',
+          'USUARIO': venta.usuario || '-',
+          'FECHA': venta.fechaVenta ? new Date(venta.fechaVenta).toLocaleDateString('es-ES') : '-',
+          'HORA': venta.horaVenta || '-',
+          'ESTADO': venta.estado || '-',
+          'SUBTOTAL': parseFloat(venta.subtotal || 0),
+          'DESCUENTO': parseFloat(venta.descuento || 0),
+          'TOTAL': parseFloat(venta.total || 0)
+        }
+      }
+
+      generarExcel({
+        titulo: "REPORTE DE INGRESOS Y EGRESOS",
+        metadata: {
+          "Periodo": fechaInicio && fechaFin ? `${fechaInicio} a ${fechaFin}` : "Todos los registros",
+          "Generado por": "Sistema",
+          "Fecha generación": new Date().toLocaleDateString(),
+          "Sucursal": "Central"
+        },
+        secciones: [
+          {
+            titulo: "Resumen Financiero",
+            tipo: "resumen",
+            datos: {
+              "Total Ingresos": `Bs. ${reporte.resumen?.totalIngresos?.toFixed(2) || '0.00'}`,
+              "Total Egresos": `Bs. ${reporte.resumen?.totalEgresos?.toFixed(2) || '0.00'}`,
+              "Balance Neto": `Bs. ${reporte.resumen?.balance?.toFixed(2) || '0.00'}`,
+              "Margen": `${reporte.resumen?.margen || '0'}%`,
+              "Ventas realizadas": reporte.resumen?.cantidadVentas || '0',
+              "Compras realizadas": reporte.resumen?.cantidadCompras || '0'
+            }
+          },
+          ...(compras.length > 0 ? [{
+            titulo: "Compras del Periodo",
+            tipo: "tabla",
+            datos: compras,
+            columnas: ['FACTURA', 'PROVEEDOR','USUARIO', 'FECHA','HORA', 'ESTADO', 'TOTAL'],
+            mapearDatos: mapearDatosComprasExcel // ✅ Agregar mapeo personalizado
+          }] : []),
+          ...(ventas.length > 0 ? [{
+            titulo: "Ventas del Periodo",
+            tipo: "tabla",
+            datos: ventas,
+            columnas: ['FACTURA', 'CLIENTE','USUARIO' ,'FECHA', 'HORA','ESTADO','SUBTOTAL', 'DESCUENTO', 'TOTAL'],
+            mapearDatos: mapearDatosVentasExcel // ✅ Agregar mapeo personalizado
+          }] : [])
+        ],
+        nombreArchivo: `reporte_ingresos_egresos_${new Date().toISOString().split('T')[0]}.xlsx`
+      })
+
+      toast.success("Excel descargado exitosamente")
     } catch (error) {
-      console.error("Error imprimiendo:", error)
-      toast.error("Error al imprimir")
+      console.error("Error generando Excel:", error)
+      toast.error("Error al descargar Excel")
     }
   }
 
@@ -153,8 +290,9 @@ const IngresoEgreso = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <MenuExportar 
-              onDescargarPDF={handleDescargarPDF}
-              onImprimir={handleImprimir}
+              onDescargarPDF={() => handleExportarPDF("descargar")}
+              onImprimir={() => handleExportarPDF("imprimir")}
+              onDescargarExcel={handleExportarExcel} // ✅ Agregar Excel
               disabled={!reporteGenerado}
             />
           </div>
@@ -175,8 +313,8 @@ const IngresoEgreso = () => {
         {(obtenerIngresosEgresos.isPending || listarPorFecha.isPending || listarVentaPorFecha.isPending) && !reporteGenerado && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Cargando reporte del mes actual...</h3>
-            <p className="text-gray-600">Generando análisis financiero</p>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Cargando reporte completo...</h3>
+            <p className="text-gray-600">Generando análisis financiero de todos los registros</p>
           </motion.div>
         )}
 
@@ -215,8 +353,8 @@ const IngresoEgreso = () => {
         {reporteGenerado && compras.length === 0 && ventas.length === 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl shadow-lg p-8 text-center">
             <FileText size={48} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">No hay datos en el periodo seleccionado</h3>
-            <p className="text-gray-600">No se encontraron compras ni ventas entre {fechaInicio} y {fechaFin}</p>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">No hay datos disponibles</h3>
+            <p className="text-gray-600">No se encontraron compras ni ventas en el sistema</p>
           </motion.div>
         )}
 

@@ -85,8 +85,11 @@ export const SideBar = () => {
     },
     {
       title: "Gestión Inventario",
-      path: "/home/inventario",
-      icon: Warehouse
+      icon: Warehouse,
+      key: "inventario",
+      subItems: [
+        { title: "Inventario", path: "/home/inventario", icon: Warehouse }
+      ],
     },
     {
       title: "Gestión Producto",
