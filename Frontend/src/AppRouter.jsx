@@ -25,6 +25,7 @@ import { ListaVentas } from "./adminDashboard/venta/Page/ListaVentaPage"
 import { PagoExitoso } from "./adminDashboard/venta/Page/PagoExitoso"
 import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta"
 import { GestionUbicaciones } from "./adminDashboard/zona/page/GestionUbicacion"
+import { Inventario } from "./adminDashboard/inventario/page/Inventario"
 
 
 

@@ -17,6 +17,7 @@ import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reporte
 import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
 import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
 import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
+import { InventarioServicio } from './services/paquete-G-Inventario/reporte-Inventario/Inventario.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -111,6 +112,14 @@ const ubicacionServicio = new UbicacionServicio({
   modeloUbicacionFisica: UbicacionFisica,
   modeloProducto: Producto
 })
+const inventarioServicio = new InventarioServicio(
+  {
+    modeloProductoVariante: ProductoVariante,
+    modeloProducto: Producto,
+    modeloCategoria: Categoria,
+    modeloMovimientoInventario: MovimientoInventario
+  }
+)
 
 App({
   usuarioServicio,
@@ -125,5 +134,6 @@ App({
   reporteIngresoEgresoServicio,
   ventaServicio,
   stripeServicio,
-  ubicacionServicio
+  ubicacionServicio,
+  inventarioServicio
 })
