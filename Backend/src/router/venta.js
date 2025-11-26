@@ -1,9 +1,11 @@
 import { Router } from 'express'
 import { VentaControlador } from '../controller/paquete-G-Venta/gestion-Venta/venta.js'
+import { ControlCajaControlador } from '../controller/Paquete-G-Venta/controlCaja/controlCaja.js'
 
-export const rutaVenta = ({ ventaServicio, stripeServicio }) => {
+export const rutaVenta = ({ ventaServicio, stripeServicio, controlCajaServicio }) => {
   const rutas = Router()
   const ventaControlador = new VentaControlador({ ventaServicio, stripeServicio })
+  const controlCajaControlador = new ControlCajaControlador({ controlCajaServicio })
 
   rutas.get('/filtrar-categoria', ventaControlador.FiltrarProductoPorCategoria)
   rutas.get('/buscar-productos', ventaControlador.BuscarProductos)
@@ -16,6 +18,7 @@ export const rutaVenta = ({ ventaServicio, stripeServicio }) => {
   rutas.get('/metodos-pago', ventaControlador.obtenerMetodosPago)
   rutas.get('/clientes', ventaControlador.obtenerClientes)
   rutas.get('/clientes/:id', ventaControlador.obtenerClientePorId)
+  rutas.get('/control-caja', controlCajaControlador.obtenerBalance)
 
   rutas.post('/:id/stripe-session', ventaControlador.crearSessionPago) // Crear session de Stripe
   rutas.get('/:id/verificar-pago', ventaControlador.verificarEstadoPago)

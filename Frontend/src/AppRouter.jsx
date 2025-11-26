@@ -24,7 +24,11 @@ import { NuevaVentaLayout } from "./adminDashboard/venta/Layout/NuevaVentaLayout
 import { ListaVentas } from "./adminDashboard/venta/Page/ListaVentaPage"
 import { PagoExitoso } from "./adminDashboard/venta/Page/PagoExitoso"
 import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta"
+import { ControlCaja } from "./adminDashboard/venta/page/ControlCaja"
+import { GestionPromociones } from "./adminDashboard/promocion/page/GestionPromociones"
 import { GestionUbicaciones } from "./adminDashboard/zona/page/GestionUbicacion"
+import { GestionInventarioLayout } from "./adminDashboard/inventario/layout/GestionInventarioLayout"
+import { GestionInventario } from "./adminDashboard/inventario/page/GestionInventario"
 
 
 
@@ -45,6 +49,9 @@ export const AppRouter = () => {
             <Route path="categorias" element={<GestionCategoria />} />
             <Route path="proveedores" element={<GestionProveedor />} />
             <Route path="compras" element={<GestionCompras />} />
+            <Route path="nota-salida" element={<GestionInventarioLayout />}>
+              <Route index element={<GestionInventario />} />
+            </Route>
             <Route path="productos" element={<GestionProductoLayout />} >
               <Route index element={<GestionProducto />} />
             </Route>
@@ -54,6 +61,8 @@ export const AppRouter = () => {
             </Route>
             <Route path="ventas/historial" element={<ListaVentas />} />
             <Route path="ventas/detalle/:id" element={<DetalleVenta />} />
+            <Route path="control-caja" element={<ControlCaja />} />
+            <Route path="promociones" element={<GestionPromociones />} />
             <Route path="bitacora" element={<VistaUsuariosActivos />} />
             <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
             <Route path="ubicaciones" element={<GestionUbicaciones />} />

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Plus, Tag } from 'lucide-react';
 import { TablaPromociones } from '../components/TablaPromociones';
 import { usePromocionManager } from '../hooks/usePromocionManager';
@@ -27,6 +27,7 @@ export const GestionPromociones = () => {
 
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState([]);
+  const [alcanceSeleccionado, setAlcanceSeleccionado] = useState('GENERAL');
 
   React.useEffect(() => {
     // Cargar listas cuando se abre el modal o cuando se selecciona alcance
@@ -41,6 +42,10 @@ export const GestionPromociones = () => {
     };
     cargarCatalogos();
   }, []);
+
+  useEffect(() => {
+    setAlcanceSeleccionado(promocionActual?.alcance || 'GENERAL');
+  }, [promocionActual]);
 
   const promocionesFiltradas = useMemo(() => {
     return (promociones || []).filter((p) => {
@@ -83,7 +88,10 @@ export const GestionPromociones = () => {
       tipo: '',
       valorDescuento: '',
       fechaInicio: '',
-      fechaFin: ''
+      fechaFin: '',
+      alcance: 'GENERAL',
+      categoriaId: '',
+      productoId: ''
     });
   };
 
@@ -144,7 +152,8 @@ export const GestionPromociones = () => {
                 onClick={() => {
                   setModoEdicion(false);
                   setPromocionActual({
-                    nombre: '', descripcion: '', tipo: '', valorDescuento: '', fechaInicio: '', fechaFin: '', alcance: 'GENERAL'
+                    nombre: '', descripcion: '', tipo: '', valorDescuento: '', fechaInicio: '', fechaFin: '', alcance: 'GENERAL',
+                    categoriaId: '', productoId: ''
                   });
                   setDialogoAbierto(true);
                 }}
@@ -181,16 +190,26 @@ export const GestionPromociones = () => {
           isOpen={dialogoAbierto}
           onClose={() => setDialogoAbierto(false)}
           title={modoEdicion ? 'Editar Promoción' : 'Crear Promoción'}
-          formConfig={{
-            defaultValues: promocionActual || { nombre: '', descripcion: '', tipo: '', valorDescuento: '', fechaInicio: '', fechaFin: '', alcance: 'GENERAL' }
-          }}
+            formConfig={{
+              defaultValues: promocionActual || { nombre: '', descripcion: '', tipo: '', valorDescuento: '', fechaInicio: '', fechaFin: '', alcance: 'GENERAL', categoriaId: '', productoId: '' }
+            }}
           onSubmit={async (values) => {
             setDialogoAbierto(false);
+            if (values.alcance === 'CATEGORIA' && !values.categoriaId) {
+              toast.error('Selecciona una categoría para la promoción');
+              return;
+            }
+            if (values.alcance === 'PRODUCTO' && !values.productoId) {
+              toast.error('Selecciona un producto para la promoción');
+              return;
+            }
             // Mapear alcance a campos del backend
             const payload = { ...values };
             payload.aplicaTodo = values.alcance === 'GENERAL' || values.alcance === 'TEMPORADA';
             payload.aplicaCategoria = values.alcance === 'CATEGORIA';
             payload.aplicaProducto = values.alcance === 'PRODUCTO';
+            payload.categoriaId = values.alcance === 'CATEGORIA' ? Number(values.categoriaId) || null : null;
+            payload.productoId = values.alcance === 'PRODUCTO' ? Number(values.productoId) || null : null;
             // Se elimina el campo referencia: no se envían categoriaId/productoId
             // Normalizar valorDescuento para BOGO
             if (values.tipo === '2X1' || values.tipo === '3X2') {
@@ -248,7 +267,21 @@ export const GestionPromociones = () => {
               <form.Field name="alcance" children={(field) => (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Alcance</label>
-                  <select className="w-full border rounded-lg px-3 py-2" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)}>
+                  <select
+                    className="w-full border rounded-lg px-3 py-2"
+                    value={field.state.value}
+                    onChange={(e) => {
+                      const valor = e.target.value
+                      field.handleChange(valor)
+                      setAlcanceSeleccionado(valor)
+                      if (valor !== 'CATEGORIA') {
+                        form.setFieldValue('categoriaId', '')
+                      }
+                      if (valor !== 'PRODUCTO') {
+                        form.setFieldValue('productoId', '')
+                      }
+                    }}
+                  >
                     <option value="GENERAL">General</option>
                     <option value="TEMPORADA">Temporada</option>
                     <option value="PRODUCTO">Producto</option>
@@ -256,6 +289,42 @@ export const GestionPromociones = () => {
                   </select>
                 </div>
               )} />
+
+              {alcanceSeleccionado === 'CATEGORIA' && (
+                <form.Field name="categoriaId" children={(field) => (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <select
+                      className="w-full border rounded-lg px-3 py-2"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    >
+                      <option value="">Seleccionar categoría</option>
+                      {categorias.map((categoria) => (
+                        <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                )} />
+              )}
+
+              {alcanceSeleccionado === 'PRODUCTO' && (
+                <form.Field name="productoId" children={(field) => (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
+                    <select
+                      className="w-full border rounded-lg px-3 py-2"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    >
+                      <option value="">Seleccionar producto</option>
+                      {productos.map((producto) => (
+                        <option key={producto.id} value={producto.id}>{producto.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                )} />
+              )}
 
               {/* Campo 'referencia' eliminado por no usarse en la base de datos */}
 

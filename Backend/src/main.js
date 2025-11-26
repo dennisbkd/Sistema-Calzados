@@ -15,6 +15,8 @@ import { rutaReporteIngresoEgreso } from './router/reporteIngresoEgreso.js'
 import { rutaVenta } from './router/venta.js'
 import { crearStripeWebhook } from './utils/webhookStripe.js'
 import { rutaUbicacion } from './router/zona.js'
+import { rutaInventario } from './router/inventario.js'
+import rutaPromociones from './router/promociones.js'
 
 export const App = ({
   usuarioServicio,
@@ -29,7 +31,9 @@ export const App = ({
   reporteIngresoEgresoServicio,
   ventaServicio,
   stripeServicio,
-  ubicacionServicio
+  ubicacionServicio,
+  notaSalidaServicio,
+  controlCajaServicio
 }) => {
   const app = express()
   const port = process.env.PORT || 3000
@@ -52,8 +56,10 @@ export const App = ({
   app.use('/compras', decodificarToken, rutaCompra({ compraServicio }))
   app.use('/bitacora', rutaBitacora({ bitacoraServicio }))
   app.use('/reportes', decodificarToken, rutaReporteIngresoEgreso({ reporteIngresoEgresoServicio }))
-  app.use('/ventas', decodificarToken, rutaVenta({ ventaServicio, stripeServicio }))
+  app.use('/ventas', decodificarToken, rutaVenta({ ventaServicio, stripeServicio, controlCajaServicio }))
   app.use('/zonas', rutaUbicacion({ ubicacionServicio }))
+  app.use('/inventario', decodificarToken, rutaInventario({ notaSalidaServicio }))
+  app.use('/promociones', decodificarToken, rutaPromociones)
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

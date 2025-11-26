@@ -16,7 +16,9 @@ import sequelize from '../config/baseDatos.js'
 import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
 import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
 import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
+import { ControlCajaServicio } from './services/paquete-G-Venta/control-caja/controlCaja.js'
 import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
+import { NotaSalidaServicio } from './services/paquete-G-Inventario/gestion-inventario/notaSalida.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -71,6 +73,14 @@ const compraServicio = new CompraServicio({
   modeloUsuario: Usuario
 })
 
+const notaSalidaServicio = new NotaSalidaServicio({
+  modeloProductoVariante: ProductoVariante,
+  modeloMovimientoInventario: MovimientoInventario,
+  modeloProducto: Producto,
+  modeloUsuario: Usuario,
+  sequelize
+})
+
 const reporteIngresoEgresoServicio = new ReporteIngresoEgresoServicio({
   modeloCompra: Compra,
   modeloVenta: Venta,
@@ -104,6 +114,10 @@ const ventaServicio = new VentaServicio(
     mailer: mailerResend
   }
 )
+const controlCajaServicio = new ControlCajaServicio({
+  modeloVenta: Venta,
+  modeloCompra: Compra
+})
 const ubicacionServicio = new UbicacionServicio({
   modeloZonaBodega: ZonaBodega,
   modeloInventarioUbicacion: InventarioUbicacion,
@@ -125,5 +139,7 @@ App({
   reporteIngresoEgresoServicio,
   ventaServicio,
   stripeServicio,
-  ubicacionServicio
+  ubicacionServicio,
+  notaSalidaServicio,
+  controlCajaServicio
 })
