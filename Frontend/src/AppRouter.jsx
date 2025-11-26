@@ -26,6 +26,7 @@ import { PagoExitoso } from "./adminDashboard/venta/Page/PagoExitoso"
 import { Inventario } from "./adminDashboard/inventario/page/Inventario"
 import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta"
 import { GestionUbicaciones } from "./adminDashboard/zona/page/GestionUbicacion"
+import { GestionPromociones } from "./adminDashboard/promocion/page/GestionPromociones"
 
 
 
@@ -40,26 +41,27 @@ export const AppRouter = () => {
         </Route>
         {/* RUTAS PARA PAGINAS PROTEGIDAS, USUARIOS QUE TENGAN TOKEN y ROLES */}
         {/* <Route element={<RutaProtegida permitidos={['administrador', 'vendedor']} />}> */}
-          <Route path="/home" element={<DashboardPage />}>
-            <Route path="usuarios" element={<GestionUsuario />} />
-            <Route path="roles" element={<RolesPage />} />
-            <Route path="categorias" element={<GestionCategoria />} />
-            <Route path="proveedores" element={<GestionProveedor />} />
-            <Route path="compras" element={<GestionCompras />} />
-            <Route path="productos" element={<GestionProductoLayout />} >
-              <Route index element={<GestionProducto />} />
-            </Route>
-            <Route path="reportes/Ingresos-Egresos" element={<IngresoEgreso />} />
-            <Route path="inventario" element={<Inventario />} />
-            <Route path="ventas" element={<NuevaVentaLayout />}>
-              <Route path="nueva" element={<GestionVenta />} />
-            </Route>
-            <Route path="ventas/historial" element={<ListaVentas />} />
-            <Route path="ventas/detalle/:id" element={<DetalleVenta />} />
-            <Route path="bitacora" element={<VistaUsuariosActivos />} />
-            <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
-            <Route path="ubicaciones" element={<GestionUbicaciones />} />
+        <Route path="/home" element={<DashboardPage />}>
+          <Route path="usuarios" element={<GestionUsuario />} />
+          <Route path="roles" element={<RolesPage />} />
+          <Route path="categorias" element={<GestionCategoria />} />
+          <Route path="proveedores" element={<GestionProveedor />} />
+          <Route path="compras" element={<GestionCompras />} />
+          <Route path="productos" element={<GestionProductoLayout />} >
+            <Route index element={<GestionProducto />} />
           </Route>
+          <Route path="reportes/Ingresos-Egresos" element={<IngresoEgreso />} />
+          <Route path="inventario" element={<Inventario />} />
+          <Route path="ventas" element={<NuevaVentaLayout />}>
+            <Route path="nueva" element={<GestionVenta />} />
+          </Route>
+          <Route path="ventas/historial" element={<ListaVentas />} />
+          <Route path="promociones" element={<GestionPromociones />} />
+          <Route path="ventas/detalle/:id" element={<DetalleVenta />} />
+          <Route path="bitacora" element={<VistaUsuariosActivos />} />
+          <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
+          <Route path="ubicaciones" element={<GestionUbicaciones />} />
+        </Route>
         {/* </Route> */}
 
         <Route element={<TrancisionLayout />}>

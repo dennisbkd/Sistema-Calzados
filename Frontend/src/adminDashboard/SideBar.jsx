@@ -72,6 +72,7 @@ export const SideBar = () => {
       subItems: [
         { title: "Nueva Venta", path: "/home/ventas/nueva", icon: Plus },
         { title: "Historial Ventas", path: "/home/ventas/historial", icon: History },
+        { title: "Promociones", path: "/home/promociones", icon: Tag }
       ]
     },
     {

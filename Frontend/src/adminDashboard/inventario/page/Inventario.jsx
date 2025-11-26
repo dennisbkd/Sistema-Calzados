@@ -15,9 +15,9 @@ import { MenuExportar } from "./../../../global/components/Menu/MenuExportar"
 import { generarExcel } from "../../../utils/serviceExcel"
 
 export const Inventario = () => {
-  const { 
-    estadoInventario, 
-    reporteInventario, 
+  const {
+    estadoInventario,
+    reporteInventario,
     movimientosInventario,
     estadoAutomatico,
     productos,
@@ -35,7 +35,7 @@ export const Inventario = () => {
     conStockBajo: false,
     activos: true
   })
-  
+
   const [filtrosReporte, setFiltrosReporte] = useState({
     tipoReporte: 'DETALLADO',
     fechaInicio: '',
@@ -94,7 +94,7 @@ export const Inventario = () => {
 
           setReporteGenerado(true)
           setInicializado(true)
-          
+
           console.log("Datos inicializados automáticamente - Mostrando todos los registros")
         } catch (error) {
           console.error("Error en inicialización automática:", error)
@@ -105,17 +105,17 @@ export const Inventario = () => {
     }
 
     inicializarDatos()
-  }, [categorias.data, productos.data, inicializado, reporteInventario, movimientosInventario])
+  }, [categorias.data, productos.data])
 
   const handleCategoriaChange = async (categoriaId, esReporte = false) => {
     if (esReporte) {
-      const nuevosFiltros = { 
-        ...filtrosReporte, 
+      const nuevosFiltros = {
+        ...filtrosReporte,
         categoriaId,
-        productoId: '' 
+        productoId: ''
       }
       setFiltrosReporte(nuevosFiltros)
-      
+
       if (categoriaId) {
         const resultado = await productosPorCategoria.mutateAsync(categoriaId)
         setProductosFiltradosReporte(Array.isArray(resultado) ? resultado : [])
@@ -123,13 +123,13 @@ export const Inventario = () => {
         setProductosFiltradosReporte(opcionesProductos)
       }
     } else {
-      const nuevosFiltros = { 
-        ...filtros, 
+      const nuevosFiltros = {
+        ...filtros,
         categoriaId,
-        productoId: '' 
+        productoId: ''
       }
       setFiltros(nuevosFiltros)
-      
+
       if (categoriaId) {
         const resultado = await productosPorCategoria.mutateAsync(categoriaId)
         setProductosFiltrados(Array.isArray(resultado) ? resultado : [])
@@ -162,14 +162,14 @@ export const Inventario = () => {
   const consultarEstado = async () => {
     try {
       const filtrosLimpios = {}
-      
+
       if (filtros.categoriaId) filtrosLimpios.categoriaId = filtros.categoriaId
       if (filtros.productoId) filtrosLimpios.productoId = filtros.productoId
       if (filtros.conStockBajo) filtrosLimpios.conStockBajo = filtros.conStockBajo
       if (filtros.activos !== undefined) filtrosLimpios.activos = filtros.activos
-      
+
       await estadoInventario.mutateAsync(filtrosLimpios)
-      
+
       setTabActivo('estado')
       setReporteGenerado(true)
       toast.success("Estado del inventario actualizado")
@@ -182,7 +182,7 @@ export const Inventario = () => {
   const generarReporte = async () => {
     try {
       const filtrosLimpios = {}
-      
+
       if (filtrosReporte.tipoReporte) filtrosLimpios.tipoReporte = filtrosReporte.tipoReporte
       if (filtrosReporte.fechaInicio) filtrosLimpios.fechaInicio = filtrosReporte.fechaInicio
       if (filtrosReporte.fechaFin) filtrosLimpios.fechaFin = filtrosReporte.fechaFin
@@ -239,10 +239,10 @@ export const Inventario = () => {
       fechaFin: '',
       tipoMovimiento: ''
     })
-    
+
     setProductosFiltrados(opcionesProductos)
     setProductosFiltradosReporte(opcionesProductos)
-    
+
     // Recargar datos sin filtros
     estadoAutomatico.refetch()
     reporteInventario.mutate({
@@ -259,7 +259,7 @@ export const Inventario = () => {
       fechaFin: '',
       tipoMovimiento: ''
     })
-    
+
     setTabActivo('estado')
     toast.success("Filtros limpiados")
   }
@@ -272,16 +272,16 @@ export const Inventario = () => {
     }
 
     try {
-      const datosExportar = tabActivo === 'estado' ? estado : 
-                           tabActivo === 'reporte' ? reporte : 
-                           { tipo: 'MOVIMIENTOS', movimientosDetallados: movimientos }
-      
+      const datosExportar = tabActivo === 'estado' ? estado :
+        tabActivo === 'reporte' ? reporte :
+          { tipo: 'MOVIMIENTOS', movimientosDetallados: movimientos }
+
       const estadisticasExportar = datosExportar?.estadisticas
 
-    generarPDF({
-        titulo: tabActivo === 'estado' ? "REPORTE DE ESTADO DE INVENTARIO" : 
-                tabActivo === 'reporte' ? `REPORTE DE INVENTARIO - ${reporte?.tipoReporte}` :
-                "REPORTE DE MOVIMIENTOS DE INVENTARIO",
+      generarPDF({
+        titulo: tabActivo === 'estado' ? "REPORTE DE ESTADO DE INVENTARIO" :
+          tabActivo === 'reporte' ? `REPORTE DE INVENTARIO - ${reporte?.tipoReporte}` :
+            "REPORTE DE MOVIMIENTOS DE INVENTARIO",
         metadata: {
           "Generado por": "Sistema",
           "Fecha generación": new Date().toLocaleDateString(),
@@ -330,9 +330,9 @@ export const Inventario = () => {
             color: [34, 153, 84]
           }] : [])
         ],
-        nombreArchivo: `${tabActivo === 'estado' ? 'estado_inventario' : 
-                       tabActivo === 'reporte' ? `reporte_${filtrosReporte.tipoReporte.toLowerCase()}` :
-                       'movimientos_inventario'}_${new Date().toISOString().split('T')[0]}.pdf`,
+        nombreArchivo: `${tabActivo === 'estado' ? 'estado_inventario' :
+          tabActivo === 'reporte' ? `reporte_${filtrosReporte.tipoReporte.toLowerCase()}` :
+            'movimientos_inventario'}_${new Date().toISOString().split('T')[0]}.pdf`,
         opcion: opcion
       })
 
@@ -352,16 +352,16 @@ export const Inventario = () => {
     }
 
     try {
-      const datosExportar = tabActivo === 'estado' ? estado : 
-                          tabActivo === 'reporte' ? reporte : 
-                          { tipo: 'MOVIMIENTOS', movimientosDetallados: movimientos }
-      
+      const datosExportar = tabActivo === 'estado' ? estado :
+        tabActivo === 'reporte' ? reporte :
+          { tipo: 'MOVIMIENTOS', movimientosDetallados: movimientos }
+
       const estadisticasExportar = datosExportar?.estadisticas
 
       generarExcel({
-        titulo: tabActivo === 'estado' ? "REPORTE DE ESTADO DE INVENTARIO" : 
-                tabActivo === 'reporte' ? `REPORTE DE INVENTARIO - ${reporte?.tipoReporte}` :
-                "REPORTE DE MOVIMIENTOS DE INVENTARIO",
+        titulo: tabActivo === 'estado' ? "REPORTE DE ESTADO DE INVENTARIO" :
+          tabActivo === 'reporte' ? `REPORTE DE INVENTARIO - ${reporte?.tipoReporte}` :
+            "REPORTE DE MOVIMIENTOS DE INVENTARIO",
         metadata: {
           "Generado por": "Sistema",
           "Fecha generación": new Date().toLocaleDateString(),
@@ -407,9 +407,9 @@ export const Inventario = () => {
             columnas: ['FECHA', 'TIPO', 'PRODUCTO', 'CATEGORIA', 'TALLA', 'COLOR', 'CANTIDAD', 'MOTIVO', 'DOCUMENTO']
           }] : [])
         ],
-        nombreArchivo: `${tabActivo === 'estado' ? 'estado_inventario' : 
-                      tabActivo === 'reporte' ? `reporte_${filtrosReporte.tipoReporte.toLowerCase()}` :
-                      'movimientos_inventario'}_${new Date().toISOString().split('T')[0]}.xlsx`
+        nombreArchivo: `${tabActivo === 'estado' ? 'estado_inventario' :
+          tabActivo === 'reporte' ? `reporte_${filtrosReporte.tipoReporte.toLowerCase()}` :
+            'movimientos_inventario'}_${new Date().toISOString().split('T')[0]}.xlsx`
       })
 
       toast.success("Excel descargado exitosamente")
@@ -426,27 +426,27 @@ export const Inventario = () => {
           <>
             <ResumenInventario datos={estado} tipo="estado" />
             {estado?.inventario && estado.inventario.length > 0 && (
-              <TablaInventario 
-                inventario={estado.inventario} 
+              <TablaInventario
+                inventario={estado.inventario}
                 loading={estadoInventario.isPending}
               />
             )}
           </>
         )
-      
+
       case 'reporte':
         return (
           <>
             <ResumenInventario datos={reporte} tipo="reporte" />
             {reporte?.inventario && reporte.inventario.length > 0 && (
-              <TablaInventario 
-                inventario={reporte.inventario} 
+              <TablaInventario
+                inventario={reporte.inventario}
                 loading={reporteInventario.isPending}
               />
             )}
           </>
         )
-      
+
       case 'movimientos':
         return (
           <>
@@ -462,7 +462,7 @@ export const Inventario = () => {
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={filtrosMovimientos.fechaInicio}
-                    onChange={(e) => setFiltrosMovimientos({...filtrosMovimientos, fechaInicio: e.target.value})}
+                    onChange={(e) => setFiltrosMovimientos({ ...filtrosMovimientos, fechaInicio: e.target.value })}
                   />
                 </div>
                 <div>
@@ -471,7 +471,7 @@ export const Inventario = () => {
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={filtrosMovimientos.fechaFin}
-                    onChange={(e) => setFiltrosMovimientos({...filtrosMovimientos, fechaFin: e.target.value})}
+                    onChange={(e) => setFiltrosMovimientos({ ...filtrosMovimientos, fechaFin: e.target.value })}
                   />
                 </div>
                 <div>
@@ -479,7 +479,7 @@ export const Inventario = () => {
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={filtrosMovimientos.tipoMovimiento}
-                    onChange={(e) => setFiltrosMovimientos({...filtrosMovimientos, tipoMovimiento: e.target.value})}
+                    onChange={(e) => setFiltrosMovimientos({ ...filtrosMovimientos, tipoMovimiento: e.target.value })}
                   >
                     <option value="">Todos los tipos</option>
                     <option value="ENTRADA_COMPRA">Entrada por Compra</option>
@@ -516,8 +516,8 @@ export const Inventario = () => {
             </div>
 
             {movimientos && movimientos.length > 0 && (
-              <TablaMovimientos 
-                movimientos={movimientos} 
+              <TablaMovimientos
+                movimientos={movimientos}
                 loading={movimientosInventario.isPending}
               />
             )}
@@ -531,7 +531,7 @@ export const Inventario = () => {
             )}
           </>
         )
-      
+
       default:
         return null
     }
@@ -553,7 +553,7 @@ export const Inventario = () => {
 
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <MenuExportar 
+            <MenuExportar
               onDescargarPDF={() => handleExportarPDF("descargar")}
               onImprimir={() => handleExportarPDF("imprimir")}
               onDescargarExcel={handleExportarExcel}

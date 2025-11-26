@@ -18,6 +18,7 @@ import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js
 import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
 import { InventarioServicio } from './services/paquete-G-Inventario/reporte-Inventario/Inventario.js'
 import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
+import { PromocionServicio } from './services/paquete-G-Venta/gestion-promocion/promocion.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -120,6 +121,12 @@ const ubicacionServicio = new UbicacionServicio({
   modeloUbicacionFisica: UbicacionFisica,
   modeloProducto: Producto
 })
+const promocionServicio = new PromocionServicio({
+  modeloPromocion: Promocion,
+  modeloCategoria: Categoria,
+  modeloProducto: Producto,
+  modeloVentaPromocion: VentaPromocion
+})
 
 App({
   usuarioServicio,
@@ -135,5 +142,6 @@ App({
   ventaServicio,
   stripeServicio,
   inventarioServicio,
-  ubicacionServicio
+  ubicacionServicio,
+  promocionServicio
 })
