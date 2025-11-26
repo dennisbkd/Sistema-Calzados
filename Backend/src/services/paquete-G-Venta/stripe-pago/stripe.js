@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
 export class StripeServicio {
-  constructor ({ stripeClaveSecreta }) {
+  constructor ({ stripeClaveSecreta = process.env.STRIPE_KEY }) {
     this.stripe = new Stripe(stripeClaveSecreta)
   }
 

@@ -13,7 +13,7 @@ import { TrancisionPages } from "./auth/utils/TrancisionPages"
 import { GestionUsuario } from "./adminDashboard/usuario/page/GestionUsuario"
 import { GestionCategoria } from "./adminDashboard/categoria/page/GestionCategoria"
 import { GestionProveedor } from "./adminDashboard/proveedor/page/GestionProveedor"
-import GestionCompras from "./adminDashboard/compras/page/GestionCompras"
+import GestionCompras from "./adminDashboard/compras/GestionCompras"
 import { GestionProducto } from "./adminDashboard/producto.jsx/page/GestionProducto"
 import { GestionProductoLayout } from "./adminDashboard/producto.jsx/layout/GestionProductoLayout"
 import IngresoEgreso from "./adminDashboard/reporte/reporteIngresoEgreso/page/IngresoEgreso"
@@ -24,7 +24,7 @@ import { NuevaVentaLayout } from "./adminDashboard/venta/Layout/NuevaVentaLayout
 import { ListaVentas } from "./adminDashboard/venta/Page/ListaVentaPage"
 import { DetalleVenta } from "./adminDashboard/venta/Page/DetalleVenta.JSX"
 import { PagoExitoso } from "./adminDashboard/venta/Page/PagoExitoso"
-
+import { Inventario } from "./adminDashboard/inventario/page/Inventario"
 
 
 export const AppRouter = () => {
@@ -37,7 +37,7 @@ export const AppRouter = () => {
           <Route path="/" element={<AutorizacionLayout />} />
         </Route>
         {/* RUTAS PARA PAGINAS PROTEGIDAS, USUARIOS QUE TENGAN TOKEN y ROLES */}
-        <Route element={<RutaProtegida permitidos={['administrador', 'vendedor']} />}>
+        {/* <Route element={<RutaProtegida permitidos={['administrador', 'vendedor']} />}> */}
           <Route path="/home" element={<DashboardPage />}>
             <Route path="usuarios" element={<GestionUsuario />} />
             <Route path="roles" element={<RolesPage />} />
@@ -48,6 +48,7 @@ export const AppRouter = () => {
               <Route index element={<GestionProducto />} />
             </Route>
             <Route path="reportes/Ingresos-Egresos" element={<IngresoEgreso />} />
+            <Route path="inventario" element={<Inventario />} />
             <Route path="ventas" element={<NuevaVentaLayout />}>
               <Route path="nueva" element={<GestionVenta />} />
             </Route>
@@ -56,7 +57,7 @@ export const AppRouter = () => {
             <Route path="bitacora" element={<VistaUsuariosActivos />} />
             <Route path="bitacora/usuario/:usuarioId" element={<DetalleUsuarioBitacora />} />
           </Route>
-        </Route>
+        {/* </Route> */}
 
         <Route element={<TrancisionLayout />}>
           <Route path="/solicitar-recuperamiento" element={<SolicitudPassword />} />

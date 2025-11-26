@@ -16,6 +16,7 @@ import sequelize from '../config/baseDatos.js'
 import { ReporteIngresoEgresoServicio } from './services/paquete-G-Venta/reportesIngresosEgresos/reporteIngresoEgreso.js'
 import { VentaServicio } from './services/paquete-G-Venta/gestion-Venta/Venta.js'
 import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js'
+import { InventarioServicio } from './services/paquete-G-Inventario/reporte-Inventario/Inventario.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -103,6 +104,14 @@ const ventaServicio = new VentaServicio(
     mailer
   }
 )
+const inventarioServicio = new InventarioServicio(
+  {
+    modeloProductoVariante: ProductoVariante,
+    modeloProducto: Producto,
+    modeloCategoria: Categoria,
+    modeloMovimientoInventario: MovimientoInventario
+  }
+)
 
 App({
   usuarioServicio,
@@ -116,5 +125,6 @@ App({
   compraServicio,
   reporteIngresoEgresoServicio,
   ventaServicio,
-  stripeServicio
+  stripeServicio,
+  inventarioServicio
 })

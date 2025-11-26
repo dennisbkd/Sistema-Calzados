@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { ChevronLeft, ChevronRight, Package, User, Eye, UserCheck } from "lucide-react"
-import DetalleVentaModal from "../components/DetalleVentaModal" // ← Agrega este import
+import DetalleVentaModal from "./DetalleVentaModal" // ← Agrega este import
 
 const TablaVentas = ({ ventas, loading }) => {
   const [paginaActual, setPaginaActual] = useState(1)

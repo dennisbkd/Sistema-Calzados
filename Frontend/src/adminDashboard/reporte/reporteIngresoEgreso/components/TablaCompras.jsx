@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { ChevronLeft, ChevronRight, Package, Eye } from "lucide-react" // ← Agrega Eye aquí
-import DetalleCompraModal from "../components/DetalleCompraModal" // ← Agrega este import
+import DetalleCompraModal from "./DetalleCompraModal" // ← Agrega este import
 
 const TablaCompras = ({ compras, loading }) => {
   const [paginaActual, setPaginaActual] = useState(1)
