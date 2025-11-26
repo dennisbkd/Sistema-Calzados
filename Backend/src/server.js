@@ -19,6 +19,7 @@ import { StripeServicio } from './services/paquete-G-Venta/stripe-pago/stripe.js
 import { InventarioServicio } from './services/paquete-G-Inventario/reporte-Inventario/Inventario.js'
 import { UbicacionServicio } from './services/paquete-G-Inventario/gestion-zona/zona.js'
 import { PromocionServicio } from './services/paquete-G-Venta/gestion-promocion/promocion.js'
+import { CajaDiariaServicio } from './services/paquete-G-Venta/gestion-Venta/cajaDiaria.js'
 
 const usuarioServicio = new UsuarioServicio(
   {
@@ -127,6 +128,13 @@ const promocionServicio = new PromocionServicio({
   modeloProducto: Producto,
   modeloVentaPromocion: VentaPromocion
 })
+const cajaDiariaServicio = new CajaDiariaServicio({
+  modeloCompra: Compra,
+  modeloVenta: Venta,
+  modeloTransaccionPago: TransaccionPago,
+  modeloMetodoPago: MetodoPago,
+  modeloUsuario: Usuario
+})
 
 App({
   usuarioServicio,
@@ -143,5 +151,6 @@ App({
   stripeServicio,
   inventarioServicio,
   ubicacionServicio,
-  promocionServicio
+  promocionServicio,
+  cajaDiariaServicio
 })

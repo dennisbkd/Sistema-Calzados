@@ -17,6 +17,7 @@ import { crearStripeWebhook } from './utils/webhookStripe.js'
 import { rutaInventario } from './router/Inventario.js'
 import { rutaUbicacion } from './router/zona.js'
 import { rutaPromocion } from './router/promociones.js'
+import { rutaCajaDiaria } from './router/cajaDiaria.js'
 
 export const App = ({
   usuarioServicio,
@@ -33,7 +34,8 @@ export const App = ({
   stripeServicio,
   inventarioServicio,
   promocionServicio,
-  ubicacionServicio
+  ubicacionServicio,
+  cajaDiariaServicio
 }) => {
   const app = express()
   const port = process.env.PORT || 3000
@@ -60,6 +62,7 @@ export const App = ({
   app.use('/inventario', decodificarToken, rutaInventario({ inventarioServicio }))
   app.use('/zonas', rutaUbicacion({ ubicacionServicio }))
   app.use('/promociones', rutaPromocion({ promocionServicio }))
+  app.use('/caja', rutaCajaDiaria({ cajaDiariaServicio }))
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
