@@ -1,19 +1,16 @@
-import express from 'express';
-import { PromocionController } from '../controller/paquete-G-Venta/gestion-Venta/promocionController.js';
+import { Router } from 'express'
+import { PromocionControlador } from '../controller/paquete-G-Venta/gestion-promocion/promocion.js'
 
-const router = express.Router();
-const promocionController = new PromocionController();
+export const rutaPromocion = ({ promocionServicio }) => {
+  const ruta = Router()
+  const promocionControlador = new PromocionControlador({ promocionServicio })
 
-// Rutas REST simples
-router.post('/', promocionController.crearPromocion);
-router.get('/', promocionController.listarPromociones);
-router.put('/:id', promocionController.editarPromocion);
-router.delete('/:id', promocionController.eliminarPromocion);
+  ruta.get('/', promocionControlador.listarPromociones)
+  ruta.get('obtener/:id', promocionControlador.obtenerPromocion)
+  ruta.post('/crear', promocionControlador.crearPromocion)
+  ruta.put('/editar/:id', promocionControlador.actualizarPromocion)
+  ruta.delete('/eliminar/:id', promocionControlador.eliminarPromocion)
+  ruta.post('/activas', promocionControlador.obtenerPromocionesActivas)
 
-// Alias siguiendo el patrón usado en el proyecto
-router.post('/crear', promocionController.crearPromocion);
-router.get('/listar', promocionController.listarPromociones);
-router.patch('/editar/:id', (req, res) => promocionController.editarPromocion(req, res));
-router.delete('/eliminar/:id', (req, res) => promocionController.eliminarPromocion(req, res));
-
-export default router;
+  return ruta
+}
